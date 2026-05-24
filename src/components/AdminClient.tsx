@@ -67,6 +67,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   const [accessModalUser, setAccessModalUser] = useState<IAdminUser | null>(null);
   const [searchCourseQuery, setSearchCourseQuery] = useState<string>("");
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [isCourseDropdownOpen, setIsCourseDropdownOpen] = useState<boolean>(false);
   const [accessDuration, setAccessDuration] = useState<"lifetime" | "30" | "90" | "180" | "custom">("lifetime");
   const [customDate, setCustomDate] = useState<string>("");
 
@@ -176,6 +177,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       });
 
       setSelectedCourseId("");
+      setSearchCourseQuery("");
+      setIsCourseDropdownOpen(false);
       setAccessDuration("lifetime");
       setCustomDate("");
       showNotification("Доступ успешно предоставлен!", "success");
@@ -679,7 +682,12 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                         </td>
                         <td style={{ padding: "20px 24px", textAlign: "center" }}>
                           <button
-                            onClick={() => setAccessModalUser(user)}
+                            onClick={() => {
+                              setSelectedCourseId("");
+                              setSearchCourseQuery("");
+                              setIsCourseDropdownOpen(false);
+                              setAccessModalUser(user);
+                            }}
                             disabled={user.role === "ADMIN"}
                             className="btn btn-secondary"
                             style={{
@@ -960,7 +968,12 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 </span>
               </div>
               <button
-                onClick={() => setAccessModalUser(null)}
+                onClick={() => {
+                  setAccessModalUser(null);
+                  setSelectedCourseId("");
+                  setSearchCourseQuery("");
+                  setIsCourseDropdownOpen(false);
+                }}
                 style={{
                   border: "none",
                   background: "none",
@@ -1047,45 +1060,191 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               <form onSubmit={handleGrantAccess}>
                 <h4 style={{ margin: "0 0 15px 0", fontSize: "15px", fontWeight: 700 }}>Предоставить новый доступ:</h4>
 
-                {/* Живой поиск по курсам */}
-                <div style={{ marginBottom: "15px" }}>
+                 {/* Кастомный выпадающий список курсов (Dropdown с живым поиском) */}
+                <div style={{ marginBottom: "15px", position: "relative" }}>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "6px" }}>
                     Выберите курс (из {localCourses.length} доступных):
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Начните вводить название курса для поиска..."
-                    value={searchCourseQuery}
-                    onChange={(e) => setSearchCourseQuery(e.target.value)}
+                  
+                  {/* Кнопка-триггер кастомного селектора */}
+                  <div
+                    onClick={() => setIsCourseDropdownOpen(!isCourseDropdownOpen)}
                     style={{
                       width: "100%",
-                      padding: "8px 12px",
-                      fontSize: "13px",
+                      padding: "10px 14px",
+                      fontSize: "14px",
                       borderRadius: "6px",
                       border: "1px solid var(--color-gray-border)",
-                      marginBottom: "8px",
+                      backgroundColor: "#fff",
+                      cursor: "pointer",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      userSelect: "none",
+                      transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+                      borderColor: isCourseDropdownOpen ? "var(--color-primary)" : "var(--color-gray-border)",
+                      boxShadow: isCourseDropdownOpen ? "0 0 0 3px rgba(197, 23, 34, 0.1)" : "none",
                     }}
-                  />
+                  >
+                    <span style={{ color: selectedCourseId ? "var(--color-dark)" : "#888", fontWeight: selectedCourseId ? 600 : 400 }}>
+                      {selectedCourseId 
+                        ? localCourses.find(c => c.id === selectedCourseId)?.title 
+                        : "-- Выберите курс --"}
+                    </span>
+                    <span style={{ 
+                      fontSize: "12px", 
+                      transition: "transform 0.2s ease", 
+                      transform: isCourseDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      color: "var(--color-primary)"
+                    }}>
+                      ▼
+                    </span>
+                  </div>
+
+                  {/* Скрытый селектор для валидации формы HTML5 (required) */}
                   <select
                     required
                     value={selectedCourseId}
                     onChange={(e) => setSelectedCourseId(e.target.value)}
                     style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      fontSize: "14px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--color-gray-border)",
-                      backgroundColor: "#fff",
+                      position: "absolute",
+                      width: "0px",
+                      height: "0px",
+                      opacity: 0,
+                      pointerEvents: "none",
                     }}
                   >
                     <option value="">-- Выберите курс --</option>
-                    {filteredCoursesForGrant.map((c) => (
+                    {localCourses.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.title} ({c.lessons.length} ур.)
+                        {c.title}
                       </option>
                     ))}
                   </select>
+
+                  {/* Кастомное выпадающее меню */}
+                  {isCourseDropdownOpen && (
+                    <>
+                      {/* Прозрачная подложка для закрытия по клику вне меню */}
+                      <div 
+                        onClick={() => {
+                          setIsCourseDropdownOpen(false);
+                          setSearchCourseQuery("");
+                        }}
+                        style={{
+                          position: "fixed",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          zIndex: 998,
+                          background: "none",
+                        }}
+                      />
+                      
+                      <div style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        right: 0,
+                        marginTop: "6px",
+                        backgroundColor: "#fff",
+                        border: "1px solid rgba(197, 23, 34, 0.15)",
+                        borderRadius: "8px",
+                        boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                        zIndex: 999,
+                        overflow: "hidden",
+                        animation: "fadeInUp 0.15s ease-out",
+                      }}>
+                        {/* Поле живого поиска внутри меню */}
+                        <div style={{ padding: "8px", borderBottom: "1px solid #f2e6e1", backgroundColor: "#faf6f4" }}>
+                          <input
+                            type="text"
+                            placeholder="🔍 Быстрый поиск курса..."
+                            value={searchCourseQuery}
+                            onChange={(e) => setSearchCourseQuery(e.target.value)}
+                            onClick={(e) => e.stopPropagation()} // предотвращаем закрытие
+                            autoFocus
+                            style={{
+                              width: "100%",
+                              padding: "8px 10px",
+                              fontSize: "13px",
+                              borderRadius: "4px",
+                              border: "1px solid var(--color-gray-border)",
+                              outline: "none",
+                              backgroundColor: "#fff",
+                            }}
+                          />
+                        </div>
+
+                        {/* Список курсов */}
+                        <div style={{ 
+                          maxHeight: "220px", 
+                          overflowY: "auto",
+                          padding: "4px 0"
+                        }}>
+                          {filteredCoursesForGrant.length === 0 ? (
+                            <div style={{ padding: "12px", fontSize: "12px", color: "#888", textAlign: "center" }}>
+                              Курсы не найдены
+                            </div>
+                          ) : (
+                            filteredCoursesForGrant.map((c) => {
+                              const isSelected = c.id === selectedCourseId;
+                              return (
+                                <div
+                                  key={c.id}
+                                  onClick={() => {
+                                    setSelectedCourseId(c.id);
+                                    setIsCourseDropdownOpen(false);
+                                    setSearchCourseQuery("");
+                                  }}
+                                  style={{
+                                    padding: "10px 14px",
+                                    fontSize: "13px",
+                                    cursor: "pointer",
+                                    transition: "background-color 0.15s ease",
+                                    backgroundColor: isSelected ? "var(--color-primary-light)" : "transparent",
+                                    color: isSelected ? "var(--color-primary)" : "var(--color-dark)",
+                                    fontWeight: isSelected ? 600 : 400,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center"
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (!isSelected) {
+                                      e.currentTarget.style.backgroundColor = "#faf0ec";
+                                      e.currentTarget.style.color = "var(--color-primary)";
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (!isSelected) {
+                                      e.currentTarget.style.backgroundColor = "transparent";
+                                      e.currentTarget.style.color = "var(--color-dark)";
+                                    }
+                                  }}
+                                >
+                                  <span style={{ paddingRight: "10px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {c.title}
+                                  </span>
+                                  <span style={{ 
+                                    fontSize: "11px", 
+                                    color: isSelected ? "var(--color-primary)" : "#9a7c56",
+                                    backgroundColor: isSelected ? "rgba(197, 23, 34, 0.1)" : "#fbf7f4",
+                                    padding: "2px 6px",
+                                    borderRadius: "4px",
+                                    fontWeight: 600,
+                                    flexShrink: 0
+                                  }}>
+                                    🔑 {c.lessons.length} ур.
+                                  </span>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Срок действия доступов */}
@@ -1163,7 +1322,12 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
                   <button
                     type="button"
-                    onClick={() => setAccessModalUser(null)}
+                    onClick={() => {
+                      setAccessModalUser(null);
+                      setSelectedCourseId("");
+                      setSearchCourseQuery("");
+                      setIsCourseDropdownOpen(false);
+                    }}
                     className="btn btn-secondary"
                     style={{ padding: "10px 20px" }}
                   >
