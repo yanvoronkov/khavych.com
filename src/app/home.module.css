@@ -175,6 +175,18 @@
   overflow: hidden;
 }
 
+.aboutOlgaImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s ease;
+}
+
+.aboutFrame:hover .aboutOlgaImage {
+  transform: scale(1.03);
+}
+
 .aboutContent h2 {
   font-family: var(--font-title);
   font-size: 36px;
@@ -260,7 +272,7 @@
 
 .servicesGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 40px;
 }
 

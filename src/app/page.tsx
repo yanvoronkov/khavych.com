@@ -522,24 +522,12 @@ export default function Home() {
           <div className={styles.aboutGrid}>
             <div className={styles.aboutImageArea}>
               <div className={styles.aboutFrame}>
-                <div className={styles.photoPlaceholder}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="64"
-                    height="64"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M4.5 16.5c-1.5 1.26-2.5 3.19-2.5 5.5h20c0-2.31-1-4.24-2.5-5.5" />
-                    <circle cx="12" cy="8" r="5" />
-                  </svg>
-                  <span style={{ color: "#c51722" }}>Энергетическое поле</span>
-                  <p style={{ color: "#777" }}>Индивидуальный подход к каждому ученику и клиенту</p>
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/olga2.jpg"
+                  alt="Ольга Хавич, нумеролог и ваш проводник в мир осознанности"
+                  className={styles.aboutOlgaImage}
+                />
               </div>
             </div>
 
