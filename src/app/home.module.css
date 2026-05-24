@@ -335,10 +335,102 @@
   background-color: var(--color-light);
 }
 
-.diplomasGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
+.sliderContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: 40px;
+  padding: 0 50px; /* Отступы по бокам для стрелочек */
+}
+
+.sliderViewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.sliderTrack {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+}
+
+.sliderSlide {
+  flex-shrink: 0;
+  padding: 0 15px; /* Зазор между слайдами */
+}
+
+.sliderArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-gray-border);
+  background-color: #fff;
+  color: var(--color-primary);
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  z-index: 10;
+  user-select: none;
+  line-height: 1;
+}
+
+.sliderArrow:hover:not(.sliderArrowDisabled) {
+  background-color: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.sliderArrowLeft {
+  left: 0;
+}
+
+.sliderArrowRight {
+  right: 0;
+}
+
+.sliderArrowDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background-color: #f5f5f7;
+  color: var(--color-gray);
+  box-shadow: none;
+}
+
+.sliderPagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 30px;
+}
+
+.sliderDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-gray-border);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  padding: 0;
+}
+
+.sliderDot:hover {
+  background-color: var(--color-primary-light);
+}
+
+.sliderDotActive {
+  background-color: var(--color-primary);
+  width: 24px; /* Элегантное удлинение активной точки */
 }
 
 .diplomaCard {
@@ -1188,33 +1280,12 @@
 
 .lightboxImage {
   max-width: 95vw;
-  max-height: 72vh;
+  max-height: 85vh;
   object-fit: contain;
-  border-radius: 6px;
-  border: 6px solid #fff;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  border: 8px solid #fff;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7);
   background-color: #fff;
-}
-
-.lightboxMeta {
-  text-align: center;
-  color: #fff;
-  margin-top: 18px;
-  max-width: 650px;
-}
-
-.lightboxMeta h3 {
-  font-family: var(--font-title);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-accent);
-  margin-bottom: 6px;
-}
-
-.lightboxMeta p {
-  font-size: 13.5px;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
 }
 
 .lightboxClose {

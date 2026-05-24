@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "src/components/Header";
 import styles from "./home.module.css";
@@ -94,10 +94,41 @@ const DIPLOMAS: Diploma[] = [
   { id: 8, title: "Психологическое консультирование", subtitle: "Методы гештальт-терапии и когнитивной коррекции в эзотерике", image: "/sertificate8.jpg" },
   { id: 9, title: "Практическая Нумерология", subtitle: "Магистр числовых прогнозов, расчет финансового и любовного каналов", image: "/sertificate9.jpg" },
   { id: 10, title: "Энергетическая Чистка", subtitle: "Мастер бесконтактного ладования, снятие деструктивных блоков", image: "/sertificate10.jpg" },
-  { id: 11, title: "Кармическая Коррекция", subtitle: "Определение и развязывание кармических узлов прошлых воплощений", image: "/sertificate11.jpg" }
+  { id: 11, title: "Кармическая Коррекция", subtitle: "Определение и развязывание кармических узлов прошлых воплощений", image: "/sertificate11.jpg" },
+  { id: 12, title: "Осознанное Менторство", subtitle: "Помощь в раскрытии внутреннего потенциала и духовного баланса", image: "/sertificate12.jpeg" },
+  { id: 13, title: "Матрица Изобилия", subtitle: "Индивидуальный расчет финансовых ключей и карьерных векторов", image: "/sertificate13.jpg" },
+  { id: 14, title: "Энерготерапия 5 Измерения", subtitle: "Интегральные практики глубокого исцеления души и сознания", image: "/sertificate14.jpeg" }
 ];
 
 export default function Home() {
+  // Состояния для карусели сертификатов
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  const [visibleSlides, setVisibleSlides] = useState<number>(3);
+
+  // Эффект для адаптивного количества слайдов в карусели сертификатов
+  useEffect(() => {
+    const updateSlidesCount = () => {
+      if (window.innerWidth < 768) {
+        setVisibleSlides(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleSlides(2);
+      } else {
+        setVisibleSlides(3);
+      }
+    };
+    updateSlidesCount();
+    window.addEventListener("resize", updateSlidesCount);
+    return () => window.removeEventListener("resize", updateSlidesCount);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlideIndex((prev) => Math.min(prev + 1, DIPLOMAS.length - visibleSlides));
+  };
+
+  const prevSlide = () => {
+    setCurrentSlideIndex((prev) => Math.max(prev - 1, 0));
+  };
+
   // Состояния для интерактивного Квиза
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [selectedScores, setSelectedScores] = useState<string[]>([]);
@@ -606,32 +637,79 @@ export default function Home() {
             </p>
           </div>
 
-          <div className={styles.diplomasGrid}>
-            {DIPLOMAS.map((dip) => (
+          <div className={styles.sliderContainer}>
+            {/* Стрелка Влево */}
+            <button
+              onClick={prevSlide}
+              disabled={currentSlideIndex === 0}
+              className={`${styles.sliderArrow} ${styles.sliderArrowLeft} ${currentSlideIndex === 0 ? styles.sliderArrowDisabled : ""}`}
+              aria-label="Предыдущий сертификат"
+            >
+              ‹
+            </button>
+
+            {/* Видимая область слайдера */}
+            <div className={styles.sliderViewport}>
               <div
-                key={dip.id}
-                className={styles.diplomaCard}
-                onClick={() => setActiveDiploma(dip)}
+                className={styles.sliderTrack}
+                style={{
+                  transform: `translateX(-${currentSlideIndex * (100 / visibleSlides)}%)`,
+                }}
               >
-                <div className={styles.diplomaImageContainer}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={dip.image}
-                    alt={dip.title}
-                    className={styles.diplomaImg}
-                  />
-                  <div className={styles.diplomaOverlay}>
-                    <span style={{ fontSize: "24px" }}>🔍</span>
-                    <span style={{ fontSize: "11px", color: "#fff", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
-                      Увеличить
-                    </span>
+                {DIPLOMAS.map((dip) => (
+                  <div
+                    key={dip.id}
+                    className={styles.sliderSlide}
+                    style={{ width: `${100 / visibleSlides}%` }}
+                  >
+                    <div
+                      className={styles.diplomaCard}
+                      onClick={() => setActiveDiploma(dip)}
+                    >
+                      <div className={styles.diplomaImageContainer}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={dip.image}
+                          alt={dip.title}
+                          className={styles.diplomaImg}
+                        />
+                        <div className={styles.diplomaOverlay}>
+                          <span style={{ fontSize: "24px" }}>🔍</span>
+                          <span style={{ fontSize: "11px", color: "#fff", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                            Увеличить
+                          </span>
+                        </div>
+                      </div>
+                      <div className={styles.diplomaMeta}>
+                        <h4 className={styles.diplomaTitle}>{dip.title}</h4>
+                        <p className={styles.diplomaSubtitle}>{dip.subtitle}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className={styles.diplomaMeta}>
-                  <h4 className={styles.diplomaTitle}>{dip.title}</h4>
-                  <p className={styles.diplomaSubtitle}>{dip.subtitle}</p>
-                </div>
+                ))}
               </div>
+            </div>
+
+            {/* Стрелка Вправо */}
+            <button
+              onClick={nextSlide}
+              disabled={currentSlideIndex >= DIPLOMAS.length - visibleSlides}
+              className={`${styles.sliderArrow} ${styles.sliderArrowRight} ${currentSlideIndex >= DIPLOMAS.length - visibleSlides ? styles.sliderArrowDisabled : ""}`}
+              aria-label="Следующий сертификат"
+            >
+              ›
+            </button>
+          </div>
+
+          {/* Пагинация (индикаторы) */}
+          <div className={styles.sliderPagination}>
+            {Array.from({ length: Math.max(0, DIPLOMAS.length - visibleSlides + 1) }).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlideIndex(idx)}
+                className={`${styles.sliderDot} ${currentSlideIndex === idx ? styles.sliderDotActive : ""}`}
+                aria-label={`Перейти к слайду ${idx + 1}`}
+              />
             ))}
           </div>
         </div>
@@ -922,13 +1000,6 @@ export default function Home() {
               alt={activeDiploma.title}
               className={styles.lightboxImage}
             />
-            <div className={styles.lightboxMeta}>
-              <h3>{activeDiploma.title}</h3>
-              <p>{activeDiploma.subtitle}</p>
-              <div style={{ marginTop: "12px", border: "1px dashed var(--color-accent)", padding: "6px 16px", fontSize: "10px", color: "var(--color-accent)", display: "inline-block", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "700" }}>
-                Официальный документ мастера
-              </div>
-            </div>
           </div>
         </div>
       )}
