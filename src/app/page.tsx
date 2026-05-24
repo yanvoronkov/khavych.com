@@ -680,10 +680,6 @@ export default function Home() {
                           </span>
                         </div>
                       </div>
-                      <div className={styles.diplomaMeta}>
-                        <h4 className={styles.diplomaTitle}>{dip.title}</h4>
-                        <p className={styles.diplomaSubtitle}>{dip.subtitle}</p>
-                      </div>
                     </div>
                   </div>
                 ))}
