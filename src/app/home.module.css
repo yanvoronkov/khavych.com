@@ -1,0 +1,1378 @@
+/* Стили для Главной страницы (Landing Page) khavych.com */
+
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: url('/hero-bg.jpg') no-repeat;
+  background-size: cover;
+  background-position: center;
+  color: var(--color-dark);
+  overflow: hidden;
+  min-height: auto !important; /* Явно убираем 90vh */
+  padding: 0 !important;       /* Явно убираем padding 80px */
+}
+
+/* Эффект мерцающих золотых звезд/частиц отключен для светлого фона */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.heroContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  grid-template-rows: auto auto;
+  grid-template-areas: 
+    "title image"
+    "bottom image";
+  gap: 15px 60px;
+  align-items: stretch; /* Позволяет колонкам растягиваться по высоте для прижатия фото */
+  width: 100%;
+}
+
+.heroTitleArea {
+  grid-area: title;
+  align-self: center; /* Центрируем заголовок по вертикали */
+  margin-top: auto;
+  animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+
+.heroImageArea {
+  grid-area: image;
+  align-self: end; /* Прижимаем к низу */
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  animation: fadeScale 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 4;
+  height: 100%;
+}
+
+.heroOlgaImage {
+  width: 100%;
+  max-height: 550px;
+  object-fit: contain;
+  display: block; /* Устраняет микро-зазоры снизу */
+  vertical-align: bottom;
+  filter: drop-shadow(0 15px 30px rgba(18, 2, 3, 0.12));
+}
+
+.heroBottomArea {
+  grid-area: bottom;
+  animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+
+.heroTitle {
+  font-family: var(--font-title);
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  color: #120203;
+}
+
+.heroTitle span {
+  background: linear-gradient(135deg, #c51722 0%, #9a7c56 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroSubtitle {
+  font-size: 18px;
+  line-height: 1.7;
+  color: rgba(18, 2, 3, 0.8);
+  margin-bottom: 35px;
+  font-weight: 500;
+  max-width: 600px;
+}
+
+.heroActions {
+  display: flex;
+  gap: 20px;
+}
+
+/* Переключатели отображения контента для адаптивности */
+.desktopOnly {
+  display: block;
+}
+
+.mobileOnly {
+  display: none !important;
+}
+
+/* Стили для вынесенного мобильного блока подзаголовка и кнопок */
+.heroBottomAreaMobile {
+  background-color: #faf6f4;
+  padding: 35px 0 45px 0;
+  border-bottom: 1px solid rgba(197, 23, 34, 0.05);
+}
+
+.heroSubtitleMobile {
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(18, 2, 3, 0.8);
+  margin-bottom: 24px;
+  font-weight: 500;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
+}
+
+.heroActionsMobile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+
+/* --- Секция "Обо мне" (About) --- */
+.about {
+  padding: 100px 0;
+  background-color: var(--color-light);
+}
+
+.aboutGrid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.aboutImageArea {
+  position: relative;
+}
+
+.aboutFrame {
+  width: 100%;
+  height: 480px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-border);
+  background: #faf6f4;
+  box-shadow: var(--shadow-premium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.aboutContent h2 {
+  font-family: var(--font-title);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--color-dark);
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+.aboutContent h2 span {
+  color: var(--color-primary);
+}
+
+.aboutText {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #4a4a4a;
+}
+
+.aboutText p {
+  margin-bottom: 20px;
+}
+
+/* Список качеств / достижений Ольги */
+.featuresList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 35px;
+}
+
+.featureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.featureItemIcon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.featureItemText h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0 0 4px 0;
+}
+
+.featureItemText p {
+  font-size: 12px;
+  color: var(--color-gray);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* --- Секция "Услуги и Практики" --- */
+.services {
+  padding: 100px 0;
+  background-color: #faf6f4;
+}
+
+.centerHeader {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 60px auto;
+}
+
+.centerHeader h2 {
+  font-family: var(--font-title);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--color-dark);
+  margin-bottom: 16px;
+}
+
+.centerHeader p {
+  font-size: 15px;
+  color: var(--color-gray);
+  line-height: 1.6;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+
+.serviceCard {
+  background-color: var(--color-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-border);
+  padding: 40px;
+  box-shadow: var(--shadow-premium);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-medium);
+}
+
+.serviceCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(197, 23, 34, 0.06);
+  border-color: rgba(197, 23, 34, 0.2);
+}
+
+.serviceIcon {
+  width: 60px;
+  height: 60px;
+  background-color: #fbeee8;
+  color: var(--color-primary);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  transition: all var(--transition-fast);
+}
+
+.serviceCard:hover .serviceIcon {
+  background-color: var(--color-primary);
+  color: var(--color-light);
+  transform: scale(1.05);
+}
+
+.serviceCard h3 {
+  font-family: var(--font-title);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0 0 14px 0;
+  line-height: 1.4;
+}
+
+.serviceCard p {
+  font-size: 14px;
+  color: var(--color-gray);
+  line-height: 1.6;
+  margin: 0 0 30px 0;
+  flex-grow: 1;
+}
+
+/* --- Секция "Сертификаты" (Diplomas) --- */
+.certificates {
+  padding: 100px 0;
+  background-color: var(--color-light);
+}
+
+.diplomasGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 30px;
+}
+
+.diplomaCard {
+  background-color: #faf6f4;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-border);
+  padding: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  transition: all var(--transition-medium);
+}
+
+.diplomaCard:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-premium);
+  border-color: rgba(197, 23, 34, 0.15);
+}
+
+.diplomaWrapper {
+  width: 100%;
+  height: 320px;
+  border-radius: var(--radius-sm);
+  background-color: #eae0db;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  border: 1px dashed rgba(197, 23, 34, 0.2);
+  color: var(--color-primary);
+}
+
+.diplomaWrapper svg {
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+.diplomaWrapper span {
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-dark);
+  line-height: 1.4;
+}
+
+.diplomaWrapper p {
+  font-size: 10px;
+  color: var(--color-gray);
+  margin-top: 6px;
+}
+
+/* --- Секция "Отзывы" (Testimonials) --- */
+.testimonials {
+  padding: 100px 0;
+  background-color: #faf6f4;
+}
+
+.testimonialsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.testimonialCard {
+  background-color: var(--color-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-border);
+  padding: 40px;
+  box-shadow: var(--shadow-premium);
+  position: relative;
+}
+
+.quoteIcon {
+  position: absolute;
+  top: 25px;
+  right: 30px;
+  color: #fbeee8;
+  z-index: 1;
+}
+
+.testimonialText {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #4a4a4a;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 28px;
+  font-style: italic;
+}
+
+.clientMeta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c51722 0%, #ff5252 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-light);
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(197, 23, 34, 0.2);
+}
+
+.clientInfo h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0 0 2px 0;
+}
+
+.clientInfo p {
+  font-size: 11px;
+  color: var(--color-gray);
+  margin: 0;
+}
+
+/* --- Футер (Footer) --- */
+.footer {
+  background-color: #120203;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 80px 0 40px 0;
+  border-top: 1px solid rgba(197, 168, 128, 0.1);
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1.5fr;
+  gap: 60px;
+  margin-bottom: 60px;
+}
+
+.footerLogo h3 {
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-light);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.footerLogo p {
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+.footerLinks h4 {
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-light);
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.linksList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linksList a {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color var(--transition-fast);
+}
+
+.linksList a:hover {
+  color: #ffbe3b;
+}
+
+.footerContacts h4 {
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-light);
+  margin-bottom: 20px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.contactIcon {
+  color: #ffbe3b;
+  flex-shrink: 0;
+}
+
+.socials {
+  display: flex;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.socialBtn {
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-light);
+  transition: all var(--transition-fast);
+}
+
+.socialBtn:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  transform: translateY(-3px);
+}
+
+.footerBottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+/* --- Секция "Проблемы и запросы клиентов" (Problems) --- */
+.problems {
+  padding: 100px 0;
+  background: linear-gradient(180deg, var(--color-light) 0%, #faf6f4 100%);
+}
+
+.problemsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.problemCard {
+  background-color: var(--color-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-border);
+  padding: 35px;
+  box-shadow: var(--shadow-premium);
+  display: flex;
+  gap: 20px;
+  transition: all var(--transition-medium);
+}
+
+.problemCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(197, 23, 34, 0.2);
+  box-shadow: 0 15px 35px rgba(197, 23, 34, 0.04);
+}
+
+.problemIcon {
+  width: 50px;
+  height: 50px;
+  background-color: #fbeee8;
+  color: var(--color-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.problemCardContent h4 {
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0 0 10px 0;
+}
+
+.problemCardContent p {
+  font-size: 14px;
+  color: var(--color-gray);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.problemsTransition {
+  text-align: center;
+  max-width: 650px;
+  margin: 40px auto 0 auto;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-dark);
+  font-weight: 600;
+  font-style: italic;
+  padding: 20px;
+  border-left: 3px solid var(--color-primary);
+  background: rgba(197, 23, 34, 0.02);
+}
+
+/* --- Секция "Система четырех ключей" (Keys) --- */
+.keys {
+  padding: 100px 0;
+  background-color: #120203;
+  color: var(--color-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.keys::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(197, 23, 34, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.keysGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+}
+
+.keyCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(197, 168, 128, 0.15);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  position: relative;
+  transition: all var(--transition-medium);
+}
+
+.keyCard:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(197, 168, 128, 0.4);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+.keyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.keyStepNumber {
+  font-family: var(--font-title);
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffbe3b;
+  opacity: 0.8;
+}
+
+.keyIcon {
+  color: #c5a880;
+}
+
+.keyStepTitle {
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-light);
+  margin: 0 0 12px 0;
+  letter-spacing: 0.5px;
+}
+
+.keyStepDesc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* --- Секция "Продукты Силы" (Products Power preview) --- */
+.productsPower {
+  padding: 100px 0;
+  background-color: var(--color-light);
+}
+
+.productsPowerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.powerCard {
+  border-radius: var(--radius-lg);
+  padding: 50px;
+  box-shadow: var(--shadow-premium);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-medium);
+}
+
+.powerCard:hover {
+  transform: translateY(-5px);
+}
+
+.powerCardNormal {
+  background: #faf6f4;
+  border: 1px solid var(--color-gray-border);
+}
+
+.powerCardPremium {
+  background: linear-gradient(135deg, #1e0507 0%, #120203 100%);
+  color: var(--color-light);
+  border: 1px solid rgba(197, 168, 128, 0.2);
+}
+
+.powerCardNormal:hover {
+  border-color: rgba(197, 23, 34, 0.2);
+  box-shadow: 0 20px 40px rgba(197, 23, 34, 0.05);
+}
+
+.powerCardPremium:hover {
+  border-color: rgba(197, 168, 128, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.powerBadge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+.powerCardNormal .powerBadge {
+  background-color: rgba(197, 23, 34, 0.08);
+  color: var(--color-primary);
+}
+
+.powerCardPremium .powerBadge {
+  background-color: rgba(197, 168, 128, 0.15);
+  color: #ffbe3b;
+  border: 1px solid rgba(197, 168, 128, 0.3);
+}
+
+.powerTitle {
+  font-family: var(--font-title);
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.powerCardPremium .powerTitle {
+  background: linear-gradient(135deg, #fff 40%, #c5a880 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.powerDesc {
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 30px;
+  flex-grow: 1;
+}
+
+.powerCardNormal .powerDesc {
+  color: var(--color-gray);
+}
+
+.powerCardPremium .powerDesc {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.powerList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 35px;
+}
+
+.powerListItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.powerCardNormal .powerListItem {
+  color: var(--color-dark);
+}
+
+.powerCardPremium .powerListItem {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.powerListItemDot {
+  color: #ffbe3b;
+}
+
+/* --- Секция "Квиз-Тест" (Quiz) --- */
+.quiz {
+  padding: 100px 0;
+  background-color: #faf6f4;
+}
+
+.quizCard {
+  background-color: var(--color-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-border);
+  box-shadow: var(--shadow-premium);
+  max-width: 800px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.quizHeader {
+  padding: 30px 40px;
+  border-bottom: 1px solid var(--color-gray-border);
+  background-color: rgba(197, 23, 34, 0.02);
+}
+
+.quizProgressWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-gray);
+  margin-bottom: 12px;
+}
+
+.quizProgressBar {
+  width: 100%;
+  height: 6px;
+  background-color: #eae0db;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.quizProgress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary) 0%, #ffbe3b 100%);
+  transition: width 0.4s ease;
+}
+
+.quizContent {
+  padding: 40px;
+}
+
+.quizQuestion h3 {
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0 0 24px 0;
+  line-height: 1.4;
+}
+
+.quizOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.quizOption {
+  width: 100%;
+  background-color: var(--color-light);
+  border: 1.5px solid var(--color-gray-border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-dark);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quizOption:hover {
+  background-color: #faf6f4;
+  border-color: var(--color-primary);
+}
+
+.quizOptionActive {
+  background-color: rgba(197, 23, 34, 0.04);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: 0 0 10px rgba(197, 23, 34, 0.1);
+}
+
+.quizOptionCheck {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-gray-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  transition: all var(--transition-fast);
+}
+
+.quizOptionActive .quizOptionCheck {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-light);
+}
+
+.quizResult {
+  text-align: center;
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quizResultIcon {
+  font-size: 50px;
+  margin-bottom: 20px;
+}
+
+.quizResultTitle {
+  font-family: var(--font-title);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-dark);
+  margin-bottom: 12px;
+}
+
+.quizResultDesc {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-gray);
+  max-width: 550px;
+  margin: 0 auto 30px auto;
+}
+
+.quizResultAction {
+  background-color: rgba(197, 23, 34, 0.05);
+  border: 1px dashed rgba(197, 23, 34, 0.3);
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 30px;
+}
+
+.quizResultAction h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quizResultAction p {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.quizFooter {
+  padding: 24px 40px;
+  background-color: #faf6f4;
+  border-top: 1px solid var(--color-gray-border);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* --- Секция "FAQ" --- */
+.faq {
+  padding: 100px 0;
+  background-color: var(--color-light);
+}
+
+.faqGrid {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faqItem {
+  border: 1px solid var(--color-gray-border);
+  border-radius: 12px;
+  background-color: #faf6f4;
+  overflow: hidden;
+  transition: all var(--transition-medium);
+}
+
+.faqItemOpen {
+  border-color: rgba(197, 23, 34, 0.2);
+  background-color: var(--color-light);
+  box-shadow: 0 10px 25px rgba(197, 23, 34, 0.03);
+}
+
+.faqQuestion {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 22px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.faqQuestion:hover {
+  color: var(--color-primary);
+}
+
+.faqIcon {
+  color: var(--color-primary);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 15px;
+}
+
+.faqItemOpen .faqIcon {
+  transform: rotate(45deg);
+}
+
+.faqAnswer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  padding: 0 30px;
+}
+
+.faqItemOpen .faqAnswer {
+  max-height: 500px;
+  padding: 0 30px 24px 30px;
+  border-top: 1px solid var(--color-gray-border);
+  padding-top: 18px;
+}
+
+.faqAnswer p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-gray);
+  margin: 0;
+}
+
+/* --- Реальные кейсы (Cases) --- */
+.caseState {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(197, 23, 34, 0.02);
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 2px solid var(--color-primary);
+}
+
+.caseStateItem {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.caseStateItem strong {
+  color: var(--color-primary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* --- Стили для модального окна Lightbox (Сертификаты) --- */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(18, 2, 3, 0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+
+.lightboxActive {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lightboxContent {
+  position: relative;
+  max-width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeScale 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lightboxImageArea {
+  width: 480px;
+  height: 600px;
+  background-color: #eae0db;
+  border: 10px solid #fff;
+  border-radius: 4px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  padding: 40px;
+  text-align: center;
+  border-image: linear-gradient(135deg, #c5a880 0%, #120203 100%) 10;
+}
+
+.lightboxImageArea svg {
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.lightboxImageArea h3 {
+  font-family: var(--font-title);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.lightboxImageArea p {
+  font-size: 13px;
+  color: var(--color-gray);
+  margin-top: 8px;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: var(--color-light);
+  font-size: 30px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.lightboxClose:hover {
+  color: #ffbe3b;
+}
+
+.aboutFrame .photoPlaceholder svg {
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+.aboutFrame .photoPlaceholder {
+  background: radial-gradient(circle at center, rgba(197, 23, 34, 0.05) 0%, transparent 100%);
+}
+
+@media (max-width: 768px) {
+  .problemsGrid, .keysGrid, .productsPowerGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .powerCard {
+    padding: 30px;
+  }
+  .quizContent, .quizHeader, .quizFooter {
+    padding: 20px;
+  }
+  .faqQuestion {
+    padding: 18px 20px;
+  }
+  .faqItemOpen .faqAnswer {
+    padding: 0 20px 20px 20px;
+  }
+  .lightboxImageArea {
+    width: 320px;
+    height: 400px;
+    padding: 20px;
+  }
+}
+
+
+/* Анимации */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .heroContainer, .aboutGrid, .footerGrid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .heroImageArea {
+    order: -1;
+  }
+
+  .servicesGrid, .testimonialsGrid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 50px 0 0 0; /* Прижимаем фото Ольги к низу секции */
+    background-position: center;
+  }
+  
+  .heroGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: "title image";
+    gap: 0 15px;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .heroTitleArea {
+    grid-area: title;
+    align-self: center;
+    width: 100%;
+    padding-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: auto !important;
+  }
+
+  .heroImageArea {
+    grid-area: image;
+    align-self: end;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  .heroOlgaImage {
+    max-height: 260px; /* Крупная фотография Ольги на мобильных */
+    width: auto;
+    object-fit: contain;
+    display: block;
+    vertical-align: bottom;
+    filter: drop-shadow(0 8px 16px rgba(18, 2, 3, 0.12));
+  }
+
+  .desktopOnly {
+    display: none !important;
+  }
+
+  .mobileOnly {
+    display: block !important;
+  }
+  
+  .heroTitle {
+    font-size: 28px !important;
+    line-height: 1.25;
+    margin-bottom: 0;
+  }
+
+  /* Размер шрифта заголовков секций 30px на мобильных */
+  .centerHeader h2,
+  .aboutContent h2 {
+    font-size: 30px !important;
+    line-height: 1.25 !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero {
+    padding: 40px 0 0 0;
+  }
+
+  .heroGrid {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+
+  .heroTitleArea {
+    padding-bottom: 15px;
+  }
+
+  .heroTitle {
+    font-size: 22px !important;
+  }
+
+  .heroOlgaImage {
+    max-height: 190px; /* Аккуратный размер на маленьких смартфонах */
+  }
+
+  .featuresList {
+    grid-template-columns: 1fr;
+  }
+}

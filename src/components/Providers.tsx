@@ -1,0 +1,19 @@
+"use client";
+
+import React from "react";
+import { CartProvider } from "src/context/CartContext";
+
+interface IProvidersProps {
+  children: React.ReactNode;
+}
+
+/**
+ * Глобальный клиентский провайдер контекстов.
+ * Используется для интеграции клиентских состояний (корзина, авторизация)
+ * в серверную иерархию Next.js App Router без потери SEO метаданных.
+ */
+export const Providers: React.FC<IProvidersProps> = ({ children }) => {
+  return <CartProvider>{children}</CartProvider>;
+};
+
+export default Providers;

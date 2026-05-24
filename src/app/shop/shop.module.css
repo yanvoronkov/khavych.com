@@ -1,0 +1,273 @@
+/* Стили для страницы магазина (/shop) */
+
+.shopPage {
+  min-height: 100vh;
+  background-color: var(--color-gray-light);
+  padding-bottom: 80px;
+}
+
+/* Баннер магазина */
+.hero {
+  background: linear-gradient(135deg, #121214 0%, #1e1e24 100%);
+  color: var(--color-light);
+  padding: 60px 0;
+  text-align: center;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.heroTitle {
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.heroDesc {
+  font-size: 16px;
+  color: var(--color-gray);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Фильтры товаров */
+.filterSection {
+  margin: 40px 0;
+}
+
+.filterRow {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filterBtn {
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: 600;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  border: 1px solid var(--color-gray-border);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.filterBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filterBtnActive {
+  background-color: var(--color-primary);
+  color: var(--color-light);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(197, 23, 34, 0.2);
+}
+
+/* Сетка товаров */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 32px;
+  margin-top: 20px;
+}
+
+/* Карточка товара */
+.card {
+  background-color: var(--color-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Картинка (заглушка) */
+.imageWrapper {
+  position: relative;
+  height: 220px;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, #fae2d7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  border-bottom: 1px solid var(--color-gray-border);
+}
+
+/* Категорийный бейдж */
+.badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.badgeBracelet {
+  background-color: var(--color-primary);
+}
+
+.badgeCourse {
+  background-color: var(--color-accent-dark);
+}
+
+.badgeConsultation {
+  background-color: var(--color-dark);
+}
+
+/* Описание карточки */
+.cardBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.productName {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.3;
+  min-height: 48px; /* Выравнивание названий */
+}
+
+.productDesc {
+  font-size: 14px;
+  color: var(--color-gray);
+  line-height: 1.5;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+/* Список фич */
+.featureList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-gray-light);
+}
+
+.featureItem {
+  font-size: 12px;
+  color: var(--color-dark);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.featureIcon {
+  color: var(--color-accent-dark);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Подвал карточки (цена и кнопка) */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-gray-light);
+}
+
+.priceCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.priceLabel {
+  font-size: 11px;
+  color: var(--color-gray);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.price {
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.buyBtn {
+  padding: 10px 18px;
+  font-size: 13px;
+  border-radius: var(--radius-md);
+}
+
+/* Адаптивность */
+@media (max-width: 576px) {
+  .heroTitle {
+    font-size: 28px;
+  }
+  
+  .heroDesc {
+    font-size: 14px;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .cardBody {
+    padding: 20px;
+  }
+}
+
+/* Стили подфильтров для консультаций */
+.subFilterRow {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background-color: var(--color-light);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-gray-border);
+}
+
+.subFilterBtn {
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 600;
+  background-color: transparent;
+  color: var(--color-dark);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.subFilterBtn:hover {
+  color: var(--color-accent-dark);
+}
+
+.subFilterBtnActive {
+  background-color: var(--color-accent-dark);
+  color: var(--color-light);
+  border-color: var(--color-accent-dark);
+  box-shadow: 0 2px 6px rgba(197, 168, 128, 0.3);
+}
+

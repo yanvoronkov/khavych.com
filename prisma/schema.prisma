@@ -1,0 +1,123 @@
+// Схема базы данных Prisma для проекта khavych.com
+// Использует СУБД PostgreSQL
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/// Роли пользователей в системе
+enum Role {
+  USER  // Обычный ученик / покупатель
+  ADMIN // Ольга (администратор сайта)
+}
+
+/// Категории товаров в каталоге
+enum Category {
+  BRACELET     // Физические товары (браслеты)
+  COURSE       // Обучающие курсы
+  CONSULTATION // Услуги / Консультации
+}
+
+/// Статусы заказов
+enum OrderStatus {
+  PENDING   // Ожидает оплаты (выставлен счет)
+  PAID      // Оплачен
+  CANCELLED // Отменен
+}
+
+/// Пользователи системы (ученики и администраторы)
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  name         String
+  phone        String
+  role         Role         @default(USER)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  accesses     UserAccess[] // Доступы пользователя к курсам
+  orders       Order[]      // Заказы пользователя
+
+  @@index([email])
+}
+
+/// Обучающие курсы
+model Course {
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  imageUrl    String?
+  isPublished Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  lessons     Lesson[]     // Уроки курса
+  accesses    UserAccess[] // Пользователи, имеющие доступ к курсу
+}
+
+/// Уроки внутри курсов
+model Lesson {
+  id          String   @id @default(uuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  videoUrl    String?  // Ссылка на видеоплеер Kinescope
+  fileUrls    String[] // Массив ссылок на прикрепленные файлы
+  order       Int      // Порядок вывода урока в списке
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+/// Таблица связей для ручной выдачи доступа к курсам
+model UserAccess {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  grantedAt DateTime  @default(now())
+  expiresAt DateTime? // Срок действия доступа (null - бессрочно)
+
+  @@unique([userId, courseId]) // У одного пользователя только один доступ к конкретному курсу
+  @@index([userId])
+  @@index([courseId])
+}
+
+
+/// Каталог товаров, услуг и курсов в магазине
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?
+  category    Category
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Заказы клиентов
+model Order {
+  id            String      @id @default(uuid())
+  userId        String?     // Nullable, если покупка оформлена гостем
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName  String
+  customerEmail String
+  customerPhone String
+  customerAddress String?   // Заполняется только для физических товаров (браслетов)
+  items         Json        // JSON-структура со списком товаров: [{ id, name, price, quantity, category }]
+  status        OrderStatus @default(PENDING)
+  totalAmount   Decimal     @db.Decimal(10, 2)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([customerEmail])
+}

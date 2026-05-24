@@ -1,0 +1,320 @@
+/* Стили для компонента CartDrawer (Выдвижная корзина) */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-normal), visibility var(--transition-normal);
+}
+
+.overlayOpen {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 480px;
+  height: 100vh;
+  background-color: var(--color-light);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--transition-slow);
+}
+
+.drawerOpen {
+  transform: translateX(0);
+}
+
+/* Шапка корзины */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid var(--color-gray-border);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-gray-light);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.closeBtn:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* Содержимое корзины */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  color: var(--color-gray);
+  gap: 16px;
+}
+
+.emptyText {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Список товаров */
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.item {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.itemImagePlaceholder {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.itemDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.itemName {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-dark);
+}
+
+.itemMeta {
+  font-size: 12px;
+  color: var(--color-gray);
+  margin-top: 4px;
+}
+
+.itemPriceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.itemPrice {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-family: var(--font-title);
+}
+
+/* Управление количеством */
+.quantityControls {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-gray-light);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.qtyBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+
+.qtyBtn:hover {
+  background-color: var(--color-light);
+  color: var(--color-primary);
+}
+
+.qtyValue {
+  width: 32px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.deleteBtn {
+  color: var(--color-gray);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  padding: 4px;
+}
+
+.deleteBtn:hover {
+  color: var(--color-primary);
+}
+
+/* Подвал корзины (Сумма и Оформление) */
+.footer {
+  padding: 24px;
+  border-top: 1px solid var(--color-gray-border);
+  background-color: var(--color-gray-light);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.summaryTotal {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-primary);
+  font-family: var(--font-title);
+}
+
+/* Форма оформления заказа */
+.checkoutForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-border);
+  background-color: var(--color-light);
+  font-size: 14px;
+  transition: var(--transition-fast);
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(197, 23, 34, 0.1);
+}
+
+.errorText {
+  font-size: 11px;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.submitBtn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.backToCartBtn {
+  font-size: 13px;
+  color: var(--color-gray);
+  align-self: center;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: var(--transition-fast);
+}
+
+.backToCartBtn:hover {
+  color: var(--color-primary);
+}
+
+/* Блок успешного заказа */
+.successState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  gap: 20px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.successIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background-color: #e2fbe5;
+  color: #059601;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.successTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #059601;
+}
+
+.successDesc {
+  font-size: 14px;
+  color: var(--color-gray);
+  max-width: 320px;
+}

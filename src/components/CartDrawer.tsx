@@ -1,0 +1,437 @@
+"use client";
+
+import React, { useState } from "react";
+import { useCart } from "src/context/CartContext";
+import { z } from "zod";
+import styles from "./CartDrawer.module.css";
+
+// Схема валидации заказа с помощью Zod
+const checkoutSchema = z.object({
+  name: z.string().min(2, "Имя должно содержать не менее 2 символов"),
+  email: z.string().email("Введите корректный адрес электронной почты"),
+  phone: z.string().min(8, "Телефон должен быть не менее 8 цифр"),
+  address: z.string().optional(),
+});
+
+type CheckoutFormData = z.infer<typeof checkoutSchema>;
+
+/**
+ * Выдвижная боковая панель корзины (CartDrawer).
+ * Позволяет просматривать корзину, менять количество браслетов,
+ * удалять товары и мгновенно оформлять заказ с отправкой Ольге в Telegram.
+ */
+export const CartDrawer: React.FC = () => {
+  const {
+    items,
+    total,
+    count,
+    isCartOpen,
+    setIsCartOpen,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+  } = useCart();
+
+  // Режимы работы: "CART" (список товаров), "CHECKOUT" (ввод данных), "SUCCESS" (успешный заказ)
+  const [mode, setMode] = useState<"CART" | "CHECKOUT" | "SUCCESS">("CART");
+  const [formData, setFormData] = useState<CheckoutFormData>({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
+  const [errors, setErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Проверяем, есть ли в корзине физические товары (браслеты), требующие доставки
+  const hasBracelets = items.some((item) => item.product.category === "BRACELET");
+
+  /**
+   * Переключение на режим оформления заказа.
+   * Очищает старые ошибки.
+   */
+  const handleGoToCheckout = () => {
+    setErrors({});
+    setMode("CHECKOUT");
+  };
+
+  /**
+   * Возврат к списку товаров корзины
+   */
+  const handleBackToCart = () => {
+    setMode("CART");
+  };
+
+  /**
+   * Обработка изменения полей ввода в форме
+   */
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Сбрасываем ошибку для редактируемого поля
+    if (errors[name as keyof CheckoutFormData]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  /**
+   * Отправка заказа в базу данных и Telegram
+   */
+  const handleSubmitOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      // 1. Валидация формы через Zod
+      const validationData: CheckoutFormData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+      };
+
+      // Если в корзине есть браслеты, адрес становится обязательным
+      if (hasBracelets && (!formData.address || formData.address.trim().length < 10)) {
+        setErrors((prev) => ({
+          ...prev,
+          address: "Для доставки браслета укажите полный адрес (город, улица, дом, индекс)",
+        }));
+        setIsSubmitting(false);
+        return;
+      }
+
+      checkoutSchema.parse(validationData);
+
+      // 2. Отправка заказа на API роут Next.js
+      const response = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerName: formData.name,
+          customerEmail: formData.email,
+          customerPhone: formData.phone,
+          customerAddress: hasBracelets ? formData.address : undefined,
+          items: items.map((item) => ({
+            id: item.product.id,
+            name: item.product.name,
+            price: item.product.price,
+            quantity: item.quantity,
+            category: item.product.category,
+          })),
+          totalAmount: total,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Ошибка при создании заказа");
+      }
+
+      // 3. Успешный заказ
+      clearCart();
+      setMode("SUCCESS");
+      setFormData({ name: "", email: "", phone: "", address: "" });
+    } catch (err: unknown) {
+      if (err instanceof z.ZodError) {
+        // Записываем ошибки валидации Zod
+        const fieldErrors: Partial<Record<keyof CheckoutFormData, string>> = {};
+        err.issues.forEach((validationError) => {
+          const path = validationError.path[0] as keyof CheckoutFormData;
+          fieldErrors[path] = validationError.message;
+        });
+        setErrors(fieldErrors);
+      } else {
+        console.error("Ошибка при оформлении заказа:", err);
+        alert(err instanceof Error ? err.message : "Произошла непредвиденная ошибка");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  /**
+   * Закрытие панели корзины с возвратом в режим корзины
+   */
+  const handleCloseDrawer = () => {
+    setIsCartOpen(false);
+    // Сбрасываем режим на CART после закрытия панели с задержкой (после окончания анимации)
+    setTimeout(() => {
+      setMode("CART");
+    }, 300);
+  };
+
+  return (
+    <>
+      {/* Затемняющий задний фон (Overlay) */}
+      <div
+        className={`${styles.overlay} ${isCartOpen ? styles.overlayOpen : ""}`}
+        onClick={handleCloseDrawer}
+      />
+
+      {/* Панель корзины (Drawer) */}
+      <div className={`${styles.drawer} ${isCartOpen ? styles.drawerOpen : ""}`}>
+        {/* Хедер панели */}
+        <div className={styles.header}>
+          <h2 className={styles.title}>
+            {mode === "CART" && "Ваша корзина"}
+            {mode === "CHECKOUT" && "Оформление заказа"}
+            {mode === "SUCCESS" && "Заказ принят!"}
+          </h2>
+          <button className={styles.closeBtn} onClick={handleCloseDrawer} aria-label="Закрыть">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              viewBox="0 0 24 24"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Тело панели (Content) */}
+        <div className={styles.content}>
+          {mode === "SUCCESS" ? (
+            /* Экран успешного оформления */
+            <div className={styles.successState}>
+              <div className={styles.successIcon}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="40"
+                  height="40"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  viewBox="0 0 24 24"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className={styles.successTitle}>Успешно оформлено!</h3>
+              <p className={styles.successDesc}>
+                Информация о вашем заказе отправлена Ольге в Telegram. Она свяжется с вами по указанному телефону или почте для выставления счета.
+              </p>
+              <button className="btn btn-primary" onClick={handleCloseDrawer}>
+                Отлично
+              </button>
+            </div>
+          ) : items.length === 0 ? (
+            /* Корзина пуста */
+            <div className={styles.emptyState}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="64"
+                height="64"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </svg>
+              <p className={styles.emptyText}>В вашей корзине пока пусто</p>
+              <button className="btn btn-secondary" onClick={handleCloseDrawer}>
+                Вернуться к покупкам
+              </button>
+            </div>
+          ) : mode === "CART" ? (
+            /* Режим списка товаров в корзине */
+            <div className={styles.itemList}>
+              {items.map((item) => (
+                <div key={item.product.id} className={styles.item}>
+                  {/* Заглушка изображения товара */}
+                  <div className={styles.itemImagePlaceholder}>
+                    {item.product.category === "BRACELET" && "📿"}
+                    {item.product.category === "COURSE" && "📖"}
+                    {item.product.category === "CONSULTATION" && "🔮"}
+                  </div>
+
+                  {/* Детали товара */}
+                  <div className={styles.itemDetails}>
+                    <div>
+                      <h4 className={styles.itemName}>{item.product.name}</h4>
+                      <span className={styles.itemMeta}>
+                        {item.product.category === "BRACELET" && "Браслет"}
+                        {item.product.category === "COURSE" && "Курс"}
+                        {item.product.category === "CONSULTATION" && "Консультация"}
+                      </span>
+                    </div>
+
+                    <div className={styles.itemPriceRow}>
+                      <span className={styles.itemPrice}>
+                        {(item.product.price * item.quantity).toLocaleString("de-DE")} €
+                      </span>
+
+                      {/* Счетчик количества (только для браслетов) */}
+                      {item.product.category === "BRACELET" ? (
+                        <div className={styles.quantityControls}>
+                          <button
+                            className={styles.qtyBtn}
+                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            aria-label="Уменьшить"
+                          >
+                            -
+                          </button>
+                          <span className={styles.qtyValue}>{item.quantity}</span>
+                          <button
+                            className={styles.qtyBtn}
+                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                            aria-label="Увеличить"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <span className={styles.itemMeta}>1 шт.</span>
+                      )}
+
+                      {/* Кнопка удаления */}
+                      <button
+                        className={styles.deleteBtn}
+                        onClick={() => removeFromCart(item.product.id)}
+                        aria-label="Удалить"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          viewBox="0 0 24 24"
+                        >
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Режим заполнения контактных данных (Checkout) */
+            <form className={styles.checkoutForm} onSubmit={handleSubmitOrder}>
+              {/* Имя */}
+              <div className={styles.formGroup}>
+                <label htmlFor="checkout-name">Ваше имя *</label>
+                <input
+                  type="text"
+                  id="checkout-name"
+                  name="name"
+                  className={styles.input}
+                  placeholder="Иван Иванов"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+                {errors.name && <span className={styles.errorText}>{errors.name}</span>}
+              </div>
+
+              {/* Email */}
+              <div className={styles.formGroup}>
+                <label htmlFor="checkout-email">Электронная почта (Email) *</label>
+                <input
+                  type="email"
+                  id="checkout-email"
+                  name="email"
+                  className={styles.input}
+                  placeholder="ivan@example.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                />
+                {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+              </div>
+
+              {/* Телефон */}
+              <div className={styles.formGroup}>
+                <label htmlFor="checkout-phone">Номер телефона (WhatsApp / Telegram) *</label>
+                <input
+                  type="tel"
+                  id="checkout-phone"
+                  name="phone"
+                  className={styles.input}
+                  placeholder="+79991234567"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  required
+                />
+                {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+              </div>
+
+              {/* Адрес (показывается только при наличии браслетов) */}
+              {hasBracelets && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="checkout-address">Адрес доставки (с индексом) *</label>
+                  <input
+                    type="text"
+                    id="checkout-address"
+                    name="address"
+                    className={styles.input}
+                    placeholder="123456, г. Москва, ул. Ленина, д. 10, кв. 25"
+                    value={formData.address || ""}
+                    onChange={handleInputChange}
+                    required
+                  />
+                  {errors.address && <span className={styles.errorText}>{errors.address}</span>}
+                </div>
+              )}
+
+              {/* Ссылка возврата в корзину */}
+              <span className={styles.backToCartBtn} onClick={handleBackToCart}>
+                Вернуться к списку товаров
+              </span>
+            </form>
+          )}
+        </div>
+
+        {/* Подвал панели (Footer - только для режимов CART и CHECKOUT) */}
+        {mode !== "SUCCESS" && items.length > 0 && (
+          <div className={styles.footer}>
+            <div className={styles.summaryRow}>
+              <span>Итого:</span>
+              <span className={styles.summaryTotal}>{total.toLocaleString("de-DE")} €</span>
+            </div>
+
+            {mode === "CART" ? (
+              <button className="btn btn-primary" onClick={handleGoToCheckout}>
+                Оформить заказ
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary btn-accent"
+                onClick={handleSubmitOrder}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Отправка..." : "Подтвердить заказ"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default CartDrawer;
