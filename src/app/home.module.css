@@ -337,57 +337,87 @@
 
 .diplomasGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 30px;
 }
 
 .diplomaCard {
   background-color: #faf6f4;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-gray-border);
-  padding: 16px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-  transition: all var(--transition-medium);
+  overflow: hidden; /* Важно для скругления картинки внутри */
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
 }
 
 .diplomaCard:hover {
-  transform: scale(1.03);
+  transform: translateY(-5px);
   box-shadow: var(--shadow-premium);
   border-color: rgba(197, 23, 34, 0.15);
 }
 
-.diplomaWrapper {
+.diplomaImageContainer {
+  position: relative;
   width: 100%;
-  height: 320px;
-  border-radius: var(--radius-sm);
+  height: 190px;
+  overflow: hidden;
   background-color: #eae0db;
+}
+
+.diplomaImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.diplomaCard:hover .diplomaImg {
+  transform: scale(1.06);
+}
+
+.diplomaOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 2, 3, 0.5);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 24px;
-  border: 1px dashed rgba(197, 23, 34, 0.2);
-  color: var(--color-primary);
+  color: #fff;
 }
 
-.diplomaWrapper svg {
-  margin-bottom: 12px;
-  opacity: 0.8;
+.diplomaCard:hover .diplomaOverlay {
+  opacity: 1;
 }
 
-.diplomaWrapper span {
+.diplomaMeta {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.diplomaTitle {
   font-family: var(--font-title);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--color-dark);
+  margin-bottom: 6px;
   line-height: 1.4;
 }
 
-.diplomaWrapper p {
-  font-size: 10px;
+.diplomaSubtitle {
+  font-size: 12px;
   color: var(--color-gray);
-  margin-top: 6px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 /* --- Секция "Отзывы" (Testimonials) --- */
@@ -1156,39 +1186,35 @@
   animation: fadeScale 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.lightboxImageArea {
-  width: 480px;
-  height: 600px;
-  background-color: #eae0db;
-  border: 10px solid #fff;
-  border-radius: 4px;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.8);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-primary);
-  padding: 40px;
+.lightboxImage {
+  max-width: 95vw;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 6px solid #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  background-color: #fff;
+}
+
+.lightboxMeta {
   text-align: center;
-  border-image: linear-gradient(135deg, #c5a880 0%, #120203 100%) 10;
+  color: #fff;
+  margin-top: 18px;
+  max-width: 650px;
 }
 
-.lightboxImageArea svg {
-  margin-bottom: 20px;
-  opacity: 0.7;
-}
-
-.lightboxImageArea h3 {
+.lightboxMeta h3 {
   font-family: var(--font-title);
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-dark);
+  color: var(--color-accent);
+  margin-bottom: 6px;
 }
 
-.lightboxImageArea p {
-  font-size: 13px;
-  color: var(--color-gray);
-  margin-top: 8px;
+.lightboxMeta p {
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
 }
 
 .lightboxClose {
