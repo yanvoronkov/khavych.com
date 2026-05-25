@@ -13,6 +13,15 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
 
+  // Состояния фильтрации товаров
+  const [filter, setFilter] = useState<"ALL" | "BRACELET" | "COURSE" | "CONSULTATION">("ALL");
+  const [subFilter, setSubFilter] = useState<string | "ALL">("ALL");
+
+  const handleMainFilterChange = (newFilter: "ALL" | "BRACELET" | "COURSE" | "CONSULTATION") => {
+    setFilter(newFilter);
+    setSubFilter("ALL");
+  };
+
   // Состояния для полей формы
   const [activeLang, setActiveLang] = useState<"ru" | "de">("ru");
   const [nameRu, setNameRu] = useState("");
@@ -305,12 +314,23 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     return nameObj?.ru || "Без названия";
   };
 
+  // Фильтруем продукты по выбранной категории
+  const filteredProducts = products.filter((product) => {
+    if (filter !== "ALL" && product.category !== filter) {
+      return false;
+    }
+    if (filter === "CONSULTATION" && subFilter !== "ALL" && product.subCategory !== subFilter) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <div className={styles.container}>
       <div className={styles.headerRow}>
         <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
           <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--color-dark)" }}>
-            Товары магазина ({products.length})
+            Товары магазина ({filteredProducts.length} из {products.length})
           </h2>
           <p style={{ fontSize: "12px", color: "var(--color-gray)" }}>
             Управление амулетами, курсами и консультациями Ольги в реальном времени
@@ -325,13 +345,79 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
         </button>
       </div>
 
-      {products.length === 0 ? (
+      {/* Кнопки фильтрации категорий, аналогичные магазину */}
+      <section className={styles.filterSection}>
+        <div className={styles.filterRow}>
+          <button
+            className={`${styles.filterBtn} ${filter === "ALL" ? styles.filterBtnActive : ""}`}
+            onClick={() => handleMainFilterChange("ALL")}
+          >
+            Все предложения
+          </button>
+          <button
+            className={`${styles.filterBtn} ${filter === "BRACELET" ? styles.filterBtnActive : ""}`}
+            onClick={() => handleMainFilterChange("BRACELET")}
+          >
+            Амулетные браслеты
+          </button>
+          <button
+            className={`${styles.filterBtn} ${filter === "COURSE" ? styles.filterBtnActive : ""}`}
+            onClick={() => handleMainFilterChange("COURSE")}
+          >
+            Обучающие курсы
+          </button>
+          <button
+            className={`${styles.filterBtn} ${filter === "CONSULTATION" ? styles.filterBtnActive : ""}`}
+            onClick={() => handleMainFilterChange("CONSULTATION")}
+          >
+            Услуги и Консультации
+          </button>
+        </div>
+
+        {/* Подфильтры для консультаций */}
+        {filter === "CONSULTATION" && (
+          <div className={styles.subFilterRow}>
+            <button
+              className={`${styles.subFilterBtn} ${subFilter === "ALL" ? styles.subFilterBtnActive : ""}`}
+              onClick={() => setSubFilter("ALL")}
+            >
+              Все услуги
+            </button>
+            <button
+              className={`${styles.subFilterBtn} ${subFilter === "NUMEROLOGY" ? styles.subFilterBtnActive : ""}`}
+              onClick={() => setSubFilter("NUMEROLOGY")}
+            >
+              Нумерология
+            </button>
+            <button
+              className={`${styles.subFilterBtn} ${subFilter === "TAROT" ? styles.subFilterBtnActive : ""}`}
+              onClick={() => setSubFilter("TAROT")}
+            >
+              Карты Таро
+            </button>
+            <button
+              className={`${styles.subFilterBtn} ${subFilter === "WAX" ? styles.subFilterBtnActive : ""}`}
+              onClick={() => setSubFilter("WAX")}
+            >
+              Восковые отливки
+            </button>
+            <button
+              className={`${styles.subFilterBtn} ${subFilter === "LADING" ? styles.subFilterBtnActive : ""}`}
+              onClick={() => setSubFilter("LADING")}
+            >
+              Ладование
+            </button>
+          </div>
+        )}
+      </section>
+
+      {filteredProducts.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", color: "var(--color-gray)", border: "1px dashed var(--color-gray-border)", borderRadius: "12px" }}>
-          <p>В магазине еще нет товаров. Добавьте первый товар!</p>
+          <p>Нет товаров, соответствующих выбранным фильтрам.</p>
         </div>
       ) : (
         <div className={styles.productsGrid}>
-          {products.map((product) => {
+          {filteredProducts.map((product) => {
             const name = getProductName(product);
             const emoji = product.category === "COURSE" ? "📖" : product.category === "CONSULTATION" ? "🔮" : "📿";
 

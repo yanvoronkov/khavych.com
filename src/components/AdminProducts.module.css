@@ -565,3 +565,76 @@
   font-weight: 600;
 }
 
+/* Фильтры товаров в админке (стили как в интернет-магазине) */
+.filterSection {
+  margin: 20px 0 30px 0;
+}
+
+.filterRow {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filterBtn {
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 600;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  border: 1px solid var(--color-gray-border);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.filterBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filterBtnActive {
+  background-color: var(--color-primary);
+  color: var(--color-light);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(197, 23, 34, 0.2);
+}
+
+.subFilterRow {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background-color: var(--color-light);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-gray-border);
+}
+
+.subFilterBtn {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 600;
+  background-color: transparent;
+  color: var(--color-dark);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.subFilterBtn:hover {
+  color: var(--color-accent-dark);
+}
+
+.subFilterBtnActive {
+  background-color: var(--color-accent-dark);
+  color: var(--color-light);
+  border-color: var(--color-accent-dark);
+  box-shadow: 0 2px 6px rgba(197, 168, 128, 0.3);
+}
+
