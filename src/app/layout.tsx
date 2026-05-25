@@ -45,6 +45,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ru_RU",
   },
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 /**
