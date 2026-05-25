@@ -67,13 +67,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Загружаем файл в Vercel Blob
+    // 3. Конвертируем File в Buffer для максимальной совместимости в Serverless среде Vercel
+    const buffer = Buffer.from(await file.arrayBuffer());
+
     // Заменяем все небезопасные символы в имени на подчеркивания
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const filename = `products/${Date.now()}-${safeName}`;
     
-    const blob = await put(filename, file, {
+    const blob = await put(filename, buffer, {
       access: "public",
+      contentType: file.type,
     });
 
     logger.info({ url: blob.url }, "Файл успешно загружен в Vercel Blob");
