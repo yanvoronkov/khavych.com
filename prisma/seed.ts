@@ -39,7 +39,7 @@ async function main() {
       },
       price: 49.0,
       oldPrice: 59.0,
-      imageUrl: "/images/bracelet-financial.jpg",
+      imageUrl: null,
       category: "BRACELET" as const,
       isAvailable: true,
       features: {
@@ -59,7 +59,7 @@ async function main() {
       },
       price: 39.0,
       oldPrice: null,
-      imageUrl: "/images/bracelet-chakras.jpg",
+      imageUrl: null,
       category: "BRACELET" as const,
       isAvailable: true,
       features: {
@@ -79,7 +79,7 @@ async function main() {
       },
       price: 42.0,
       oldPrice: 48.0,
-      imageUrl: "/images/bracelet-protection.jpg",
+      imageUrl: null,
       category: "BRACELET" as const,
       isAvailable: true,
       features: {
@@ -99,7 +99,7 @@ async function main() {
       },
       price: 189.0,
       oldPrice: 249.0,
-      imageUrl: "/images/course-numerology.jpg",
+      imageUrl: null,
       category: "COURSE" as const,
       isAvailable: true,
       features: {
@@ -119,7 +119,7 @@ async function main() {
       },
       price: 145.0,
       oldPrice: null,
-      imageUrl: "/images/course-tarot.jpg",
+      imageUrl: null,
       category: "COURSE" as const,
       isAvailable: true,
       features: {
@@ -139,7 +139,7 @@ async function main() {
       },
       price: 85.0,
       oldPrice: 100.0,
-      imageUrl: "/images/consultation-matrix.jpg",
+      imageUrl: null,
       category: "CONSULTATION" as const,
       subCategory: "NUMEROLOGY",
       isAvailable: true,
@@ -160,7 +160,7 @@ async function main() {
       },
       price: 60.0,
       oldPrice: null,
-      imageUrl: "/images/consultation-energy.jpg",
+      imageUrl: null,
       category: "CONSULTATION" as const,
       subCategory: "LADING",
       isAvailable: true,
