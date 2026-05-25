@@ -39,6 +39,10 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Стейты для кастомных премиальных списков
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isSubCategoryOpen, setIsSubCategoryOpen] = useState(false);
+
   // Открытие модального окна для добавления нового товара
   const handleOpenAddModal = () => {
     setEditingProduct(null);
@@ -56,6 +60,8 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     setNewFeature("");
     setActiveLang("ru");
     setErrorMsg("");
+    setIsCategoryOpen(false);
+    setIsSubCategoryOpen(false);
     setIsModalOpen(true);
   };
 
@@ -84,6 +90,8 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     setNewFeature("");
     setActiveLang("ru");
     setErrorMsg("");
+    setIsCategoryOpen(false);
+    setIsSubCategoryOpen(false);
     setIsModalOpen(true);
   };
 
@@ -478,31 +486,135 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label className={styles.formLabel}>Категория</label>
-                    <select 
-                      className={styles.formSelect}
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value as any)}
-                    >
-                      <option value="BRACELET">Амулетный браслет</option>
-                      <option value="COURSE">Обучающий курс</option>
-                      <option value="CONSULTATION">Услуга/Консультация</option>
-                    </select>
+                    <div className={styles.customSelectContainer}>
+                      <div 
+                        className={`${styles.customSelectTrigger} ${isCategoryOpen ? styles.customSelectTriggerActive : ""}`}
+                        onClick={() => {
+                          setIsCategoryOpen(!isCategoryOpen);
+                          setIsSubCategoryOpen(false);
+                        }}
+                      >
+                        <span>{getCategoryLabel(category)}</span>
+                        <span style={{ fontSize: "10px", color: "var(--color-primary)" }}>▼</span>
+                      </div>
+
+                      {isCategoryOpen && (
+                        <>
+                          <div 
+                            style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 99 }} 
+                            onClick={() => setIsCategoryOpen(false)}
+                          />
+                          <div className={styles.customSelectDropdown}>
+                            <div 
+                              className={`${styles.customSelectOption} ${category === "BRACELET" ? styles.customSelectOptionSelected : ""}`}
+                              onClick={() => {
+                                setCategory("BRACELET");
+                                setIsCategoryOpen(false);
+                              }}
+                            >
+                              Амулетный браслет
+                            </div>
+                            <div 
+                              className={`${styles.customSelectOption} ${category === "COURSE" ? styles.customSelectOptionSelected : ""}`}
+                              onClick={() => {
+                                setCategory("COURSE");
+                                setIsCategoryOpen(false);
+                              }}
+                            >
+                              Обучающий курс
+                            </div>
+                            <div 
+                              className={`${styles.customSelectOption} ${category === "CONSULTATION" ? styles.customSelectOptionSelected : ""}`}
+                              onClick={() => {
+                                setCategory("CONSULTATION");
+                                setIsCategoryOpen(false);
+                              }}
+                            >
+                              Услуга/Консультация
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {category === "CONSULTATION" ? (
                     <div className={styles.formGroup}>
                       <label className={styles.formLabel}>Подкатегория услуги</label>
-                      <select 
-                        className={styles.formSelect}
-                        value={subCategory}
-                        onChange={(e) => setSubCategory(e.target.value)}
-                      >
-                        <option value="">Без подкатегории</option>
-                        <option value="NUMEROLOGY">Нумерология</option>
-                        <option value="TAROT">Карты Таро</option>
-                        <option value="WAX">Восковые отливки</option>
-                        <option value="LADING">Энергетическое Ладование</option>
-                      </select>
+                      <div className={styles.customSelectContainer}>
+                        <div 
+                          className={`${styles.customSelectTrigger} ${isSubCategoryOpen ? styles.customSelectTriggerActive : ""}`}
+                          onClick={() => {
+                            setIsSubCategoryOpen(!isSubCategoryOpen);
+                            setIsCategoryOpen(false);
+                          }}
+                        >
+                          <span>
+                            {subCategory === "NUMEROLOGY" ? "Нумерология" :
+                             subCategory === "TAROT" ? "Карты Таро" :
+                             subCategory === "WAX" ? "Восковые отливки" :
+                             subCategory === "LADING" ? "Энергетическое Ладование" :
+                             "Без подкатегории"}
+                          </span>
+                          <span style={{ fontSize: "10px", color: "var(--color-primary)" }}>▼</span>
+                        </div>
+
+                        {isSubCategoryOpen && (
+                          <>
+                            <div 
+                              style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 99 }} 
+                              onClick={() => setIsSubCategoryOpen(false)}
+                            />
+                            <div className={styles.customSelectDropdown}>
+                              <div 
+                                className={`${styles.customSelectOption} ${subCategory === "" ? styles.customSelectOptionSelected : ""}`}
+                                onClick={() => {
+                                  setSubCategory("");
+                                  setIsSubCategoryOpen(false);
+                                }}
+                              >
+                                Без подкатегории
+                              </div>
+                              <div 
+                                className={`${styles.customSelectOption} ${subCategory === "NUMEROLOGY" ? styles.customSelectOptionSelected : ""}`}
+                                onClick={() => {
+                                  setSubCategory("NUMEROLOGY");
+                                  setIsSubCategoryOpen(false);
+                                }}
+                              >
+                                Нумерология
+                              </div>
+                              <div 
+                                className={`${styles.customSelectOption} ${subCategory === "TAROT" ? styles.customSelectOptionSelected : ""}`}
+                                onClick={() => {
+                                  setSubCategory("TAROT");
+                                  setIsSubCategoryOpen(false);
+                                }}
+                              >
+                                Карты Таро
+                              </div>
+                              <div 
+                                className={`${styles.customSelectOption} ${subCategory === "WAX" ? styles.customSelectOptionSelected : ""}`}
+                                onClick={() => {
+                                  setSubCategory("WAX");
+                                  setIsSubCategoryOpen(false);
+                                }}
+                              >
+                                Восковые отливки
+                              </div>
+                              <div 
+                                className={`${styles.customSelectOption} ${subCategory === "LADING" ? styles.customSelectOptionSelected : ""}`}
+                                onClick={() => {
+                                  setSubCategory("LADING");
+                                  setIsSubCategoryOpen(false);
+                                }}
+                              >
+                                Энергетическое Ладование
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <div className={styles.formGroup}>
