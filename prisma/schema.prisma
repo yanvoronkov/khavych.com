@@ -124,3 +124,10 @@ model Order {
   @@index([userId])
   @@index([customerEmail])
 }
+
+/// Системные настройки (динамические конфигурации, например настройки бота Telegram)
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

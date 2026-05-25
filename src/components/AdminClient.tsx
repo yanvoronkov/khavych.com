@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import styles from "../app/cabinet/cabinet.module.css";
 import { AdminProducts } from "./AdminProducts";
+import { AdminSettings } from "./AdminSettings";
 
 // --- ИНТЕРФЕЙСЫ ТИПИЗАЦИИ ---
 
@@ -68,7 +69,7 @@ interface IAdminClientProps {
 export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses, initialProducts }) => {
   // --- СОСТОЯНИЕ (STATE) ---
   
-  const [activeTab, setActiveTab] = useState<"users" | "courses" | "products">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "courses" | "products" | "settings">("users");
   const [users, setUsers] = useState<IAdminUser[]>(initialUsers);
   const [localCourses, setLocalCourses] = useState<IAdminCourse[]>(courses);
   
@@ -539,6 +540,22 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         >
           🛒 Товары магазина
         </button>
+        <button
+          onClick={() => setActiveTab("settings")}
+          style={{
+            padding: "10px 20px",
+            fontSize: "15px",
+            fontWeight: 700,
+            cursor: "pointer",
+            border: "none",
+            borderRadius: "6px",
+            backgroundColor: activeTab === "settings" ? "var(--color-primary)" : "transparent",
+            color: activeTab === "settings" ? "#fff" : "var(--color-dark)",
+            transition: "all 0.3s ease",
+          }}
+        >
+          ⚙️ Настройки
+        </button>
       </div>
 
       {/* Оповещения */}
@@ -954,6 +971,11 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       {/* --- ТАБ 3: ТОВАРЫ МАГАЗИНА --- */}
       {activeTab === "products" && (
         <AdminProducts initialProducts={initialProducts} />
+      )}
+
+      {/* --- ТАБ 4: НАСТРОЙКИ --- */}
+      {activeTab === "settings" && (
+        <AdminSettings showNotification={showNotification} />
       )}
 
       {/* --- МОДАЛЬНОЕ ОКНО: УПРАВЛЕНИЕ ДОСТУПАМИ УЧЕНИКА --- */}

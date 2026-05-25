@@ -99,14 +99,31 @@ async function sendTelegramNotification(
   data: z.infer<typeof orderCreateSchema>,
   orderId: string
 ) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  let token = process.env.TELEGRAM_BOT_TOKEN;
+  let chatId = process.env.TELEGRAM_CHAT_ID;
+
+  try {
+    // 1. Пытаемся получить настройки динамически из базы данных
+    const [dbToken, dbChatId] = await Promise.all([
+      db.setting.findUnique({ where: { key: "telegramBotToken" } }),
+      db.setting.findUnique({ where: { key: "telegramChatId" } }),
+    ]);
+
+    if (dbToken && dbToken.value.trim()) {
+      token = dbToken.value.trim();
+    }
+    if (dbChatId && dbChatId.value.trim()) {
+      chatId = dbChatId.value.trim();
+    }
+  } catch (dbErr) {
+    logger.warn({ dbErr }, "Не удалось прочитать настройки Telegram из базы данных, используем .env");
+  }
 
   // Если ключи не настроены (например, при локальной разработке), просто логируем это
   if (!token || !chatId || token === "your-telegram-bot-token" || chatId === "your-telegram-chat-id") {
     logger.warn(
       { orderId },
-      "Уведомление в Telegram не отправлено: не настроены TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID в .env"
+      "Уведомление в Telegram не отправлено: не настроены TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID в .env / БД"
     );
     return;
   }
