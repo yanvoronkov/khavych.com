@@ -1,6 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { IProduct } from "src/data/products";
-import { ICartItem } from "src/context/CartContext";
+import { IProduct, ICartItem } from "src/context/CartContext";
 import {
   addItemToCartHelper,
   calculateCartCount,

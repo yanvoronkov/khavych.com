@@ -10,11 +10,11 @@ export const dynamic = "force-dynamic";
 const productSchema = z.object({
   name: z.object({
     ru: z.string().min(1, "Название на русском языке обязательно"),
-    en: z.string().optional().nullable(),
+    de: z.string().optional().nullable(),
   }),
   description: z.object({
     ru: z.string().min(1, "Описание на русском языке обязательно"),
-    en: z.string().optional().nullable(),
+    de: z.string().optional().nullable(),
   }),
   price: z.number().min(0, "Цена не может быть отрицательной"),
   oldPrice: z.number().min(0, "Старая цена не может быть отрицательной").nullable().optional(),
@@ -23,7 +23,7 @@ const productSchema = z.object({
   subCategory: z.string().nullable().optional(),
   features: z.object({
     ru: z.array(z.string()).optional(),
-    en: z.array(z.string()).optional(),
+    de: z.array(z.string()).optional(),
   }).nullable().optional(),
   isAvailable: z.boolean().optional(),
 });
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     const validatedData = productSchema.parse(body);
 
     // Подготовка features JSON
-    const featuresJson = validatedData.features || { ru: [], en: [] };
+    const featuresJson = validatedData.features || { ru: [], de: [] };
 
     const product = await db.product.create({
       data: {

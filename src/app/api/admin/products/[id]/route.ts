@@ -10,11 +10,11 @@ export const dynamic = "force-dynamic";
 const productUpdateSchema = z.object({
   name: z.object({
     ru: z.string().min(1, "Название на русском языке обязательно"),
-    en: z.string().optional().nullable(),
+    de: z.string().optional().nullable(),
   }),
   description: z.object({
     ru: z.string().min(1, "Описание на русском языке обязательно"),
-    en: z.string().optional().nullable(),
+    de: z.string().optional().nullable(),
   }),
   price: z.number().min(0, "Цена не может быть отрицательной"),
   oldPrice: z.number().min(0, "Старая цена не может быть отрицательной").nullable().optional(),
@@ -23,7 +23,7 @@ const productUpdateSchema = z.object({
   subCategory: z.string().nullable().optional(),
   features: z.object({
     ru: z.array(z.string()).optional(),
-    en: z.array(z.string()).optional(),
+    de: z.array(z.string()).optional(),
   }).nullable().optional(),
   isAvailable: z.boolean().optional(),
 });
@@ -85,7 +85,7 @@ export async function PATCH(
         imageUrl: validatedData.imageUrl,
         category: validatedData.category,
         subCategory: validatedData.subCategory,
-        features: validatedData.features || { ru: [], en: [] },
+        features: validatedData.features || { ru: [], de: [] },
         isAvailable: validatedData.isAvailable ?? existingProduct.isAvailable,
       },
     });

@@ -1,7 +1,20 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { IProduct } from "src/data/products";
+/**
+ * Интерфейс, описывающий продукт (товар, услугу или курс)
+ */
+export interface IProduct {
+  id: string;
+  name: string | any; // Поддерживаем как строки, так и JSON-объекты из БД
+  description: string | any;
+  price: number;
+  oldPrice?: number | null;
+  imageUrl: string | null;
+  category: "BRACELET" | "COURSE" | "CONSULTATION";
+  isAvailable: boolean;
+  subCategory?: string | null;
+}
 import {
   addItemToCartHelper,
   calculateCartCount,

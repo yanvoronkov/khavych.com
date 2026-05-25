@@ -14,11 +14,11 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
 
   // Состояния для полей формы
-  const [activeLang, setActiveLang] = useState<"ru" | "en">("ru");
+  const [activeLang, setActiveLang] = useState<"ru" | "de">("ru");
   const [nameRu, setNameRu] = useState("");
-  const [nameEn, setNameEn] = useState("");
+  const [nameDe, setNameDe] = useState("");
   const [descRu, setDescRu] = useState("");
-  const [descEn, setDescEn] = useState("");
+  const [descDe, setDescDe] = useState("");
   const [price, setPrice] = useState<number>(0);
   const [oldPrice, setOldPrice] = useState<number | "">("");
   const [category, setCategory] = useState<"BRACELET" | "COURSE" | "CONSULTATION">("BRACELET");
@@ -27,7 +27,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
 
   // Особенности товара (features)
   const [featuresRu, setFeaturesRu] = useState<string[]>([]);
-  const [featuresEn, setFeaturesEn] = useState<string[]>([]);
+  const [featuresDe, setFeaturesDe] = useState<string[]>([]);
   const [newFeature, setNewFeature] = useState("");
 
   // Загрузка файлов
@@ -47,16 +47,16 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
   const handleOpenAddModal = () => {
     setEditingProduct(null);
     setNameRu("");
-    setNameEn("");
+    setNameDe("");
     setDescRu("");
-    setDescEn("");
+    setDescDe("");
     setPrice(0);
     setOldPrice("");
     setCategory("BRACELET");
     setSubCategory("");
     setImageUrl("");
     setFeaturesRu([]);
-    setFeaturesEn([]);
+    setFeaturesDe([]);
     setNewFeature("");
     setActiveLang("ru");
     setErrorMsg("");
@@ -74,19 +74,19 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     const pDesc = typeof product.description === "string" ? JSON.parse(product.description) : product.description;
     const pFeatures = product.features 
       ? (typeof product.features === "string" ? JSON.parse(product.features) : product.features)
-      : { ru: [], en: [] };
+      : { ru: [], de: [] };
 
     setNameRu(pName?.ru || "");
-    setNameEn(pName?.en || "");
+    setNameDe(pName?.de || "");
     setDescRu(pDesc?.ru || "");
-    setDescEn(pDesc?.en || "");
+    setDescDe(pDesc?.de || "");
     setPrice(product.price);
     setOldPrice(product.oldPrice !== null ? product.oldPrice : "");
     setCategory(product.category);
     setSubCategory(product.subCategory || "");
     setImageUrl(product.imageUrl || "");
     setFeaturesRu(pFeatures?.ru || []);
-    setFeaturesEn(pFeatures?.en || []);
+    setFeaturesDe(pFeatures?.de || []);
     setNewFeature("");
     setActiveLang("ru");
     setErrorMsg("");
@@ -201,7 +201,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     if (activeLang === "ru") {
       setFeaturesRu(prev => [...prev, newFeature.trim()]);
     } else {
-      setFeaturesEn(prev => [...prev, newFeature.trim()]);
+      setFeaturesDe(prev => [...prev, newFeature.trim()]);
     }
     setNewFeature("");
   };
@@ -211,7 +211,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     if (activeLang === "ru") {
       setFeaturesRu(prev => prev.filter((_, i) => i !== idx));
     } else {
-      setFeaturesEn(prev => prev.filter((_, i) => i !== idx));
+      setFeaturesDe(prev => prev.filter((_, i) => i !== idx));
     }
   };
 
@@ -238,11 +238,11 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     const payload = {
       name: {
         ru: nameRu.trim(),
-        en: nameEn.trim() || nameRu.trim(), // Если нет англ., дублируем русское
+        de: nameDe.trim() || nameRu.trim(), // Если нет англ., дублируем русское
       },
       description: {
         ru: descRu.trim(),
-        en: descEn.trim() || descRu.trim(),
+        de: descDe.trim() || descRu.trim(),
       },
       price: Number(price),
       oldPrice: oldPrice !== "" ? Number(oldPrice) : null,
@@ -251,7 +251,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
       subCategory: category === "CONSULTATION" && subCategory ? subCategory : null,
       features: {
         ru: featuresRu,
-        en: featuresEn.length > 0 ? featuresEn : featuresRu,
+        de: featuresDe.length > 0 ? featuresDe : featuresRu,
       },
       isAvailable: editingProduct ? editingProduct.isAvailable : true,
     };
@@ -426,10 +426,10 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
                   </button>
                   <button 
                     type="button" 
-                    className={`${styles.langTab} ${activeLang === "en" ? styles.langTabActive : ""}`}
-                    onClick={() => setActiveLang("en")}
+                    className={`${styles.langTab} ${activeLang === "de" ? styles.langTabActive : ""}`}
+                    onClick={() => setActiveLang("de")}
                   >
-                    Английский перевод (EN)
+                    Немецкий перевод (DE)
                   </button>
                 </div>
 
@@ -460,23 +460,23 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
                 ) : (
                   <>
                     <div className={styles.formGroup}>
-                      <label className={styles.formLabel}>Название на английском (перевод)</label>
+                      <label className={styles.formLabel}>Название на немецком (перевод)</label>
                       <input 
                         type="text" 
                         className={styles.formInput} 
-                        placeholder="Например: Amulet Bracelet 'Financial Flow'"
-                        value={nameEn}
-                        onChange={(e) => setNameEn(e.target.value)}
+                        placeholder="Например: Amulett-Armband 'Finanzfluss'"
+                        value={nameDe}
+                        onChange={(e) => setNameDe(e.target.value)}
                       />
                     </div>
                     <div className={styles.formGroup}>
-                      <label className={styles.formLabel}>Описание на английском (перевод)</label>
+                      <label className={styles.formLabel}>Описание на немецком (перевод)</label>
                       <textarea 
                         rows={4}
                         className={styles.formTextarea} 
-                        placeholder="English description of the product..."
-                        value={descEn}
-                        onChange={(e) => setDescEn(e.target.value)}
+                        placeholder="Deutsche Beschreibung des Produkts..."
+                        value={descDe}
+                        onChange={(e) => setDescDe(e.target.value)}
                       />
                     </div>
                   </>
@@ -624,6 +624,8 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
                   )}
                 </div>
 
+               
+
                 {/* Цены */}
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
@@ -664,12 +666,24 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
                     )}
                     
                     {imageUrl ? (
-                      <>
+                      <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center" }} onClick={(e) => e.stopPropagation()}>
                         <img src={imageUrl} alt="Превью" className={styles.uploadPreview} />
-                        <span style={{ fontSize: "11px", color: "var(--color-primary)", fontWeight: 600, marginTop: "8px" }}>
-                          Нажмите, чтобы заменить
-                        </span>
-                      </>
+                        <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "12px" }}>
+                          <span 
+                            style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            Заменить
+                          </span>
+                          <span style={{ color: "var(--color-gray-border)", fontSize: "12px" }}>|</span>
+                          <span 
+                            style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                            onClick={() => setImageUrl("")}
+                          >
+                            Удалить
+                          </span>
+                        </div>
+                      </div>
                     ) : (
                       <div className={styles.uploadPlaceholder}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -689,13 +703,13 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
                 {/* Управление особенностями (Features) */}
                 <div className={styles.formGroup}>
                   <label className={styles.formLabel}>
-                    Особенности товара ({activeLang === "ru" ? "RU" : "EN"})
+                    Особенности товара ({activeLang === "ru" ? "RU" : "DE"})
                   </label>
                   <div className={styles.featureInputRow}>
                     <input 
                       type="text" 
                       className={styles.formInput} 
-                      placeholder={activeLang === "ru" ? "Например: Натуральный цитрин класса ААА" : "Example: Natural citrine AAA class"}
+                      placeholder={activeLang === "ru" ? "Например: Натуральный цитрин класса ААА" : "z.B. Natur-Citrin der Klasse AAA"}
                       value={newFeature}
                       onChange={(e) => setNewFeature(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddFeature())}
@@ -706,7 +720,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
                   </div>
 
                   <div className={styles.featureList}>
-                    {(activeLang === "ru" ? featuresRu : featuresEn).map((feat, idx) => (
+                    {(activeLang === "ru" ? featuresRu : featuresDe).map((feat, idx) => (
                       <div key={idx} className={styles.featureItem}>
                         <span>{feat}</span>
                         <span className={styles.removeFeatureBtn} onClick={() => handleRemoveFeature(idx)}>

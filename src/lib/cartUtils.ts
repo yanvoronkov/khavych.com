@@ -1,5 +1,4 @@
-import { IProduct } from "src/data/products";
-import { ICartItem } from "src/context/CartContext";
+import { IProduct, ICartItem } from "src/context/CartContext";
 
 /**
  * Чистая функция для добавления продукта в массив элементов корзины.
