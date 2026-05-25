@@ -31,16 +31,17 @@ enum OrderStatus {
 
 /// Пользователи системы (ученики и администраторы)
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
-  passwordHash String
-  name         String
-  phone        String
-  role         Role         @default(USER)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  accesses     UserAccess[] // Доступы пользователя к курсам
-  orders       Order[]      // Заказы пользователя
+  id             String       @id @default(uuid())
+  email          String       @unique
+  passwordHash   String
+  name           String
+  phone          String
+  role           Role         @default(USER)
+  additionalInfo String?      // Дополнительная информация об ученике
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  accesses       UserAccess[] // Доступы пользователя к курсам
+  orders         Order[]      // Заказы пользователя
 
   @@index([email])
 }

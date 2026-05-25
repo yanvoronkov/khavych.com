@@ -43,6 +43,7 @@ export interface IAdminUser {
   email: string;
   phone: string;
   role: "USER" | "ADMIN";
+  additionalInfo?: string | null;
   accesses: IAdminUserAccess[];
 }
 
@@ -90,6 +91,25 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   });
   const [courseImageUploading, setCourseImageUploading] = useState<boolean>(false);
   const [courseImageUploadProgress, setCourseImageUploadProgress] = useState<number>(0);
+
+  // --- МОДАЛЬНОЕ ОКНО УПРАВЛЕНИЯ УЧЕНИКОМ ---
+  const [userModal, setUserModal] = useState<{
+    isOpen: boolean;
+    mode: "create" | "edit";
+    userId: string;
+    name: string;
+    email: string;
+    phone: string;
+    additionalInfo: string;
+  }>({
+    isOpen: false,
+    mode: "create",
+    userId: "",
+    name: "",
+    email: "",
+    phone: "",
+    additionalInfo: "",
+  });
   
   // Состояния для всплывающих уведомлений
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
@@ -573,6 +593,117 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }
   };
 
+  // --- УПРАВЛЕНИЕ УЧЕНИКАМИ (API) ---
+
+  const handleOpenUserAddModal = () => {
+    setUserModal({
+      isOpen: true,
+      mode: "create",
+      userId: "",
+      name: "",
+      email: "",
+      phone: "",
+      additionalInfo: "",
+    });
+  };
+
+  const handleOpenUserEditModal = (user: IAdminUser) => {
+    setUserModal({
+      isOpen: true,
+      mode: "edit",
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      additionalInfo: user.additionalInfo || "",
+    });
+  };
+
+  const handleSaveUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setActionLoading(true);
+    setMessage(null);
+
+    try {
+      if (userModal.mode === "create") {
+        const response = await fetch("/api/admin/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: userModal.name,
+            email: userModal.email,
+            phone: userModal.phone,
+            additionalInfo: userModal.additionalInfo || null,
+          }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "Ошибка при создании ученика");
+
+        // Обновляем локальное состояние пользователей
+        setUsers((prevUsers) => [result.user, ...prevUsers]);
+        
+        // Показываем алерт с временным паролем
+        alert(`🎉 Ученик успешно добавлен!\n\n🔑 Временный пароль для входа: ${result.defaultPassword}\nПожалуйста, передайте этот пароль ученику.`);
+        
+        showNotification("Ученик успешно создан", "success");
+      } else {
+        // Режим редактирования (PUT)
+        const response = await fetch(`/api/admin/users/${userModal.userId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: userModal.name,
+            email: userModal.email,
+            phone: userModal.phone,
+            additionalInfo: userModal.additionalInfo || null,
+          }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "Ошибка при сохранении данных ученика");
+
+        // Обновляем локальное состояние пользователей
+        setUsers((prevUsers) =>
+          prevUsers.map((u) => (u.id === userModal.userId ? { ...u, ...result.user } : u))
+        );
+
+        showNotification("Данные ученика обновлены", "success");
+      }
+
+      setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", additionalInfo: "" });
+    } catch (err: unknown) {
+      showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if (!confirm("Вы действительно хотите удалить этого ученика? Все его доступы и заказы будут безвозвратно удалены.")) return;
+
+    setActionLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`/api/admin/users/${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Ошибка при удалении ученика");
+
+      // Обновляем состояние на клиенте
+      setUsers((prevUsers) => prevUsers.filter((u) => u.id !== id));
+
+      showNotification("Ученик успешно удален из базы данных", "success");
+    } catch (err: unknown) {
+      showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // --- ФИЛЬТРАЦИЯ ДАННЫХ УЧЕНИКОВ ---
   const filteredUsers = users.filter((user) => {
     const query = searchQuery.toLowerCase();
@@ -698,9 +829,14 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               border: "1px solid var(--color-gray-border)",
               marginBottom: "25px",
               boxShadow: "var(--shadow-premium)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              gap: "20px",
+              flexWrap: "wrap",
             }}
           >
-            <div className={styles.formGroup} style={{ margin: 0 }}>
+            <div className={styles.formGroup} style={{ margin: 0, flexGrow: 1, minWidth: "280px" }}>
               <label htmlFor="admin-search" style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px", display: "block" }}>
                 Быстрый поиск ученика (введите Имя, Email или Телефон)
               </label>
@@ -731,6 +867,24 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 </svg>
               </div>
             </div>
+            
+            <button
+              onClick={handleOpenUserAddModal}
+              className="btn btn-primary"
+              style={{
+                height: "45px",
+                padding: "0 24px",
+                fontSize: "14px",
+                fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                backgroundColor: "#2e7d32",
+                borderColor: "#2e7d32",
+              }}
+            >
+              ➕ Добавить ученика
+            </button>
           </div>
 
           {/* Таблица */}
@@ -795,6 +949,11 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                           <div style={{ fontSize: "12px", color: "var(--color-gray)", marginTop: "4px" }}>
                             {user.phone}
                           </div>
+                          {user.additionalInfo && (
+                            <div style={{ fontSize: "11px", color: "#b45309", backgroundColor: "#fffbeb", padding: "4px 8px", borderRadius: "4px", marginTop: "6px", display: "inline-block", border: "1px solid #fef3c7" }}>
+                              📝 {user.additionalInfo}
+                            </div>
+                          )}
                         </td>
                         <td style={{ padding: "20px 24px" }}>
                           {user.role === "ADMIN" ? (
@@ -838,28 +997,67 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                           )}
                         </td>
                         <td style={{ padding: "20px 24px", textAlign: "center" }}>
-                          <button
-                            onClick={() => {
-                              setSelectedCourseId("");
-                              setSearchCourseQuery("");
-                              setIsCourseDropdownOpen(false);
-                              setAccessModalUser(user);
-                            }}
-                            disabled={user.role === "ADMIN"}
-                            className="btn btn-secondary"
-                            style={{
-                              padding: "8px 16px",
-                              fontSize: "13px",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "6px",
-                              borderColor: user.role === "ADMIN" ? "#ccc" : "var(--color-primary)",
-                              color: user.role === "ADMIN" ? "#999" : "var(--color-primary)",
-                              cursor: user.role === "ADMIN" ? "not-allowed" : "pointer",
-                            }}
-                          >
-                            🔑 Управлять доступами
-                          </button>
+                          <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+                            <button
+                              onClick={() => {
+                                setSelectedCourseId("");
+                                setSearchCourseQuery("");
+                                setIsCourseDropdownOpen(false);
+                                setAccessModalUser(user);
+                              }}
+                              disabled={user.role === "ADMIN"}
+                              className="btn btn-secondary"
+                              style={{
+                                padding: "6px 12px",
+                                fontSize: "12px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                borderColor: user.role === "ADMIN" ? "#ccc" : "var(--color-primary)",
+                                color: user.role === "ADMIN" ? "#999" : "var(--color-primary)",
+                                cursor: user.role === "ADMIN" ? "not-allowed" : "pointer",
+                              }}
+                              title="Управление доступами к курсам"
+                            >
+                              🔑 Доступы
+                            </button>
+                            
+                            <button
+                              onClick={() => handleOpenUserEditModal(user)}
+                              className="btn btn-secondary"
+                              style={{
+                                padding: "6px 12px",
+                                fontSize: "12px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                borderColor: "var(--color-primary)",
+                                color: "var(--color-primary)",
+                              }}
+                              title="Редактировать личные данные ученика"
+                            >
+                              ✏️ Ред.
+                            </button>
+                            
+                            <button
+                              onClick={() => handleDeleteUser(user.id)}
+                              disabled={user.role === "ADMIN"}
+                              className="btn btn-primary"
+                              style={{
+                                padding: "6px 12px",
+                                fontSize: "12px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                backgroundColor: user.role === "ADMIN" ? "#ccc" : "#c62828",
+                                borderColor: user.role === "ADMIN" ? "#ccc" : "#c62828",
+                                cursor: user.role === "ADMIN" ? "not-allowed" : "pointer",
+                              }}
+                              title="Удалить ученика"
+                            >
+                              🗑️
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1923,6 +2121,185 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 >
                   {actionLoading && <span className="spinner" />}
                   Сохранить изменения
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ/РЕДАКТИРОВАНИЕ УЧЕНИКА --- */}
+      {userModal.isOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "var(--radius-lg)",
+              width: "100%",
+              maxWidth: "500px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+              border: "1px solid var(--color-gray-border)",
+            }}
+          >
+            {/* Хедер модалки */}
+            <div
+              style={{
+                padding: "20px 24px",
+                borderBottom: "1px solid var(--color-gray-border)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                backgroundColor: "#fbf7f5",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700, color: "var(--color-dark)" }}>
+                {userModal.mode === "create" ? "➕ Добавление ученика" : "✏️ Редактирование личных данных"}
+              </h3>
+              <button
+                onClick={() => setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", additionalInfo: "" })}
+                style={{
+                  border: "none",
+                  background: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: "#888",
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveUser} style={{ padding: "24px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
+                
+                {/* Имя */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    ФИО ученика *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Например: Иван Иванов"
+                    value={userModal.name}
+                    onChange={(e) => setUserModal((prev) => ({ ...prev, name: e.target.value }))}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                    }}
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Email (уникальный) *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Например: ivan@example.com"
+                    value={userModal.email}
+                    onChange={(e) => setUserModal((prev) => ({ ...prev, email: e.target.value }))}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                    }}
+                  />
+                </div>
+
+                {/* Телефон */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Телефон *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Например: +79991234567"
+                    value={userModal.phone}
+                    onChange={(e) => setUserModal((prev) => ({ ...prev, phone: e.target.value }))}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                    }}
+                  />
+                </div>
+
+                {/* Временный пароль (показываем только при создании) */}
+                {userModal.mode === "create" && (
+                  <div style={{ padding: "10px 12px", backgroundColor: "#fff9e6", borderRadius: "6px", border: "1px solid #f5e6cc", fontSize: "12px", color: "#785c12" }}>
+                    💡 Временный пароль для входа по умолчанию: <b>khavich2026</b> (ученик сможет войти с ним и изменить его в любой момент).
+                  </div>
+                )}
+
+                {/* Дополнительная информация */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Дополнительная информация (заметки о клиенте)
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Например: Покупатель амулетов, интересуется Таро..."
+                    value={userModal.additionalInfo}
+                    onChange={(e) => setUserModal((prev) => ({ ...prev, additionalInfo: e.target.value }))}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                      resize: "vertical",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                </div>
+
+              </div>
+
+              {/* Действия */}
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  onClick={() => setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", additionalInfo: "" })}
+                  className="btn btn-secondary"
+                  style={{ padding: "10px 20px" }}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="btn btn-primary"
+                  style={{ padding: "10px 20px", display: "inline-flex", alignItems: "center", gap: "8px" }}
+                >
+                  {actionLoading && <span className="spinner" />}
+                  {userModal.mode === "create" ? "Создать ученика" : "Сохранить"}
                 </button>
               </div>
             </form>
