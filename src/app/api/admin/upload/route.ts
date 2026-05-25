@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     // 2. Считываем файл из FormData
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+    const uploadType = formData.get("uploadType") as string | null;
 
     if (!file) {
       return NextResponse.json(
@@ -43,16 +44,39 @@ export async function POST(request: Request) {
       );
     }
 
-    // Проверка типа файла (только картинки)
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json(
-        {
-          error: true,
-          code: "INVALID_FILE_TYPE",
-          message: "Разрешена загрузка только графических изображений (картинок)",
-        },
-        { status: 400 }
-      );
+    // Проверка типа файла
+    if (uploadType === "document") {
+      // Для документов запрещаем только опасные исполняемые расширения и типы файлов
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      const dangerousExtensions = ["exe", "bat", "cmd", "sh", "js", "ts", "html", "htm", "lnk", "vbs", "com", "scr"];
+      
+      if (
+        dangerousExtensions.includes(fileExtension || "") || 
+        file.type === "text/html" || 
+        file.type === "application/javascript" ||
+        file.type === "text/javascript"
+      ) {
+        return NextResponse.json(
+          {
+            error: true,
+            code: "DANGEROUS_FILE_TYPE",
+            message: "Загрузка исполняемых файлов и веб-страниц запрещена в целях безопасности",
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      // По умолчанию (для картинок товаров и курсов)
+      if (!file.type.startsWith("image/")) {
+        return NextResponse.json(
+          {
+            error: true,
+            code: "INVALID_FILE_TYPE",
+            message: "Разрешена загрузка только графических изображений (картинок)",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Ограничение размера файла (макс. 5 МБ)
@@ -72,14 +96,15 @@ export async function POST(request: Request) {
 
     // Заменяем все небезопасные символы в имени на подчеркивания
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const filename = `products/${Date.now()}-${safeName}`;
+    const folder = uploadType === "document" ? "lessons" : "products";
+    const filename = `${folder}/${Date.now()}-${safeName}`;
     
     const blob = await put(filename, buffer, {
       access: "public",
       contentType: file.type,
     });
 
-    logger.info({ url: blob.url }, "Файл успешно загружен в Vercel Blob");
+    logger.info({ url: blob.url, uploadType }, "Файл успешно загружен в Vercel Blob");
 
     return NextResponse.json({
       success: true,

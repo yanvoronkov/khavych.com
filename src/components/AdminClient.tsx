@@ -92,6 +92,9 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   const [courseImageUploading, setCourseImageUploading] = useState<boolean>(false);
   const [courseImageUploadProgress, setCourseImageUploadProgress] = useState<number>(0);
 
+  const [lessonFileUploading, setLessonFileUploading] = useState<Record<number, boolean>>({});
+  const [lessonFileProgress, setLessonFileProgress] = useState<Record<number, number>>({});
+
   // --- МОДАЛЬНОЕ ОКНО УПРАВЛЕНИЯ УЧЕНИКОМ ---
   const [userModal, setUserModal] = useState<{
     isOpen: boolean;
@@ -549,6 +552,69 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     } finally {
       setCourseImageUploading(false);
       setTimeout(() => setCourseImageUploadProgress(0), 1000);
+    }
+  };
+
+  const handleLessonFileUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    
+    // Проверка размера файла перед отправкой (макс. 4.5 МБ для Vercel Serverless Function payload limit)
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert("Размер файла превышает 4.5 МБ. Для больших файлов рекомендуется использовать внешние ссылки (Google Диск, Яндекс.Диск) или сжать текущий файл перед загрузкой.");
+      e.target.value = "";
+      return;
+    }
+
+    // Проверка на потенциально опасные расширения
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    const dangerousExtensions = ["exe", "bat", "cmd", "sh", "js", "ts", "html", "htm", "lnk", "vbs", "com", "scr"];
+    if (dangerousExtensions.includes(fileExtension || "")) {
+      alert("Загрузка исполняемых файлов и веб-страниц запрещена в целях безопасности.");
+      e.target.value = "";
+      return;
+    }
+
+    setLessonFileUploading((prev) => ({ ...prev, [index]: true }));
+    setLessonFileProgress((prev) => ({ ...prev, [index]: 20 }));
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("uploadType", "document");
+
+      setLessonFileProgress((prev) => ({ ...prev, [index]: 50 }));
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      setLessonFileProgress((prev) => ({ ...prev, [index]: 90 }));
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Ошибка при загрузке файла");
+      }
+
+      // Обновляем URL в форме урока
+      handleFileUrlChange(index, data.url);
+      setLessonFileProgress((prev) => ({ ...prev, [index]: 100 }));
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Не удалось загрузить файл");
+    } finally {
+      setLessonFileUploading((prev) => ({ ...prev, [index]: false }));
+      setTimeout(() => {
+        setLessonFileProgress((prev) => {
+          const updated = { ...prev };
+          delete updated[index];
+          return updated;
+        });
+      }, 1000);
+      e.target.value = "";
     }
   };
 
@@ -1875,50 +1941,103 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                     Ссылки на дополнительные материалы (PDF методички, рабочие тетради)
                   </label>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {lessonForm.fileUrls.map((url, idx) => (
-                      <div key={idx} style={{ display: "flex", gap: "8px" }}>
-                        <input
-                          type="text"
-                          placeholder="Например: https://my-host.com/files/material.pdf"
-                          value={url}
-                          onChange={(e) => handleFileUrlChange(idx, e.target.value)}
-                          style={{
-                            flexGrow: 1,
-                            padding: "8px 12px",
-                            fontSize: "13px",
-                            borderRadius: "6px",
-                            border: "1px solid var(--color-gray-border)",
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFileUrlInput(idx)}
-                          disabled={lessonForm.fileUrls.length === 1}
-                          style={{
-                            padding: "0 10px",
-                            backgroundColor: "#fff",
-                            border: "1px solid #c62828",
-                            color: "#c62828",
-                            borderRadius: "6px",
-                            cursor: lessonForm.fileUrls.length === 1 ? "not-allowed" : "pointer",
-                            opacity: lessonForm.fileUrls.length === 1 ? 0.3 : 1,
-                          }}
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    ))}
+                    {lessonForm.fileUrls.map((url, idx) => {
+                      const isUploading = !!lessonFileUploading[idx];
+                      const progress = lessonFileProgress[idx] || 0;
+                      return (
+                        <div key={idx} style={{ position: "relative", paddingBottom: isUploading ? "4px" : "0" }}>
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <input
+                              type="text"
+                              placeholder="Например: https://my-host.com/files/material.pdf"
+                              value={url}
+                              onChange={(e) => handleFileUrlChange(idx, e.target.value)}
+                              disabled={isUploading}
+                              style={{
+                                flexGrow: 1,
+                                padding: "8px 12px",
+                                fontSize: "13px",
+                                borderRadius: "6px",
+                                border: "1px solid var(--color-gray-border)",
+                              }}
+                            />
+                            
+                            <input
+                              type="file"
+                              id={`lesson-file-input-${idx}`}
+                              style={{ display: "none" }}
+                              onChange={(e) => handleLessonFileUpload(idx, e)}
+                              disabled={isUploading}
+                            />
+                            
+                            <button
+                              type="button"
+                              onClick={() => document.getElementById(`lesson-file-input-${idx}`)?.click()}
+                              disabled={isUploading}
+                              style={{
+                                padding: "0 12px",
+                                backgroundColor: "#fbfbf9",
+                                border: "1px solid var(--color-gray-border)",
+                                color: "var(--color-primary)",
+                                borderRadius: "6px",
+                                cursor: isUploading ? "not-allowed" : "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "13px",
+                                fontWeight: 600,
+                                transition: "all 0.2s"
+                              }}
+                              title="Загрузить файл"
+                            >
+                              {isUploading ? "⏳ Загрузка..." : "📤 Загрузить файл"}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFileUrlInput(idx)}
+                              disabled={lessonForm.fileUrls.length === 1 || isUploading}
+                              style={{
+                                padding: "0 10px",
+                                backgroundColor: "#fff",
+                                border: "1px solid #c62828",
+                                color: "#c62828",
+                                borderRadius: "6px",
+                                cursor: (lessonForm.fileUrls.length === 1 || isUploading) ? "not-allowed" : "pointer",
+                                opacity: (lessonForm.fileUrls.length === 1 || isUploading) ? 0.3 : 1,
+                              }}
+                            >
+                              &times;
+                            </button>
+                          </div>
+                          
+                          {isUploading && (
+                            <div style={{
+                              position: "absolute",
+                              bottom: 0,
+                              left: 0,
+                              width: `${progress}%`,
+                              height: "3px",
+                              backgroundColor: "var(--color-primary)",
+                              borderRadius: "3px",
+                              transition: "width 0.2s"
+                            }} />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   <button
                     type="button"
                     onClick={handleAddFileUrlInput}
+                    disabled={Object.values(lessonFileUploading).some(Boolean)}
                     style={{
                       background: "none",
                       border: "none",
-                      color: "var(--color-primary)",
+                      color: Object.values(lessonFileUploading).some(Boolean) ? "var(--color-gray-border)" : "var(--color-primary)",
                       fontSize: "12px",
                       fontWeight: 700,
-                      cursor: "pointer",
+                      cursor: Object.values(lessonFileUploading).some(Boolean) ? "not-allowed" : "pointer",
                       marginTop: "8px",
                       padding: 0,
                     }}
@@ -1941,7 +2060,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 </button>
                 <button
                   type="submit"
-                  disabled={actionLoading}
+                  disabled={actionLoading || Object.values(lessonFileUploading).some(Boolean)}
                   className="btn btn-primary"
                   style={{ padding: "10px 20px", display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
