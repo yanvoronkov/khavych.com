@@ -23,35 +23,57 @@ export default async function CabinetPage() {
     redirect("/login");
   }
 
-  // 2. Получаем список активных доступов пользователя (исключаем просроченные)
-  const accesses = await db.userAccess.findMany({
-    where: {
-      userId: session.userId,
-      OR: [
-        { expiresAt: null },
-        { expiresAt: { gt: new Date() } }
-      ]
-    },
-    include: {
-      course: {
-        include: {
-          lessons: {
-            orderBy: {
-              order: "asc",
+  // 2. Получаем список курсов. Для администратора выводим ВСЕ курсы, для учеников — только с активным доступом
+  let courses: any[] = [];
+
+  if (session.role === "ADMIN") {
+    const dbCourses = await db.course.findMany({
+      include: {
+        lessons: {
+          orderBy: {
+            order: "asc",
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    courses = dbCourses.map((c) => ({
+      ...c,
+      expiresAt: null, // У администратора полный бессрочный доступ
+    }));
+  } else {
+    const accesses = await db.userAccess.findMany({
+      where: {
+        userId: session.userId,
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } }
+        ]
+      },
+      include: {
+        course: {
+          include: {
+            lessons: {
+              orderBy: {
+                order: "asc",
+              },
             },
           },
         },
       },
-    },
-    orderBy: {
-      grantedAt: "desc",
-    },
-  });
+      orderBy: {
+        grantedAt: "desc",
+      },
+    });
 
-  const courses = accesses.map((access) => ({
-    ...access.course,
-    expiresAt: access.expiresAt,
-  }));
+    courses = accesses.map((access) => ({
+      ...access.course,
+      expiresAt: access.expiresAt,
+    }));
+  }
 
   return (
     <div className={styles.cabinetPage}>

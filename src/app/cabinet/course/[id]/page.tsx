@@ -38,19 +38,21 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
     redirect("/login");
   }
 
-  // 2. Проверяем наличие доступа (UserAccess) к данному курсу у текущего пользователя
-  const access = await db.userAccess.findUnique({
-    where: {
-      userId_courseId: {
-        userId: session.userId,
-        courseId: courseId,
+  // 2. Проверяем наличие доступа (UserAccess) к данному курсу у текущего пользователя (если не ADMIN)
+  if (session.role !== "ADMIN") {
+    const access = await db.userAccess.findUnique({
+      where: {
+        userId_courseId: {
+          userId: session.userId,
+          courseId: courseId,
+        },
       },
-    },
-  });
+    });
 
-  // Если доступа нет или срок действия истек, перенаправляем обратно в кабинет
-  if (!access || !isAccessActive(access.expiresAt)) {
-    redirect("/cabinet");
+    // Если доступа нет или срок действия истек, перенаправляем обратно в кабинет
+    if (!access || !isAccessActive(access.expiresAt)) {
+      redirect("/cabinet");
+    }
   }
 
   // 3. Загружаем курс и его уроки из БД
@@ -67,7 +69,7 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
     },
   });
 
-  if (!course || !course.isPublished) {
+  if (!course || (!course.isPublished && session.role !== "ADMIN")) {
     redirect("/cabinet");
   }
 
