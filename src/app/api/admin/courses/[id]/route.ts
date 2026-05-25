@@ -116,3 +116,81 @@ export async function PUT(
     );
   }
 }
+
+/**
+ * Удаление курса администратором (DELETE)
+ * Путь: /api/admin/courses/[id]
+ */
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession();
+
+    if (!session || session.role !== "ADMIN") {
+      return NextResponse.json(
+        {
+          error: true,
+          code: "FORBIDDEN",
+          message: "У вас нет прав для выполнения этого действия",
+        },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        {
+          error: true,
+          code: "BAD_REQUEST",
+          message: "ID курса не передан",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Проверяем, существует ли курс
+    const existingCourse = await db.course.findUnique({
+      where: { id },
+    });
+
+    if (!existingCourse) {
+      return NextResponse.json(
+        {
+          error: true,
+          code: "NOT_FOUND",
+          message: "Курс не найден",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Удаляем курс из базы данных (уроки удалятся каскадно)
+    await db.course.delete({
+      where: { id },
+    });
+
+    logger.info(
+      { adminId: session.userId, courseId: id },
+      "Курс успешно удален администратором"
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: "Курс успешно удален",
+    });
+  } catch (error: unknown) {
+    logger.error({ error }, "Ошибка при удалении курса в API");
+    return NextResponse.json(
+      {
+        error: true,
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Не удалось удалить курс",
+      },
+      { status: 500 }
+    );
+  }
+}

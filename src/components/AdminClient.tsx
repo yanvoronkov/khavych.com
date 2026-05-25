@@ -80,12 +80,14 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   // --- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ КУРСА ---
   const [courseModal, setCourseModal] = useState<{
     isOpen: boolean;
+    mode: "create" | "edit";
     courseId: string;
     title: string;
     description: string;
     imageUrl: string;
   }>({
     isOpen: false,
+    mode: "create",
     courseId: "",
     title: "",
     description: "",
@@ -507,9 +509,21 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
   // --- УПРАВЛЕНИЕ КУРСАМИ (API) ---
 
+  const handleCreateCourseClick = () => {
+    setCourseModal({
+      isOpen: true,
+      mode: "create",
+      courseId: "",
+      title: "",
+      description: "",
+      imageUrl: "",
+    });
+  };
+
   const handleOpenCourseModal = (course: IAdminCourse) => {
     setCourseModal({
       isOpen: true,
+      mode: "edit",
       courseId: course.id,
       title: course.title,
       description: course.description || "",
@@ -627,8 +641,14 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     setMessage(null);
 
     try {
-      const response = await fetch(`/api/admin/courses/${courseModal.courseId}`, {
-        method: "PUT",
+      const isCreate = courseModal.mode === "create";
+      const url = isCreate 
+        ? "/api/admin/courses" 
+        : `/api/admin/courses/${courseModal.courseId}`;
+      const method = isCreate ? "POST" : "PUT";
+
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: courseModal.title,
@@ -641,24 +661,54 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       if (!response.ok) throw new Error(result.message || "Ошибка при сохранении курса");
 
       // Обновляем локальное состояние курсов
-      setLocalCourses((prevCourses) =>
-        prevCourses.map((c) => {
-          if (c.id === courseModal.courseId) {
-            return {
-              ...c,
-              title: result.course.title,
-              description: result.course.description,
-              imageUrl: result.course.imageUrl,
-            };
-          }
-          return c;
-        })
-      );
+      if (isCreate) {
+        setLocalCourses((prevCourses) => [...prevCourses, result.course]);
+        showNotification("Курс успешно создан!", "success");
+      } else {
+        setLocalCourses((prevCourses) =>
+          prevCourses.map((c) => {
+            if (c.id === courseModal.courseId) {
+              return {
+                ...c,
+                title: result.course.title,
+                description: result.course.description,
+                imageUrl: result.course.imageUrl,
+              };
+            }
+            return c;
+          })
+        );
+        showNotification("Параметры курса успешно сохранены!", "success");
+      }
 
-      showNotification("Параметры курса успешно сохранены!", "success");
-      setCourseModal({ isOpen: false, courseId: "", title: "", description: "", imageUrl: "" });
+      setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", description: "", imageUrl: "" });
     } catch (err: unknown) {
       showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: string, title: string) => {
+    const confirmed = confirm(`Вы действительно хотите безвозвратно удалить курс «${title}»?\nВсе уроки этого курса будут удалены автоматически!`);
+    if (!confirmed) return;
+
+    setActionLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`/api/admin/courses/${courseId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Ошибка при удалении курса");
+
+      // Обновляем локальное состояние курсов
+      setLocalCourses((prevCourses) => prevCourses.filter((c) => c.id !== courseId));
+      showNotification("Курс успешно удален!", "success");
+    } catch (err: unknown) {
+      showNotification(err instanceof Error ? err.message : "Не удалось удалить курс", "error");
     } finally {
       setActionLoading(false);
     }
@@ -1143,6 +1193,19 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       {/* --- ТАБ 2: КУРСЫ И УРОКИ --- */}
       {activeTab === "courses" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+            <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--color-dark)", margin: 0 }}>
+              Список обучающих курсов ({localCourses.length})
+            </h2>
+            <button
+              onClick={handleCreateCourseClick}
+              className="btn btn-primary"
+              style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 20px" }}
+            >
+              ➕ Добавить новый курс
+            </button>
+          </div>
           {localCourses.map((course) => {
             const isExpanded = !!expandedCourses[course.id];
             return (
@@ -1202,7 +1265,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                       className="btn btn-secondary"
                       style={{ padding: "6px 12px", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}
                     >
-                      ✏️ Редактировать курс
+                      ✏️ Редактировать
                     </button>
                     <button
                       onClick={() => handleOpenLessonModal("create", course.id)}
@@ -1211,7 +1274,23 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                     >
                       ➕ Добавить урок
                     </button>
-                    <span style={{ fontSize: "20px", color: "#888", marginLeft: "10px", userSelect: "none" }}>
+                    <button
+                      onClick={() => handleDeleteCourse(course.id, course.title)}
+                      className="btn btn-secondary"
+                      style={{ 
+                        padding: "6px 12px", 
+                        fontSize: "12px", 
+                        display: "inline-flex", 
+                        alignItems: "center", 
+                        gap: "4px", 
+                        color: "#c62828", 
+                        borderColor: "#c62828",
+                        backgroundColor: "#fff"
+                      }}
+                    >
+                      🗑️ Удалить
+                    </button>
+                    <span style={{ fontSize: "20px", color: "#888", marginLeft: "5px", userSelect: "none" }}>
                       {isExpanded ? "▲" : "▼"}
                     </span>
                   </div>
@@ -2119,10 +2198,10 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               }}
             >
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700, color: "var(--color-dark)" }}>
-                ✏️ Редактирование курса
+                {courseModal.mode === "create" ? "➕ Создание нового курса" : "✏️ Редактирование курса"}
               </h3>
               <button
-                onClick={() => setCourseModal({ isOpen: false, courseId: "", title: "", description: "", imageUrl: "" })}
+                onClick={() => setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", description: "", imageUrl: "" })}
                 style={{
                   border: "none",
                   background: "none",
@@ -2254,7 +2333,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
                 <button
                   type="button"
-                  onClick={() => setCourseModal({ isOpen: false, courseId: "", title: "", description: "", imageUrl: "" })}
+                  onClick={() => setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", description: "", imageUrl: "" })}
                   className="btn btn-secondary"
                   style={{ padding: "10px 20px" }}
                 >
@@ -2267,7 +2346,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                   style={{ padding: "10px 20px", display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
                   {actionLoading && <span className="spinner" />}
-                  Сохранить изменения
+                  {courseModal.mode === "create" ? "Создать курс" : "Сохранить изменения"}
                 </button>
               </div>
             </form>
