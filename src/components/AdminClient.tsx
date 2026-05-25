@@ -75,6 +75,21 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   
   // Поиск пользователей
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // --- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ КУРСА ---
+  const [courseModal, setCourseModal] = useState<{
+    isOpen: boolean;
+    courseId: string;
+    title: string;
+    imageUrl: string;
+  }>({
+    isOpen: false,
+    courseId: "",
+    title: "",
+    imageUrl: "",
+  });
+  const [courseImageUploading, setCourseImageUploading] = useState<boolean>(false);
+  const [courseImageUploadProgress, setCourseImageUploadProgress] = useState<number>(0);
   
   // Состояния для всплывающих уведомлений
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
@@ -465,6 +480,99 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }
   };
 
+  // --- УПРАВЛЕНИЕ КУРСАМИ (API) ---
+
+  const handleOpenCourseModal = (course: IAdminCourse) => {
+    setCourseModal({
+      isOpen: true,
+      courseId: course.id,
+      title: course.title,
+      imageUrl: course.imageUrl || "",
+    });
+  };
+
+  const handleCourseImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.startsWith("image/")) {
+      alert("Пожалуйста, выберите графический файл (изображение)");
+      return;
+    }
+
+    setCourseImageUploading(true);
+    setCourseImageUploadProgress(20);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      setCourseImageUploadProgress(50);
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      setCourseImageUploadProgress(90);
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Ошибка при загрузке картинки");
+      }
+
+      setCourseModal((prev) => ({ ...prev, imageUrl: data.url }));
+      setCourseImageUploadProgress(100);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Не удалось загрузить изображение");
+    } finally {
+      setCourseImageUploading(false);
+      setTimeout(() => setCourseImageUploadProgress(0), 1000);
+    }
+  };
+
+  const handleSaveCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setActionLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`/api/admin/courses/${courseModal.courseId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: courseModal.title,
+          imageUrl: courseModal.imageUrl || null,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Ошибка при сохранении курса");
+
+      // Обновляем локальное состояние курсов
+      setLocalCourses((prevCourses) =>
+        prevCourses.map((c) => {
+          if (c.id === courseModal.courseId) {
+            return {
+              ...c,
+              title: result.course.title,
+              imageUrl: result.course.imageUrl,
+            };
+          }
+          return c;
+        })
+      );
+
+      showNotification("Параметры курса успешно сохранены!", "success");
+      setCourseModal({ isOpen: false, courseId: "", title: "", imageUrl: "" });
+    } catch (err: unknown) {
+      showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // --- ФИЛЬТРАЦИЯ ДАННЫХ УЧЕНИКОВ ---
   const filteredUsers = users.filter((user) => {
     const query = searchQuery.toLowerCase();
@@ -820,6 +928,13 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => handleOpenCourseModal(course)}
+                      className="btn btn-secondary"
+                      style={{ padding: "6px 12px", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                    >
+                      ✏️ Редактировать курс
+                    </button>
                     <button
                       onClick={() => handleOpenLessonModal("create", course.id)}
                       className="btn btn-primary"
@@ -1634,6 +1749,180 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 >
                   {actionLoading && <span className="spinner" />}
                   {lessonModal.mode === "create" ? "Создать урок" : "Сохранить"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- МОДАЛЬНОЕ ОКНО: РЕДАКТИРОВАНИЕ КУРСА --- */}
+      {courseModal.isOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "var(--radius-lg)",
+              width: "100%",
+              maxWidth: "500px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+              border: "1px solid var(--color-gray-border)",
+            }}
+          >
+            {/* Хедер модалки */}
+            <div
+              style={{
+                padding: "20px 24px",
+                borderBottom: "1px solid var(--color-gray-border)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                backgroundColor: "#fbf7f5",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700, color: "var(--color-dark)" }}>
+                ✏️ Редактирование курса
+              </h3>
+              <button
+                onClick={() => setCourseModal({ isOpen: false, courseId: "", title: "", imageUrl: "" })}
+                style={{
+                  border: "none",
+                  background: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: "#888",
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCourse} style={{ padding: "24px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
+                
+                {/* Название */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Название курса *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Например: Обучение Таро"
+                    value={courseModal.title}
+                    onChange={(e) => setCourseModal((prev) => ({ ...prev, title: e.target.value }))}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                    }}
+                  />
+                </div>
+
+                {/* Ссылка на изображение */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Изображение для карточки магазина (URL)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Например: /public/tarot.png"
+                    value={courseModal.imageUrl}
+                    onChange={(e) => setCourseModal((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                      marginBottom: "10px",
+                    }}
+                  />
+                  
+                  {/* Загрузка файла */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCourseImageUpload}
+                      style={{ display: "none" }}
+                      id="course-image-file-input"
+                    />
+                    
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("course-image-file-input")?.click()}
+                      disabled={courseImageUploading}
+                      className="btn btn-secondary"
+                      style={{
+                        padding: "8px 12px",
+                        fontSize: "12px",
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {courseImageUploading ? "Загрузка..." : "📤 Загрузить файл изображения"}
+                    </button>
+                    
+                    {courseImageUploading && (
+                      <div style={{ width: "100%", backgroundColor: "#eee", borderRadius: "4px", height: "6px", overflow: "hidden" }}>
+                        <div style={{ width: `${courseImageUploadProgress}%`, backgroundColor: "var(--color-primary)", height: "100%", transition: "width 0.2s" }} />
+                      </div>
+                    )}
+                    
+                    {courseModal.imageUrl && (
+                      <div style={{ marginTop: "10px", border: "1px solid var(--color-gray-border)", borderRadius: "6px", padding: "8px", display: "flex", justifyContent: "center", backgroundColor: "#fafafa" }}>
+                        <img
+                          src={courseModal.imageUrl}
+                          alt="Превью курса"
+                          style={{ maxHeight: "120px", objectFit: "contain", borderRadius: "4px" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Действия */}
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  onClick={() => setCourseModal({ isOpen: false, courseId: "", title: "", imageUrl: "" })}
+                  className="btn btn-secondary"
+                  style={{ padding: "10px 20px" }}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading || courseImageUploading}
+                  className="btn btn-primary"
+                  style={{ padding: "10px 20px", display: "inline-flex", alignItems: "center", gap: "8px" }}
+                >
+                  {actionLoading && <span className="spinner" />}
+                  Сохранить изменения
                 </button>
               </div>
             </form>
