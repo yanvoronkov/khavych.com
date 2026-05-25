@@ -93,11 +93,14 @@ model UserAccess {
 /// Каталог товаров, услуг и курсов в магазине
 model Product {
   id          String   @id @default(uuid())
-  name        String
-  description String
-  price       Decimal  @db.Decimal(10, 2)
+  name        Json     // JSON вида: { "ru": "...", "en": "..." }
+  description Json     // JSON вида: { "ru": "...", "en": "..." }
+  price       Float    // Текущая цена
+  oldPrice    Float?   // Старая цена для скидки (null = нет скидки)
   imageUrl    String?
   category    Category
+  subCategory String?  // "NUMEROLOGY" | "TAROT" | "WAX" | "LADING"
+  features    Json?    // JSON вида: { "ru": ["...", "..."], "en": ["...", "..."] }
   isAvailable Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

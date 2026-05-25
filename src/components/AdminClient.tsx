@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import styles from "../app/cabinet/cabinet.module.css";
+import { AdminProducts } from "./AdminProducts";
 
 // --- ИНТЕРФЕЙСЫ ТИПИЗАЦИИ ---
 
@@ -44,15 +45,30 @@ export interface IAdminUser {
   accesses: IAdminUserAccess[];
 }
 
+export interface IDBProduct {
+  id: string;
+  name: any;
+  description: any;
+  price: number;
+  oldPrice: number | null;
+  imageUrl: string | null;
+  category: "BRACELET" | "COURSE" | "CONSULTATION";
+  subCategory: string | null;
+  features: any;
+  isAvailable: boolean;
+  createdAt: string;
+}
+
 interface IAdminClientProps {
   initialUsers: IAdminUser[];
   courses: IAdminCourse[];
+  initialProducts: any[];
 }
 
-export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses }) => {
+export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses, initialProducts }) => {
   // --- СОСТОЯНИЕ (STATE) ---
   
-  const [activeTab, setActiveTab] = useState<"users" | "courses">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "courses" | "products">("users");
   const [users, setUsers] = useState<IAdminUser[]>(initialUsers);
   const [localCourses, setLocalCourses] = useState<IAdminCourse[]>(courses);
   
@@ -507,6 +523,22 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         >
           📚 Курсы и уроки (CRUD)
         </button>
+        <button
+          onClick={() => setActiveTab("products")}
+          style={{
+            padding: "10px 20px",
+            fontSize: "15px",
+            fontWeight: 700,
+            cursor: "pointer",
+            border: "none",
+            borderRadius: "6px",
+            backgroundColor: activeTab === "products" ? "var(--color-primary)" : "transparent",
+            color: activeTab === "products" ? "#fff" : "var(--color-dark)",
+            transition: "all 0.3s ease",
+          }}
+        >
+          🛒 Товары магазина
+        </button>
       </div>
 
       {/* Оповещения */}
@@ -917,6 +949,11 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             );
           })}
         </div>
+      )}
+
+      {/* --- ТАБ 3: ТОВАРЫ МАГАЗИНА --- */}
+      {activeTab === "products" && (
+        <AdminProducts initialProducts={initialProducts} />
       )}
 
       {/* --- МОДАЛЬНОЕ ОКНО: УПРАВЛЕНИЕ ДОСТУПАМИ УЧЕНИКА --- */}

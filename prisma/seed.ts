@@ -29,67 +29,146 @@ async function main() {
   const products = [
     {
       id: "bracelet-1",
-      name: "Амулетный браслет «Финансовый поток»",
-      description: "Авторский браслет из натуральных камней (пирит, цитрин, тигровый глаз) с индивидуальным нумерологическим кодом богатства на золотой фурнитуре. Помогает открыть новые источники дохода и привлечь удачу.",
-      price: 4900,
+      name: {
+        ru: "Амулетный браслет «Финансовый поток»",
+        en: "Amulet Bracelet 'Financial Flow'"
+      },
+      description: {
+        ru: "Авторский браслет из натуральных камней (пирит, цитрин, тигровый глаз) с индивидуальным нумерологическим кодом богатства на золотой фурнитуре. Помогает открыть новые источники дохода и привлечь удачу.",
+        en: "Author's bracelet made of natural stones (pyrite, citrine, tiger's eye) with an individual numerological wealth code on gold hardware. Helps open new sources of income and attract luck."
+      },
+      price: 49.0,
+      oldPrice: 59.0,
       imageUrl: "/images/bracelet-financial.jpg",
       category: "BRACELET" as const,
       isAvailable: true,
+      features: {
+        ru: ["Натуральный цитрин и пирит класса ААА", "Индивидуальный расчет по вашей дате рождения", "Активация энергетическим ладованием"],
+        en: ["Natural citrine and pyrite AAA class", "Individual calculation by your date of birth", "Activation by energy lading"]
+      }
     },
     {
       id: "bracelet-2",
-      name: "Энергетический браслет «Гармония 7 Чакр»",
-      description: "Сбалансированное сочетание семи священных камней (аметист, лазурит, бирюза, императорская яшма, тигровый глаз, янтарь, сердолик) для очищения, гармонизации и наполнения жизненной силой всех энергетических центров.",
-      price: 3800,
+      name: {
+        ru: "Энергетический браслет «Гармония 7 Чакр»",
+        en: "Energy Bracelet '7 Chakras Harmony'"
+      },
+      description: {
+        ru: "Сбалансированное сочетание семи священных камней (аметист, лазурит, бирюза, императорская яшма, тигровый глаз, янтарь, сердолик) для очищения, гармонизации и наполнения жизненной силой всех энергетических центров.",
+        en: "Balanced combination of seven sacred stones (amethyst, lapis lazuli, turquoise, imperial jasper, tiger's eye, amber, carnelian) for purification, harmonization and filling with vital force of all energy centers."
+      },
+      price: 39.0,
+      oldPrice: null,
       imageUrl: "/images/bracelet-chakras.jpg",
       category: "BRACELET" as const,
       isAvailable: true,
+      features: {
+        ru: ["7 натуральных минералов для каждой чакры", "Основа из прочной эластичной нити", "Подходит для ежедневных медитаций"],
+        en: ["7 natural minerals for each chakra", "Base made of strong elastic thread", "Suitable for daily meditations"]
+      }
     },
     {
       id: "bracelet-3",
-      name: "Браслет-оберег «Защита и Сила»",
-      description: "Мощный оберег из черного турмалина (шерла) и матового шунгита. Нейтрализует негативные энергетические воздействия, укрепляет биополе, придает уверенность и внутреннюю стабильность.",
-      price: 4200,
+      name: {
+        ru: "Браслет-оберег «Защита и Сила»",
+        en: "Amulet Bracelet 'Protection and Strength'"
+      },
+      description: {
+        ru: "Мощный оберег из черного турмалина (шерла) и матового шунгита. Нейтрализует негативные энергетические воздействия, укрепляет биополе, придает уверенность и внутреннюю стабильность.",
+        en: "Powerful amulet made of black tourmaline (sherl) and matte shungite. Neutralizes negative energy influences, strengthens the biofield, gives confidence and internal stability."
+      },
+      price: 42.0,
+      oldPrice: 48.0,
       imageUrl: "/images/bracelet-protection.jpg",
       category: "BRACELET" as const,
       isAvailable: true,
+      features: {
+        ru: ["Натуральный шерл (черный турмалин)", "Защита от негативного влияния", "Ручная сборка под размер запястья"],
+        en: ["Natural sherl (black tourmaline)", "Protection from negative influence", "Hand assembly to wrist size"]
+      }
     },
     {
       id: "course-1",
-      name: "Курс «Практическая Нумерология. Матрица Судьбы»",
-      description: "Глубокая авторская программа обучения нумерологии. С нуля научитесь рассчитывать и анализировать судьбу человека, кармические узлы, финансовый потенциал и совместимость в отношениях.",
-      price: 18900,
+      name: {
+        ru: "Курс «Практическая Нумерология. Матрица Судьбы»",
+        en: "Course 'Practical Numerology. Matrix of Destiny'"
+      },
+      description: {
+        ru: "Глубокая авторская программа обучения нумерологии. С нуля научитесь рассчитывать и анализировать судьбу человека, кармические узлы, финансовый потенциал и совместимость в отношениях.",
+        en: "Deep author's program for teaching numerology. From scratch you will learn to calculate and analyze a person's destiny, karmic nodes, financial potential and compatibility in relationships."
+      },
+      price: 189.0,
+      oldPrice: 249.0,
       imageUrl: "/images/course-numerology.jpg",
       category: "COURSE" as const,
       isAvailable: true,
+      features: {
+        ru: ["24 видеоурока без воды с методичками", "Доступ в личный кабинет ученика навсегда", "Сертификат об окончании курса"],
+        en: ["24 video lessons without water with manuals", "Access to the student's personal account forever", "Certificate of course completion"]
+      }
     },
     {
       id: "course-2",
-      name: "Курс «Таро для начинающих. Старшие Арканы»",
-      description: "Пошаговый курс по глубокому изучению 22 Старших Арканов Таро. Вы изучите архетипы карт, научитесь делать точные расклады на любые жизненные вопросы без зубрежки значений.",
-      price: 14500,
+      name: {
+        ru: "Курс «Таро для начинающих. Старшие Арканы»",
+        en: "Course 'Tarot for Beginners. Major Arcana'"
+      },
+      description: {
+        ru: "Пошаговый курс по глубокому изучению 22 Старших Арканов Таро. Вы изучите архетипы карт, научитесь делать точные расклады на любые жизненные вопросы без зубрежки значений.",
+        en: "Step-by-step course on deep study of 22 Major Arcana of Tarot. You will study card archetypes, learn to make accurate spreads on any life questions without memorizing values."
+      },
+      price: 145.0,
+      oldPrice: null,
       imageUrl: "/images/course-tarot.jpg",
       category: "COURSE" as const,
       isAvailable: true,
+      features: {
+        ru: ["Подробный разбор 22 Старших Арканов", "Практические домашние задания с проверкой", "Удобные шпаргалки по раскладам"],
+        en: ["Detailed analysis of 22 Major Arcana", "Practical homework with review", "Convenient cheat sheets on spreads"]
+      }
     },
     {
       id: "consultation-1",
-      name: "Индивидуальный Нумерологический разбор матрицы",
-      description: "Полная консультация Ольги Хавич по вашей дате рождения (1.5-2 часа, онлайн). Подробный анализ вашего жизненного предназначения, скрытых талантов, кармических задач и рекомендаций на текущий период.",
-      price: 8500,
+      name: {
+        ru: "Индивидуальный Нумерологический разбор матрицы",
+        en: "Individual Numerological Matrix Analysis"
+      },
+      description: {
+        ru: "Полная консультация Ольги Хавич по вашей дате рождения (1.5-2 часа, онлайн). Подробный анализ вашего жизненного предназначения, скрытых талантов, кармических задач и рекомендаций на текущий период.",
+        en: "Full consultation of Olga Khavich by your date of birth (1.5-2 hours, online). Detailed analysis of your life purpose, hidden talents, karmic tasks and recommendations for the current period."
+      },
+      price: 85.0,
+      oldPrice: 100.0,
       imageUrl: "/images/consultation-matrix.jpg",
       category: "CONSULTATION" as const,
+      subCategory: "NUMEROLOGY",
       isAvailable: true,
+      features: {
+        ru: ["Живая онлайн-встреча с записью", "Текстовый PDF-отчет на 40+ страниц", "Ответы на любые ваши вопросы"],
+        en: ["Live online meeting with recording", "Text PDF report of 40+ pages", "Answers to any of your questions"]
+      }
     },
     {
       id: "consultation-2",
-      name: "Чакродиагностика и Энергетическое ладование",
-      description: "Комплексная сессия по диагностике ваших энергетических центров (чакр), выявлению блоков и зажимов, с последующим мягким восковым ладованием и восстановлением целостности ауры.",
-      price: 6000,
+      name: {
+        ru: "Чакродиагностика и Энергетическое ладование",
+        en: "Chakra Diagnosis and Energy Lading"
+      },
+      description: {
+        ru: "Комплексная сессия по диагностике ваших энергетических центров (чакр), выявлению блоков и зажимов, с последующим мягким восковым ладованием и восстановлением целостности ауры.",
+        en: "Comprehensive session for diagnosing your energy centers (chakras), identifying blocks and clamps, followed by soft wax lading and restoring the integrity of the aura."
+      },
+      price: 60.0,
+      oldPrice: null,
       imageUrl: "/images/consultation-energy.jpg",
       category: "CONSULTATION" as const,
+      subCategory: "LADING",
       isAvailable: true,
-    },
+      features: {
+        ru: ["Полная диагностика биополя", "Дистанционная работа по фото", "Рекомендации по защите энергии"],
+        en: ["Full biofield diagnostics", "Remote work by photo", "Recommendations for energy protection"]
+      }
+    }
   ];
 
   for (const product of products) {

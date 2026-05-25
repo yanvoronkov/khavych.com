@@ -95,6 +95,27 @@ export default async function AdminPage() {
     })),
   }));
 
+  // 4. Получаем список всех товаров в магазине для управления ими
+  const productsFromDb = await db.product.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const products = productsFromDb.map((p) => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price: p.price,
+    oldPrice: p.oldPrice,
+    imageUrl: p.imageUrl,
+    category: p.category,
+    subCategory: p.subCategory,
+    features: p.features,
+    isAvailable: p.isAvailable,
+    createdAt: p.createdAt.toISOString(),
+  }));
+
   return (
     <div className={styles.cabinetPage}>
       {/* Подключаем глобальный Header */}
@@ -127,7 +148,11 @@ export default async function AdminPage() {
         <section className={styles.coursesSection}>
           <h2 className={styles.sectionTitle}>База учеников и управление доступами</h2>
           
-          <AdminClient initialUsers={users} courses={courses} />
+          <AdminClient 
+            initialUsers={users} 
+            courses={courses} 
+            initialProducts={products}
+          />
         </section>
       </main>
     </div>
