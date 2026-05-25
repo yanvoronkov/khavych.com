@@ -71,6 +71,16 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
    */
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!settings.telegramBotToken.trim() || !settings.telegramChatId.trim()) {
+      setLocalMessage({
+        text: "Для сохранения настроек необходимо заполнить оба поля: Токен бота и ID чата",
+        type: "error",
+      });
+      showNotification("Заполните оба обязательных поля", "error");
+      return;
+    }
+
     setSaving(true);
     setLocalMessage(null);
     
@@ -192,7 +202,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
         <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div className={styles.formGroup}>
             <label className={styles.formLabel} htmlFor="telegramBotToken">
-              Токен бота Telegram (Bot Token)
+              Токен бота Telegram (Bot Token) *
             </label>
             <input
               type="text"
@@ -206,7 +216,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel} htmlFor="telegramChatId">
-              ID чата или группы Telegram (Chat ID)
+              ID чата или группы Telegram (Chat ID) *
             </label>
             <input
               type="text"

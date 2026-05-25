@@ -132,6 +132,17 @@ export async function POST(request: Request) {
     const tokenVal = validatedData.telegramBotToken?.trim() || "";
     const chatIdVal = validatedData.telegramChatId?.trim() || "";
 
+    if (!tokenVal || !chatIdVal) {
+      return NextResponse.json(
+        {
+          error: true,
+          code: "BAD_REQUEST",
+          message: "Для сохранения настроек необходимо заполнить оба поля: Токен бота и ID чата",
+        },
+        { status: 400 }
+      );
+    }
+
     // Сохраняем токен
     await db.setting.upsert({
       where: { key: "telegramBotToken" },
