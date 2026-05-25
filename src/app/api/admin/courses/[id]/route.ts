@@ -7,6 +7,7 @@ import { logger } from "src/lib/logger";
 // Схема валидации тела запроса
 const courseUpdateSchema = z.object({
   title: z.string().min(1, "Название курса не должно быть пустым"),
+  description: z.string().min(1, "Описание курса не должно быть пустым"),
   imageUrl: z.string().optional().nullable(),
 });
 
@@ -72,6 +73,7 @@ export async function PUT(
       where: { id },
       data: {
         title: validatedData.title.trim(),
+        description: validatedData.description.trim(),
         imageUrl: validatedData.imageUrl?.trim() || null,
       },
       include: {

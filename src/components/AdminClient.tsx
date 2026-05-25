@@ -82,11 +82,13 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     isOpen: boolean;
     courseId: string;
     title: string;
+    description: string;
     imageUrl: string;
   }>({
     isOpen: false,
     courseId: "",
     title: "",
+    description: "",
     imageUrl: "",
   });
   const [courseImageUploading, setCourseImageUploading] = useState<boolean>(false);
@@ -510,6 +512,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       isOpen: true,
       courseId: course.id,
       title: course.title,
+      description: course.description || "",
       imageUrl: course.imageUrl || "",
     });
   };
@@ -629,6 +632,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: courseModal.title,
+          description: courseModal.description,
           imageUrl: courseModal.imageUrl || null,
         }),
       });
@@ -643,6 +647,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             return {
               ...c,
               title: result.course.title,
+              description: result.course.description,
               imageUrl: result.course.imageUrl,
             };
           }
@@ -651,7 +656,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       );
 
       showNotification("Параметры курса успешно сохранены!", "success");
-      setCourseModal({ isOpen: false, courseId: "", title: "", imageUrl: "" });
+      setCourseModal({ isOpen: false, courseId: "", title: "", description: "", imageUrl: "" });
     } catch (err: unknown) {
       showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
     } finally {
@@ -2117,7 +2122,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 ✏️ Редактирование курса
               </h3>
               <button
-                onClick={() => setCourseModal({ isOpen: false, courseId: "", title: "", imageUrl: "" })}
+                onClick={() => setCourseModal({ isOpen: false, courseId: "", title: "", description: "", imageUrl: "" })}
                 style={{
                   border: "none",
                   background: "none",
@@ -2150,6 +2155,29 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                       fontSize: "14px",
                       borderRadius: "6px",
                       border: "1px solid var(--color-gray-border)",
+                    }}
+                  />
+                </div>
+
+                {/* Описание курса */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Описание курса *
+                  </label>
+                  <textarea
+                    required
+                    placeholder="Введите описание программы обучения, ключевые темы и результаты курса..."
+                    rows={4}
+                    value={courseModal.description}
+                    onChange={(e) => setCourseModal((prev) => ({ ...prev, description: e.target.value }))}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                      resize: "vertical",
+                      fontFamily: "inherit"
                     }}
                   />
                 </div>
@@ -2226,7 +2254,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
                 <button
                   type="button"
-                  onClick={() => setCourseModal({ isOpen: false, courseId: "", title: "", imageUrl: "" })}
+                  onClick={() => setCourseModal({ isOpen: false, courseId: "", title: "", description: "", imageUrl: "" })}
                   className="btn btn-secondary"
                   style={{ padding: "10px 20px" }}
                 >
