@@ -5,7 +5,7 @@ import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
 
 const createLessonSchema = z.object({
-  courseId: z.string().uuid("Неверный формат ID курса"),
+  courseId: z.string().min(1, "ID курса не должен быть пустым"),
   title: z.string().min(1, "Название урока не должно быть пустым"),
   description: z.string(),
   videoUrl: z.string().nullable().optional(),
