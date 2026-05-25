@@ -2,16 +2,23 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCart } from "src/context/CartContext";
 import styles from "./Header.module.css";
 
 /**
  * Компонент Header (Шапка сайта).
- * Без логотипа, с меню слева и поддержкой мобильного меню-гамбургера.
+ * Поддерживает адаптивное меню-гамбургер, автоматическую смену пунктов навигации
+ * и кнопок действий в зависимости от того, на какой странице находится пользователь (главная, магазин, ЛК).
  */
 export const Header: React.FC = () => {
+  const pathname = usePathname();
   const { count, setIsCartOpen } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  // Флаги определения страниц для условного рендеринга меню
+  const isCabinet = pathname?.startsWith("/cabinet") || pathname?.startsWith("/admin");
+  const isShop = pathname?.startsWith("/shop");
 
   return (
     <header className={styles.header}>
@@ -29,18 +36,40 @@ export const Header: React.FC = () => {
 
         {/* Навигация (меню слева на десктопах, раскрывающийся блок на мобильных) */}
         <nav className={`${styles.nav} ${isMenuOpen ? styles.navActive : ""}`}>
-          <Link href="/#about" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-            Обо мне
-          </Link>
-          <Link href="/#services" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-            Услуги
-          </Link>
-          <Link href="/shop" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-            Магазин
-          </Link>
-          <Link href="/#skills" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-            Сертификаты
-          </Link>
+          {isCabinet ? (
+            <>
+              <Link href="/" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
+                Главная
+              </Link>
+              <Link href="/shop" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
+                Магазин
+              </Link>
+            </>
+          ) : isShop ? (
+            <>
+              <Link href="/" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
+                Главная
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/#about" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
+                Обо мне
+              </Link>
+              <Link href="/#services" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
+                Услуги
+              </Link>
+              <Link href="/shop" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
+                Магазин
+              </Link>
+              <Link href="/#testimonials" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
+                Отзывы
+              </Link>
+              <Link href="/#skills" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
+                Сертификаты
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Действия справа (Корзина и Кабинет) */}
@@ -69,24 +98,26 @@ export const Header: React.FC = () => {
             {count > 0 && <span className={styles.cartBadge}>{count}</span>}
           </button>
 
-          {/* Вход в Личный кабинет */}
-          <Link href="/login" className={styles.loginBtn}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              viewBox="0 0 24 24"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            <span>Кабинет</span>
-          </Link>
+          {/* Вход в Личный кабинет - НЕ отображается, если мы уже находимся в ЛК / админке */}
+          {!isCabinet && (
+            <Link href="/login" className={styles.loginBtn}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span>Кабинет</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>

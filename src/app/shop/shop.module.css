@@ -8,24 +8,30 @@
 
 /* Баннер магазина */
 .hero {
-  background: linear-gradient(135deg, #121214 0%, #1e1e24 100%);
-  color: var(--color-light);
-  padding: 60px 0;
-  text-align: center;
-  border-bottom: 2px solid var(--color-accent);
+  background-color: var(--color-light);
+  border-bottom: 1px solid var(--color-gray-border);
+  padding: 20px 0;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  text-align: left;
 }
 
 .heroTitle {
-  font-size: 36px;
-  font-weight: 800;
-  margin-bottom: 12px;
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #d4af37 0%, #aa851c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  margin: 0 0 4px 0;
 }
 
 .heroDesc {
-  font-size: 16px;
+  font-size: 13px;
   color: var(--color-gray);
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
 }
 
 /* Фильтры товаров */
@@ -216,14 +222,6 @@
 
 /* Адаптивность */
 @media (max-width: 576px) {
-  .heroTitle {
-    font-size: 28px;
-  }
-  
-  .heroDesc {
-    font-size: 14px;
-  }
-  
   .grid {
     grid-template-columns: 1fr;
     gap: 20px;

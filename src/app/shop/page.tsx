@@ -229,7 +229,7 @@ export default function ShopPage() {
       <section className={styles.hero}>
         <div className="container">
           <h1 className={`${styles.heroTitle} animate-fade-up`}>
-            Магазин <span className="text-gold">Ольги Хавич</span>
+            Магазин Ольги Хавич
           </h1>
           <p className={`${styles.heroDesc} animate-fade-in`}>
             Выберите авторский амулетный браслет из натуральных камней, 

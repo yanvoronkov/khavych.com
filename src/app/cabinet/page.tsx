@@ -66,10 +66,6 @@ export default async function CabinetPage() {
             <p>Добро пожаловать в ваше личное пространство обучения</p>
           </div>
           <div className={styles.headerActions}>
-            <Link href="/shop" className="btn btn-secondary">
-              В магазин
-            </Link>
-            
             {/* Если вошел администратор, показываем кнопку перехода в админку */}
             {session.role === "ADMIN" && (
               <Link href="/admin" className="btn btn-secondary" style={{ borderColor: "#c51722", color: "#c51722" }}>
