@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
   pool: Pool | undefined;
 };
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.khavych_POSTGRES_PRISMA_URL || process.env.khavych_DATABASE_URL || process.env.DATABASE_URL;
 
 const pool = globalForPrisma.pool ?? new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
