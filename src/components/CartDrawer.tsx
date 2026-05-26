@@ -54,6 +54,18 @@ export const CartDrawer: React.FC = () => {
   const [paypalLoaded, setPaypalLoaded] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState<"PAYPAL" | "MANUAL" | null>(null);
 
+  // Состояния для кастомных уведомлений и диалоговых окон
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const [customAlert, setCustomAlert] = useState<{ message: string; title: string } | null>(null);
+  const [customConfirm, setCustomConfirm] = useState<{ message: string; title: string; onConfirm: () => void } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast((prev) => (prev?.message === message ? null : prev));
+    }, 4500);
+  };
+
   // Восстановление неоплаченного заказа при переходе по ссылке
   const restoreOrderSession = async (orderId: string) => {
     try {
@@ -69,7 +81,10 @@ export const CartDrawer: React.FC = () => {
       
       if (order.status !== "PENDING") {
         const statusText = order.status === "PAID" ? "ОПЛАЧЕН" : "ОТМЕНЕН";
-        alert(`Этот заказ уже имеет статус: ${statusText}. Восстановление оплаты невозможно.`);
+        setCustomAlert({
+          title: "Восстановление заказа",
+          message: `Этот заказ уже имеет статус: ${order.status === "PAID" ? "Оплачен" : "Отменен"}. Восстановление оплаты невозможно.`
+        });
         window.history.replaceState({}, document.title, window.location.pathname);
         return;
       }
@@ -114,7 +129,10 @@ export const CartDrawer: React.FC = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "Ошибка при восстановлении сессии оплаты");
+      setCustomAlert({
+        title: "Ошибка восстановления",
+        message: err.message || "Ошибка при восстановлении сессии оплаты"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -625,30 +643,40 @@ export const CartDrawer: React.FC = () => {
                     fontWeight: 500,
                     transition: "color 0.2s ease" 
                   }}
-                  onClick={async () => {
-                    if (confirm("Вы действительно хотите отменить этот заказ?")) {
-                      setIsSubmitting(true);
-                      try {
-                        const res = await fetch(`/api/orders/${createdOrderId}/cancel`, {
-                          method: "POST"
-                        });
-                        if (res.ok) {
-                          alert("Заказ успешно отменен.");
-                          clearCart();
-                          setMode("CART");
-                          setCreatedOrderId("");
-                          setPaymentMethod(null);
-                        } else {
-                          const data = await res.json();
-                          alert(data.message || "Не удалось отменить заказ.");
+                  onClick={() => {
+                    setCustomConfirm({
+                      title: "⚠️ Отмена заказа",
+                      message: "Вы действительно хотите отменить оформление этого заказа?",
+                      onConfirm: async () => {
+                        setIsSubmitting(true);
+                        try {
+                          const res = await fetch(`/api/orders/${createdOrderId}/cancel`, {
+                            method: "POST"
+                          });
+                          if (res.ok) {
+                            showToast("Заказ успешно отменен.", "success");
+                            clearCart();
+                            setMode("CART");
+                            setCreatedOrderId("");
+                            setPaymentMethod(null);
+                          } else {
+                            const data = await res.json();
+                            setCustomAlert({
+                              title: "Ошибка",
+                              message: data.message || "Не удалось отменить заказ."
+                            });
+                          }
+                        } catch (err) {
+                          console.error("Ошибка при отмене заказа:", err);
+                          setCustomAlert({
+                            title: "Ошибка",
+                            message: "Произошла ошибка при отмене заказа."
+                          });
+                        } finally {
+                          setIsSubmitting(false);
                         }
-                      } catch (err) {
-                        console.error("Ошибка при отмене заказа:", err);
-                        alert("Произошла ошибка при отмене заказа.");
-                      } finally {
-                        setIsSubmitting(false);
                       }
-                    }
+                    });
                   }}
                 >
                   Отменить заказ
@@ -753,6 +781,72 @@ export const CartDrawer: React.FC = () => {
                 {isSubmitting ? "Отправка..." : "Подтвердить заказ"}
               </button>
             )}
+          </div>
+        )}
+
+        {/* Всплывающий кастомный тост (Toast) */}
+        {toast && (
+          <div className={`${styles.toastContainer} ${toast.type === "success" ? styles.toastSuccess : toast.type === "error" ? styles.toastError : styles.toastInfo}`}>
+            <span style={{ fontSize: "16px" }}>
+              {toast.type === "success" ? "✅" : toast.type === "error" ? "❌" : "ℹ️"}
+            </span>
+            <div style={{ fontSize: "13px", fontWeight: 500 }}>{toast.message}</div>
+          </div>
+        )}
+
+        {/* Кастомное диалоговое окно подтверждения (Confirm Modal) */}
+        {customConfirm && (
+          <div className={styles.customModalOverlay}>
+            <div className={styles.customModal}>
+              <div className={styles.customModalHeader}>
+                <span className={styles.customModalTitle}>{customConfirm.title}</span>
+              </div>
+              <div className={styles.customModalBody}>
+                {customConfirm.message}
+              </div>
+              <div className={styles.customModalFooter}>
+                <button 
+                  type="button" 
+                  className={`${styles.customModalBtn} ${styles.customModalBtnCancel}`}
+                  onClick={() => setCustomConfirm(null)}
+                >
+                  Отмена
+                </button>
+                <button 
+                  type="button" 
+                  className={`${styles.customModalBtn} ${styles.customModalBtnConfirm}`}
+                  onClick={() => {
+                    customConfirm.onConfirm();
+                    setCustomConfirm(null);
+                  }}
+                >
+                  Продолжить
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Кастомное диалоговое окно оповещения (Alert Modal) */}
+        {customAlert && (
+          <div className={styles.customModalOverlay}>
+            <div className={styles.customModal}>
+              <div className={styles.customModalHeader}>
+                <span className={styles.customModalTitle}>ℹ️ {customAlert.title}</span>
+              </div>
+              <div className={styles.customModalBody}>
+                {customAlert.message}
+              </div>
+              <div className={styles.customModalFooter}>
+                <button 
+                  type="button" 
+                  className={`${styles.customModalBtn} ${styles.customModalBtnConfirm}`}
+                  onClick={() => setCustomAlert(null)}
+                >
+                  Ок
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

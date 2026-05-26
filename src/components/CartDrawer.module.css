@@ -374,3 +374,147 @@
   cursor: pointer;
 }
 
+/* Всплывающие кастомные уведомления (Toasts) */
+.toastContainer {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toastSuccess {
+  background-color: #f4fbf5;
+  border: 1px solid #ccefd2;
+  color: #1b5e20;
+}
+
+.toastError {
+  background-color: #fdf6f6;
+  border: 1px solid #f8d7da;
+  color: #721c24;
+}
+
+.toastInfo {
+  background-color: #f7f9fc;
+  border: 1px solid #d1ecf1;
+  color: #0c5460;
+}
+
+/* Кастомные диалоговые окна (Alert/Confirm Modals) */
+.customModalOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn var(--transition-fast) forwards;
+}
+
+.customModal {
+  background-color: var(--color-light);
+  border: 1px solid #eae0db;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 15px 35px rgba(107, 29, 47, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.customModalHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customModalTitle {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.customModalBody {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-dark);
+}
+
+.customModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.customModalBtn {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.customModalBtnConfirm {
+  background: linear-gradient(135deg, #6b1d2f 0%, #4a101d 100%);
+  color: #ffffff;
+}
+
+.customModalBtnConfirm:hover {
+  opacity: 0.9;
+}
+
+.customModalBtnCancel {
+  background-color: var(--color-gray-light);
+  border: 1px solid var(--color-gray-border);
+  color: var(--color-gray);
+}
+
+.customModalBtnCancel:hover {
+  background-color: var(--color-gray-border);
+  color: var(--color-dark);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
