@@ -70,11 +70,11 @@ interface IAdminClientProps {
 
 export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses, initialProducts }) => {
   // --- СОСТОЯНИЕ (STATE) ---
-  
+
   const [activeTab, setActiveTab] = useState<"users" | "courses" | "products" | "orders" | "settings">("users");
   const [users, setUsers] = useState<IAdminUser[]>(initialUsers);
   const [localCourses, setLocalCourses] = useState<IAdminCourse[]>(courses);
-  
+
   // Поиск пользователей
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -118,7 +118,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     phone: "",
     additionalInfo: "",
   });
-  
+
   // Состояния для всплывающих уведомлений
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
@@ -578,7 +578,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    
+
     // Проверка размера файла перед отправкой (макс. 4.5 МБ для Vercel Serverless Function payload limit)
     const MAX_SIZE = 4.5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
@@ -643,8 +643,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
     try {
       const isCreate = courseModal.mode === "create";
-      const url = isCreate 
-        ? "/api/admin/courses" 
+      const url = isCreate
+        ? "/api/admin/courses"
         : `/api/admin/courses/${courseModal.courseId}`;
       const method = isCreate ? "POST" : "PUT";
 
@@ -764,10 +764,10 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
         // Обновляем локальное состояние пользователей
         setUsers((prevUsers) => [result.user, ...prevUsers]);
-        
+
         // Показываем алерт с временным паролем
         alert(`🎉 Ученик успешно добавлен!\n\n🔑 Временный пароль для входа: ${result.defaultPassword}\nПожалуйста, передайте этот пароль ученику.`);
-        
+
         showNotification("Ученик успешно создан", "success");
       } else {
         // Режим редактирования (PUT)
@@ -851,6 +851,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
           marginBottom: "25px",
           borderBottom: "2px solid #eae0db",
           paddingBottom: "10px",
+          flexWrap: "wrap",
         }}
       >
         <button
@@ -867,7 +868,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             transition: "all 0.3s ease",
           }}
         >
-          👤 Ученики и доступы
+          👤 Ученики
         </button>
         <button
           onClick={() => setActiveTab("courses")}
@@ -883,7 +884,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             transition: "all 0.3s ease",
           }}
         >
-          📚 Курсы и уроки (CRUD)
+          📚 Курсы
         </button>
         <button
           onClick={() => setActiveTab("products")}
@@ -899,7 +900,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             transition: "all 0.3s ease",
           }}
         >
-          🛒 Товары магазина
+          🛒 Товары
         </button>
         <button
           onClick={() => setActiveTab("orders")}
@@ -1005,7 +1006,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 </svg>
               </div>
             </div>
-            
+
             <button
               onClick={handleOpenUserAddModal}
               className="btn btn-primary"
@@ -1159,7 +1160,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                             >
                               🔑 Доступы
                             </button>
-                            
+
                             <button
                               onClick={() => handleOpenUserEditModal(user)}
                               className="btn btn-secondary"
@@ -1176,7 +1177,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                             >
                               ✏️ Ред.
                             </button>
-                            
+
                             <button
                               onClick={() => handleDeleteUser(user.id)}
                               disabled={user.role === "ADMIN"}
@@ -1210,7 +1211,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       {/* --- ТАБ 2: КУРСЫ И УРОКИ --- */}
       {activeTab === "courses" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          
+
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
             <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--color-dark)", margin: 0 }}>
               Список обучающих курсов ({localCourses.length})
@@ -1294,13 +1295,13 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                     <button
                       onClick={() => handleDeleteCourse(course.id, course.title)}
                       className="btn btn-secondary"
-                      style={{ 
-                        padding: "6px 12px", 
-                        fontSize: "12px", 
-                        display: "inline-flex", 
-                        alignItems: "center", 
-                        gap: "4px", 
-                        color: "#c62828", 
+                      style={{
+                        padding: "6px 12px",
+                        fontSize: "12px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        color: "#c62828",
                         borderColor: "#c62828",
                         backgroundColor: "#fff"
                       }}
@@ -1604,12 +1605,12 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               <form onSubmit={handleGrantAccess}>
                 <h4 style={{ margin: "0 0 15px 0", fontSize: "15px", fontWeight: 700 }}>Предоставить новый доступ:</h4>
 
-                 {/* Кастомный выпадающий список курсов (Dropdown с живым поиском) */}
+                {/* Кастомный выпадающий список курсов (Dropdown с живым поиском) */}
                 <div style={{ marginBottom: "15px", position: "relative" }}>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "6px" }}>
                     Выберите курс (из {localCourses.length} доступных):
                   </label>
-                  
+
                   {/* Кнопка-триггер кастомного селектора */}
                   <div
                     onClick={() => setIsCourseDropdownOpen(!isCourseDropdownOpen)}
@@ -1631,13 +1632,13 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                     }}
                   >
                     <span style={{ color: selectedCourseId ? "var(--color-dark)" : "#888", fontWeight: selectedCourseId ? 600 : 400 }}>
-                      {selectedCourseId 
-                        ? localCourses.find(c => c.id === selectedCourseId)?.title 
+                      {selectedCourseId
+                        ? localCourses.find(c => c.id === selectedCourseId)?.title
                         : "-- Выберите курс --"}
                     </span>
-                    <span style={{ 
-                      fontSize: "12px", 
-                      transition: "transform 0.2s ease", 
+                    <span style={{
+                      fontSize: "12px",
+                      transition: "transform 0.2s ease",
                       transform: isCourseDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
                       color: "var(--color-primary)"
                     }}>
@@ -1670,7 +1671,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                   {isCourseDropdownOpen && (
                     <>
                       {/* Прозрачная подложка для закрытия по клику вне меню */}
-                      <div 
+                      <div
                         onClick={() => {
                           setIsCourseDropdownOpen(false);
                           setSearchCourseQuery("");
@@ -1685,7 +1686,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                           background: "none",
                         }}
                       />
-                      
+
                       <div style={{
                         position: "absolute",
                         top: "100%",
@@ -1722,8 +1723,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                         </div>
 
                         {/* Список курсов */}
-                        <div style={{ 
-                          maxHeight: "220px", 
+                        <div style={{
+                          maxHeight: "220px",
                           overflowY: "auto",
                           padding: "4px 0"
                         }}>
@@ -1770,8 +1771,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                                   <span style={{ paddingRight: "10px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                     {c.title}
                                   </span>
-                                  <span style={{ 
-                                    fontSize: "11px", 
+                                  <span style={{
+                                    fontSize: "11px",
                                     color: isSelected ? "var(--color-primary)" : "#9a7c56",
                                     backgroundColor: isSelected ? "rgba(197, 23, 34, 0.1)" : "#fbf7f4",
                                     padding: "2px 6px",
@@ -1953,7 +1954,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             <form onSubmit={handleSaveLesson} style={{ padding: "24px" }}>
               {/* Поля формы */}
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-                
+
                 {/* Название */}
                 <div>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
@@ -2067,7 +2068,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                                 border: "1px solid var(--color-gray-border)",
                               }}
                             />
-                            
+
                             <input
                               type="file"
                               id={`lesson-file-input-${idx}`}
@@ -2075,7 +2076,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                               onChange={(e) => handleLessonFileUpload(idx, e)}
                               disabled={isUploading}
                             />
-                            
+
                             <button
                               type="button"
                               onClick={() => document.getElementById(`lesson-file-input-${idx}`)?.click()}
@@ -2116,7 +2117,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                               &times;
                             </button>
                           </div>
-                          
+
                           {isUploading && (
                             <div style={{
                               position: "absolute",
@@ -2238,7 +2239,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
             <form onSubmit={handleSaveCourse} style={{ padding: "24px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-                
+
                 {/* Название */}
                 <div>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
@@ -2302,7 +2303,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                       marginBottom: "10px",
                     }}
                   />
-                  
+
                   {/* Загрузка файла */}
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <input
@@ -2312,7 +2313,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                       style={{ display: "none" }}
                       id="course-image-file-input"
                     />
-                    
+
                     <button
                       type="button"
                       onClick={() => document.getElementById("course-image-file-input")?.click()}
@@ -2330,13 +2331,13 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                     >
                       {courseImageUploading ? "Загрузка..." : "📤 Загрузить файл изображения"}
                     </button>
-                    
+
                     {courseImageUploading && (
                       <div style={{ width: "100%", backgroundColor: "#eee", borderRadius: "4px", height: "6px", overflow: "hidden" }}>
                         <div style={{ width: `${courseImageUploadProgress}%`, backgroundColor: "var(--color-primary)", height: "100%", transition: "width 0.2s" }} />
                       </div>
                     )}
-                    
+
                     {courseModal.imageUrl && (
                       <div style={{ marginTop: "10px", border: "1px solid var(--color-gray-border)", borderRadius: "6px", padding: "8px", display: "flex", justifyContent: "center", backgroundColor: "#fafafa" }}>
                         <img
@@ -2435,7 +2436,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
             <form onSubmit={handleSaveUser} style={{ padding: "24px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-                
+
                 {/* Имя */}
                 <div>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>

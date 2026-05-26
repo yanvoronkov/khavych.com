@@ -498,3 +498,117 @@
     justify-content: space-between;
   }
 }
+
+/* --- Стили раздела Мои заказы --- */
+.ordersSection {
+  margin-top: 50px;
+}
+
+.tableContainer {
+  background-color: #ffffff;
+  border: 1px solid var(--color-gray-border);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.ordersTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.ordersTable th {
+  background-color: #faf6f5;
+  padding: 16px 20px;
+  font-weight: 700;
+  color: #6b1d2f;
+  border-bottom: 1px solid var(--color-gray-border);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+}
+
+.ordersTable td {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-gray-border);
+  vertical-align: middle;
+  color: var(--color-dark);
+}
+
+.ordersTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ordersTable tbody tr:hover {
+  background-color: #fffaf9;
+}
+
+.orderId {
+  font-family: monospace;
+  font-weight: 600;
+  font-size: 13px;
+  color: #888888;
+}
+
+.amount {
+  font-weight: 700;
+  color: #6b1d2f;
+  font-size: 15px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badgePENDING {
+  background-color: #fff9db;
+  color: #f59f00;
+}
+
+.badgePAID {
+  background-color: #ebfbee;
+  color: #2b8a3e;
+}
+
+.badgeCANCELLED {
+  background-color: #f1f3f5;
+  color: #868e96;
+}
+
+.payBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(135deg, #6b1d2f 0%, #4a101d 100%);
+  color: #ffffff !important;
+  text-decoration: none;
+  box-shadow: 0 4px 8px rgba(107, 29, 47, 0.12);
+  transition: all 0.2s ease;
+}
+
+.payBtn:hover {
+  background: linear-gradient(135deg, #82273d 0%, #5d1627 100%);
+  box-shadow: 0 6px 12px rgba(107, 29, 47, 0.2);
+  transform: translateY(-1px);
+}
