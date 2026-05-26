@@ -610,6 +610,50 @@ export const CartDrawer: React.FC = () => {
               >
                 Вернуться назад
               </span>
+
+              {!isSubmitting && (
+                <span 
+                  className={styles.cancelOrderBtn} 
+                  style={{ 
+                    display: "block", 
+                    textAlign: "center", 
+                    marginTop: "16px", 
+                    cursor: "pointer", 
+                    color: "#a30000", 
+                    textDecoration: "underline", 
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    transition: "color 0.2s ease" 
+                  }}
+                  onClick={async () => {
+                    if (confirm("Вы действительно хотите отменить этот заказ?")) {
+                      setIsSubmitting(true);
+                      try {
+                        const res = await fetch(`/api/orders/${createdOrderId}/cancel`, {
+                          method: "POST"
+                        });
+                        if (res.ok) {
+                          alert("Заказ успешно отменен.");
+                          clearCart();
+                          setMode("CART");
+                          setCreatedOrderId("");
+                          setPaymentMethod(null);
+                        } else {
+                          const data = await res.json();
+                          alert(data.message || "Не удалось отменить заказ.");
+                        }
+                      } catch (err) {
+                        console.error("Ошибка при отмене заказа:", err);
+                        alert("Произошла ошибка при отмене заказа.");
+                      } finally {
+                        setIsSubmitting(false);
+                      }
+                    }
+                  }}
+                >
+                  Отменить заказ
+                </span>
+              )}
             </div>
           ) : (
             /* Режим заполнения контактных данных (Checkout) */
