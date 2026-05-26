@@ -120,20 +120,19 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--color-light);
+  background-color: #ffffff;
+  color: var(--color-primary);
+  border: 1px solid rgba(197, 23, 34, 0.2);
   box-shadow: var(--shadow-sm);
 }
 
 .badgeBracelet {
-  background-color: var(--color-primary);
 }
 
 .badgeCourse {
-  background-color: var(--color-accent-dark);
 }
 
 .badgeConsultation {
-  background-color: var(--color-dark);
 }
 
 /* Описание карточки */

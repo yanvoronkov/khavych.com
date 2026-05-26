@@ -202,7 +202,7 @@ export default function Home() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/olga.png"
-                alt="Ольга Хавич, нумеролог"
+                alt="Ольга Хавич, духовный целитель, таролог, нумеролог"
                 className={styles.heroOlgaImage}
               />
             </div>
@@ -299,8 +299,8 @@ export default function Home() {
           <div className={styles.centerHeader}>
             <h2 style={{ color: "#fff" }}>Система Четырех Ключей</h2>
             <p style={{ color: "rgba(255,255,255,0.7)" }}>
-              Моя методика построена на интегральном подходе: от точного математического расчета
-              вашей матрицы судьбы до физического очищения биополя воском и наполнения силой.
+              Моя методика построена на интегральном подходе: от точной диагностики развилок вашей реальности
+              и глубокого очищения воском до наполнения природной силой и детального расчета матрицы судьбы.
             </p>
           </div>
 
@@ -308,19 +308,6 @@ export default function Home() {
             <div className={styles.keyCard}>
               <div className={styles.keyHeader}>
                 <div className={styles.keyStepNumber}>01</div>
-                <div className={styles.keyIcon}>🔢</div>
-              </div>
-              <h3 className={styles.keyStepTitle}>Расчет (Нумерология)</h3>
-              <p className={styles.keyStepDesc}>
-                Составляем точную ментальную карту вашей жизни по дате рождения. Находим сильные стороны,
-                предназначение и кармические задачи.
-              </p>
-            </div>
-
-            <div className={styles.keyCard}>
-              <div className={styles.keyHeader}>
-                <div className={styles.keyStepNumber}>02</div>
-                <div className={styles.keyIcon}>🃏</div>
               </div>
               <h3 className={styles.keyStepTitle}>Диагностика (Таро)</h3>
               <p className={styles.keyStepDesc}>
@@ -331,8 +318,7 @@ export default function Home() {
 
             <div className={styles.keyCard}>
               <div className={styles.keyHeader}>
-                <div className={styles.keyStepNumber}>03</div>
-                <div className={styles.keyIcon}>🕯️</div>
+                <div className={styles.keyStepNumber}>02</div>
               </div>
               <h3 className={styles.keyStepTitle}>Очищение (Отливки)</h3>
               <p className={styles.keyStepDesc}>
@@ -343,13 +329,23 @@ export default function Home() {
 
             <div className={styles.keyCard}>
               <div className={styles.keyHeader}>
-                <div className={styles.keyStepNumber}>04</div>
-                <div className={styles.keyIcon}>☀️</div>
+                <div className={styles.keyStepNumber}>03</div>
               </div>
               <h3 className={styles.keyStepTitle}>Наполнение (Ладование)</h3>
               <p className={styles.keyStepDesc}>
                 Заполняем очищенные каналы природной силой. Настраиваем ваше биополе
                 на финансовую стабильность, здоровье и привлечение любви.
+              </p>
+            </div>
+
+            <div className={styles.keyCard}>
+              <div className={styles.keyHeader}>
+                <div className={styles.keyStepNumber}>04</div>
+              </div>
+              <h3 className={styles.keyStepTitle}>Расчет (Нумерология)</h3>
+              <p className={styles.keyStepDesc}>
+                Составляем точную ментальную карту вашей жизни по дате рождения. Находим сильные стороны,
+                предназначение и кармические задачи.
               </p>
             </div>
           </div>
@@ -369,19 +365,10 @@ export default function Home() {
 
           <div className={styles.servicesGrid}>
             <article className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>🔢</div>
-              <h3>Нумерологический прогноз</h3>
-              <p>
-                Глубокий анализ вашей личности и судьбы по дате рождения. Расчет предназначения,
-                финансовых каналов, совместимости в любви и прогнозирование ключевых периодов жизни.
-              </p>
-              <Link href="/shop?category=CONSULTATION&subCategory=NUMEROLOGY" className="btn btn-secondary" style={{ marginTop: "auto" }} id="service-matrix-btn">
-                Выбрать расчет (от 70 €)
-              </Link>
-            </article>
-
-            <article className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>🃏</div>
+              <div className={styles.serviceImageWrapper}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/service-tarot.jpg" alt="Карты Таро" className={styles.serviceImage} />
+              </div>
               <h3>Карты Таро</h3>
               <p>
                 Точный анализ запутанных жизненных ситуаций и прогнозирование вероятностей. Расклады на
@@ -393,7 +380,10 @@ export default function Home() {
             </article>
 
             <article className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>🕯️</div>
+              <div className={styles.serviceImageWrapper}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/service-wax.jpg" alt="Восковые отливки" className={styles.serviceImage} />
+              </div>
               <h3>Восковые отливки</h3>
               <p>
                 Диагностика и глубокое очищение энергетических центров (чакр). Снятие негатива,
@@ -405,7 +395,10 @@ export default function Home() {
             </article>
 
             <article className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>☀️</div>
+              <div className={styles.serviceImageWrapper}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/service-lading.jpg" alt="Ладование биополя" className={styles.serviceImage} />
+              </div>
               <h3>Ладование биополя</h3>
               <p>
                 Практики наполнения чистой силой после очищений. Восстановление здоровья,
@@ -413,6 +406,21 @@ export default function Home() {
               </p>
               <Link href="/shop?category=CONSULTATION&subCategory=LADING" className="btn btn-secondary" style={{ marginTop: "auto" }} id="service-lading-btn">
                 Наполниться силой (от 35 €)
+              </Link>
+            </article>
+
+            <article className={styles.serviceCard}>
+              <div className={styles.serviceImageWrapper}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/service-numerology.jpg" alt="Нумерологический прогноз" className={styles.serviceImage} />
+              </div>
+              <h3>Нумерологический прогноз</h3>
+              <p>
+                Глубокий анализ вашей личности и судьбы по дате рождения. Расчет предназначения,
+                финансовых каналов, совместимости в любви и прогнозирование ключевых периодов жизни.
+              </p>
+              <Link href="/shop?category=CONSULTATION&subCategory=NUMEROLOGY" className="btn btn-secondary" style={{ marginTop: "auto" }} id="service-matrix-btn">
+                Выбрать расчет (от 70 €)
               </Link>
             </article>
           </div>
