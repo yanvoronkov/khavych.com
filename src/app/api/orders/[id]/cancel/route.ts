@@ -57,14 +57,15 @@ export async function POST(
     // 3. Отправляем Telegram-уведомление администратору об отмене клиентом
     await sendTelegramClientCancelNotification(order);
 
-    // 4. Отправляем Email-уведомление клиенту об отмене
-    sendOrderCancelledEmail({
-      toEmail: order.customerEmail,
-      customerName: order.customerName,
-      orderId: order.id,
-    }).catch((err) => {
+    try {
+      await sendOrderCancelledEmail({
+        toEmail: order.customerEmail,
+        customerName: order.customerName,
+        orderId: order.id,
+      });
+    } catch (err) {
       logger.error({ err, orderId: order.id }, "Ошибка при отправке письма об отмене заказа клиентом");
-    });
+    }
 
     logger.info({ orderId: id }, "Заказ успешно отменен клиентом из корзины");
 

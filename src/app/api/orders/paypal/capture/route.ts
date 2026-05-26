@@ -159,17 +159,19 @@ export async function POST(request: Request) {
       // Отправка письма на почту через Resend
       const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://khavich.com"}/cabinet`;
       
-      sendOrderPaidEmail({
-        toEmail: emailLower,
-        customerName: order.customerName,
-        orderId: order.id,
-        items: orderItems,
-        totalAmount: Number(order.totalAmount),
-        temporaryPassword: isNewUser ? temporaryPassword : undefined,
-        loginUrl,
-      }).catch((err) => {
+      try {
+        await sendOrderPaidEmail({
+          toEmail: emailLower,
+          customerName: order.customerName,
+          orderId: order.id,
+          items: orderItems,
+          totalAmount: Number(order.totalAmount),
+          temporaryPassword: isNewUser ? temporaryPassword : undefined,
+          loginUrl,
+        });
+      } catch (err) {
         logger.error({ err, email: emailLower }, "Ошибка отправки письма об успешной оплате при capture");
-      });
+      }
     });
 
     // 4. Отправляем Telegram-уведомление администратору об успешной авто-оплате PayPal

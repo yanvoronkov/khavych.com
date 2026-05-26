@@ -1,12 +1,58 @@
-import { Resend } from "resend";
 import { logger } from "./logger";
 
-// Инициализируем клиент Resend с помощью API ключа из переменных окружения
+// Получаем API ключ Resend из переменных окружения
 const resendApiKey = process.env.RESEND_API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-// Почтовый ящик отправителя по умолчанию (если домен не верифицирован, Resend позволяет слать с onboarding@resend.dev)
+// Почтовый ящик отправителя по умолчанию
 const FROM_EMAIL = process.env.EMAIL_FROM || "onboarding@resend.dev";
+
+/**
+ * Вспомогательная функция для отправки писем через прямой REST API запрос к Resend.
+ * Это гарантирует 100% стабильную отправку в Next.js без сетевых ошибок SDK.
+ */
+async function sendEmailViaRest({
+  to,
+  subject,
+  html,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<boolean> {
+  if (!resendApiKey) {
+    logger.warn({ to }, "RESEND_API_KEY не настроен. Отправка письма пропущена.");
+    return false;
+  }
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: to,
+        subject: subject,
+        html: html,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      logger.error({ error: data, to }, "Ошибка Resend API при отправке письма через REST");
+      return false;
+    }
+
+    logger.info({ to, id: data.id }, "Письмо успешно отправлено через Resend REST API");
+    return true;
+  } catch (error: any) {
+    logger.error({ error, to }, "Критическая ошибка при отправке письма через REST");
+    return false;
+  }
+}
 
 interface ISendWelcomeEmailParams {
   toEmail: string;
@@ -26,7 +72,7 @@ export async function sendWelcomeEmail({
   temporaryPassword,
   loginUrl,
 }: ISendWelcomeEmailParams): Promise<boolean> {
-  if (!resend) {
+  if (!resendApiKey) {
     logger.warn(
       { toEmail },
       "Resend API Key не настроен. Отправка приветственного письма пропущена."
@@ -34,7 +80,6 @@ export async function sendWelcomeEmail({
     return false;
   }
 
-  try {
     const isNewUser = !!temporaryPassword;
     
     // Формируем тему письма
@@ -190,25 +235,11 @@ export async function sendWelcomeEmail({
       </html>
     `;
 
-    // Отправляем письмо через Resend API
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
+    return await sendEmailViaRest({
       to: toEmail,
-      subject: subject,
-      html: html,
+      subject,
+      html,
     });
-
-    if (response.error) {
-      logger.error({ error: response.error, toEmail }, "Ошибка Resend API при отправке письма");
-      return false;
-    }
-
-    logger.info({ toEmail, id: response.data?.id }, "Приветственное письмо успешно отправлено через Resend");
-    return true;
-  } catch (error: any) {
-    logger.error({ error, toEmail }, "Внутренняя ошибка при отправке приветственного письма");
-    return false;
-  }
 }
 
 interface IOrderEmailItem {
@@ -239,7 +270,7 @@ export async function sendOrderCreatedEmail({
   items,
   totalAmount,
 }: ISendOrderCreatedEmailParams): Promise<boolean> {
-  if (!resend) {
+  if (!resendApiKey) {
     logger.warn(
       { toEmail, orderId },
       "Resend API Key не настроен. Отправка подтверждения создания заказа пропущена."
@@ -247,7 +278,6 @@ export async function sendOrderCreatedEmail({
     return false;
   }
 
-  try {
     const subject = `Ваш заказ №${orderId.substring(0, 8)} на сайте Ольги Хавич оформлен!`;
 
     // Формируем строки таблицы товаров
@@ -418,25 +448,11 @@ export async function sendOrderCreatedEmail({
       </html>
     `;
 
-    // Отправляем письмо через Resend API
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
+    return await sendEmailViaRest({
       to: toEmail,
-      subject: subject,
-      html: html,
+      subject,
+      html,
     });
-
-    if (response.error) {
-      logger.error({ error: response.error, toEmail, orderId }, "Ошибка Resend API при отправке подтверждения заказа");
-      return false;
-    }
-
-    logger.info({ toEmail, orderId, id: response.data?.id }, "Подтверждение создания заказа успешно отправлено через Resend");
-    return true;
-  } catch (error: any) {
-    logger.error({ error, toEmail, orderId }, "Внутренняя ошибка при отправке подтверждения создания заказа");
-    return false;
-  }
 }
 
 interface ISendOrderCancelledEmailParams {
@@ -455,7 +471,7 @@ export async function sendOrderCancelledEmail({
   customerName,
   orderId,
 }: ISendOrderCancelledEmailParams): Promise<boolean> {
-  if (!resend) {
+  if (!resendApiKey) {
     logger.warn(
       { toEmail, orderId },
       "Resend API Key не настроен. Отправка уведомления об отмене заказа пропущена."
@@ -463,8 +479,7 @@ export async function sendOrderCancelledEmail({
     return false;
   }
 
-  try {
-    const subject = `Заказ №${orderId.substring(0, 8)} на сайте Ольги Хавич отменен`;
+  const subject = `Заказ №${orderId.substring(0, 8)} на сайте Ольги Хавич отменен`;
 
     // Премиальный HTML-шаблон письма в золотисто-бордовой гамме
     const html = `
@@ -561,25 +576,11 @@ export async function sendOrderCancelledEmail({
       </html>
     `;
 
-    // Отправляем письмо через Resend API
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
+    return await sendEmailViaRest({
       to: toEmail,
-      subject: subject,
-      html: html,
+      subject,
+      html,
     });
-
-    if (response.error) {
-      logger.error({ error: response.error, toEmail, orderId }, "Ошибка Resend API при отправке письма об отмене заказа");
-      return false;
-    }
-
-    logger.info({ toEmail, orderId, id: response.data?.id }, "Письмо об отмене заказа успешно отправлено через Resend");
-    return true;
-  } catch (error: any) {
-    logger.error({ error, toEmail, orderId }, "Внутренняя ошибка при отправке письма об отмене заказа");
-    return false;
-  }
 }
 
 interface ISendOrderPaidEmailParams {
@@ -606,7 +607,7 @@ export async function sendOrderPaidEmail({
   temporaryPassword,
   loginUrl,
 }: ISendOrderPaidEmailParams): Promise<boolean> {
-  if (!resend) {
+  if (!resendApiKey) {
     logger.warn(
       { toEmail, orderId },
       "Resend API Key не настроен. Отправка подтверждения оплаты заказа пропущена."
@@ -614,8 +615,7 @@ export async function sendOrderPaidEmail({
     return false;
   }
 
-  try {
-    const hasCourse = items.some((item) => item.category === "COURSE");
+  const hasCourse = items.some((item) => item.category === "COURSE");
 
     if (hasCourse) {
       // Если есть хотя бы один курс, используем полноценный шаблон школы с учетными данными
@@ -812,24 +812,11 @@ export async function sendOrderPaidEmail({
       </html>
     `;
 
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
+    return await sendEmailViaRest({
       to: toEmail,
-      subject: subject,
-      html: html,
+      subject,
+      html,
     });
-
-    if (response.error) {
-      logger.error({ error: response.error, toEmail, orderId }, "Ошибка Resend API при отправке подтверждения оплаты заказа");
-      return false;
-    }
-
-    logger.info({ toEmail, orderId, id: response.data?.id }, "Подтверждение оплаты заказа успешно отправлено через Resend");
-    return true;
-  } catch (error: any) {
-    logger.error({ error, toEmail, orderId }, "Внутренняя ошибка при отправке подтверждения оплаты заказа");
-    return false;
-  }
 }
 
 

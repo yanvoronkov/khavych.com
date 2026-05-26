@@ -163,17 +163,19 @@ export async function PUT(
         // Ссылка на личный кабинет
         const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://khavich.com"}/cabinet`;
 
-        sendOrderPaidEmail({
-          toEmail: emailLower,
-          customerName: order.customerName,
-          orderId: order.id,
-          items: orderItems,
-          totalAmount: Number(order.totalAmount),
-          temporaryPassword: isNewUser ? temporaryPassword : undefined,
-          loginUrl,
-        }).catch((err) => {
+        try {
+          await sendOrderPaidEmail({
+            toEmail: emailLower,
+            customerName: order.customerName,
+            orderId: order.id,
+            items: orderItems,
+            totalAmount: Number(order.totalAmount),
+            temporaryPassword: isNewUser ? temporaryPassword : undefined,
+            loginUrl,
+          });
+        } catch (err) {
           logger.error({ err, email: emailLower }, "Ошибка при отправке письма об успешной оплате клиенту");
-        });
+        }
       });
 
       // Отправляем Telegram-уведомление администратору о ручном подтверждении оплаты
@@ -189,13 +191,15 @@ export async function PUT(
         await sendTelegramStatusNotification(order, "CANCELLED");
 
         // Отправка Email клиенту об отмене
-        sendOrderCancelledEmail({
-          toEmail: order.customerEmail,
-          customerName: order.customerName,
-          orderId: order.id,
-        }).catch((err) => {
+        try {
+          await sendOrderCancelledEmail({
+            toEmail: order.customerEmail,
+            customerName: order.customerName,
+            orderId: order.id,
+          });
+        } catch (err) {
           logger.error({ err, orderId: order.id }, "Ошибка при отправке письма об отмене заказа");
-        });
+        }
       }
     }
 
