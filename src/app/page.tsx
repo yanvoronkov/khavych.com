@@ -100,20 +100,86 @@ const DIPLOMAS: Diploma[] = [
   { id: 14, title: "Энерготерапия 5 Измерения", subtitle: "Интегральные практики глубокого исцеления души и сознания", image: "/sertificate14.jpeg" }
 ];
 
+interface Testimonial {
+  id: number;
+  text: string;
+  author: string;
+  avatar: string;
+  role: string;
+}
+
+const TESTIMONIALS: Testimonial[] = [
+  {
+    id: 1,
+    text: "Хочу выразить огромную благодарность Ольге замечательному человеку и настоящему профессионалу своего дела. Обращение к ней стало для меня очень важной поддержкой в непростой период жизни. Она не только помогла разобраться в ситуации, но и дала уверенность, спокойствие и внутреннюю гармонию.\n\nОчень чуткий, добрый и искренний человек, который действительно переживает за людей и старается помочь от души. Общение было комфортным и тёплым, без осуждения и давления. Всё, о чём мы говорили, оказалось очень точным и полезным для меня.\n\nСпасибо за помощь, внимание и доброе отношение. Редко встречаются такие светлые и отзывчивые люди. От всей души рекомендую!",
+    author: "Елена",
+    avatar: "ЕЛ",
+    role: "Клиент"
+  },
+  {
+    id: 2,
+    text: "Добрый вечер! Ольга, хотела бы выразить Вам огромное спасибо за информацию, анализ и подсказки. Получила огромное количество подробной информации по всем направлениям жизни.\nСамое главное получила для себя ответы на вопросы на которые давно искала ответы. Очень профессиональный подход.\nОльга, вы опытный специалист, дающий мудрые и точные советы и инструменты. Мой запрос был раскрыт, стало понятно направление для дальнейшего движения, даны рекомендации на что обратить внимание, что стоит делать, а от чего стоит отказаться, это было в точку.\nОльга, благодарю вас и желаю удачи!",
+    author: "Ирина",
+    avatar: "ИР",
+    role: "Клиент"
+  },
+  {
+    id: 3,
+    text: "Уважаемая Ольга, спасибо за ваш вклад в открытие мне дорог для хорошей работы и безопасности. С Вашей помощью я смогла безопасно доехать домой, хотя в дороге была ужасная авария. Решить многие вопросы по документам, за короткое время приобрести много знакомых, найти три работы, главное кругом успевать теперь. А так же отдельное спасибо за старославянский родовой обряд на помощь и поддержку рода.\nВсе работает, рекомендую Вас как специалиста в этой области своим друзьям и знакомым. Желаю Вам только идти вперед ❤️❤️❤️❤️",
+    author: "Татьяна",
+    avatar: "ТТ",
+    role: "Клиент"
+  },
+  {
+    id: 4,
+    text: "Оля спасибо большое тебе за курс, очень приятно с тобой работать 😍 мне очень нравится твоя трактовка карт и то как ты объясняешь, информации невероятно много, буду разбираться ✨😍",
+    author: "Юлия",
+    avatar: "ЮЛ",
+    role: "Ученица курса"
+  },
+  {
+    id: 5,
+    text: "Приветики. 😊 Свеча какая прямая и пламя так прямо горит 🥰. А цветочки это лаванда, щебрец, ромашка или я ошибаюсь? Как красиво 😍. Спасибочки солнце 😘 Кстати я все эти дни так себя прекрасно чувствую, так легко, высыпаюсь, в течении дня полна энергии. Суб., воскресенье работала с 6 утра и целый день после до вечера чем то занималась и даже не устала. А ещё не поверишь я не чувствую боли в спине, это прям огонь. Я так сильно тебе благодарна и не только тебе, а тому кто привёл меня на встречу с тобой. 🥰😘",
+    author: "Анна",
+    avatar: "АН",
+    role: "Клиент"
+  },
+  {
+    id: 6,
+    text: "Доброе утро. Оля я вчера проснулась в 5:40, проводила малого в школу и думала лягу спать. Но на моё удивление у меня было много энергии, спать не хотелось от слова совсем. Сегодня я чувствую себя так же. Полна энергии и нет чувства сонливости и усталости. ☺️☺️☺️\nЭх... пойду гладить кучу белья 🤣🤣🤣\nСпасибочки 😘",
+    author: "Светлана",
+    avatar: "СВ",
+    role: "Клиент"
+  }
+];
+
 export default function Home() {
-  // Состояния для карусели сертификатов
+  // Состояния для каруселей
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
   const [visibleSlides, setVisibleSlides] = useState<number>(3);
 
-  // Эффект для адаптивного количества слайдов в карусели сертификатов
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState<number>(0);
+  const [visibleTestimonials, setVisibleTestimonials] = useState<number>(3);
+
+  // Эффект для адаптивного количества слайдов в каруселях
   useEffect(() => {
     const updateSlidesCount = () => {
+      // Сертификаты
       if (window.innerWidth < 768) {
         setVisibleSlides(1);
       } else if (window.innerWidth < 1024) {
         setVisibleSlides(2);
       } else {
         setVisibleSlides(3);
+      }
+
+      // Отзывы
+      if (window.innerWidth < 768) {
+        setVisibleTestimonials(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleTestimonials(2);
+      } else {
+        setVisibleTestimonials(3);
       }
     };
     updateSlidesCount();
@@ -127,6 +193,14 @@ export default function Home() {
 
   const prevSlide = () => {
     setCurrentSlideIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  const nextTestimonial = () => {
+    setCurrentTestimonialIndex((prev) => Math.min(prev + 1, TESTIMONIALS.length - visibleTestimonials));
+  };
+
+  const prevTestimonial = () => {
+    setCurrentTestimonialIndex((prev) => Math.max(prev - 1, 0));
   };
 
   // Состояния для интерактивного Квиза
@@ -192,7 +266,7 @@ export default function Home() {
             {/* Блок заголовка */}
             <div className={styles.heroTitleArea}>
               <h1 className={styles.heroTitle} id="main-title">
-                Ольга Хавич, <br />
+                Ольга Хавич, духовный целитель, таролог, нумеролог <br />
                 <span>нумеролог</span>
               </h1>
             </div>
@@ -255,7 +329,12 @@ export default function Home() {
 
           <div className={styles.problemsGrid}>
             <div className={styles.problemCard}>
-              <div className={styles.problemIcon}>💼</div>
+              <div className={styles.problemIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.problemSvgIcon}>
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+              </div>
               <div className={styles.problemCardContent}>
                 <h4>Финансы и карьера</h4>
                 <p>Уперлись в финансовый потолок? Бизнес буксует? Не понимаете, в какое русло направить силы для привлечения материального изобилия?</p>
@@ -263,7 +342,11 @@ export default function Home() {
             </div>
 
             <div className={styles.problemCard}>
-              <div className={styles.problemIcon}>❤️</div>
+              <div className={styles.problemIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.problemSvgIcon}>
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </div>
               <div className={styles.problemCardContent}>
                 <h4>Личные отношения</h4>
                 <p>Наступаете на одни и те же грабли с партнерами? Ощущаете одиночество и непонимание? Переживаете болезненный разрыв или семейный кризис?</p>
@@ -271,7 +354,11 @@ export default function Home() {
             </div>
 
             <div className={styles.problemCard}>
-              <div className={styles.problemIcon}>⚡</div>
+              <div className={styles.problemIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.problemSvgIcon}>
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+              </div>
               <div className={styles.problemCardContent}>
                 <h4>Энергия и здоровье</h4>
                 <p>Чувствуете хроническую усталость, опустошение или апатию? Ощущаете, что все дороги закрыты и удача буквально отвернулась от вас?</p>
@@ -279,7 +366,12 @@ export default function Home() {
             </div>
 
             <div className={styles.problemCard}>
-              <div className={styles.problemIcon}>🧩</div>
+              <div className={styles.problemIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.problemSvgIcon}>
+                  <circle cx="12" cy="12" r="10" />
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                </svg>
+              </div>
               <div className={styles.problemCardContent}>
                 <h4>Предназначение и дети</h4>
                 <p>Не знаете, кто вы на самом деле и в чем ваша кармическая задача? Хотите понять таланты и особенности характера вашего ребенка?</p>
@@ -730,90 +822,74 @@ export default function Home() {
             </p>
           </div>
 
-          <div className={styles.testimonialsGrid}>
-            <article className={styles.testimonialCard}>
-              <div className={styles.quoteIcon}>
-                <svg width="45" height="45" fill="currentColor" viewBox="0 0 24 24" opacity="0.1">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.154c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
-              </div>
-              <p className={styles.testimonialText}>
-                «Заказывала браслет "Финансовый поток". Ольга рассчитала его специально под мою матрицу.
-                Удивительно, но уже через две недели мне предложили долгожданное повышение и вернули давний
-                долг! Сам браслет выглядит очень изящно и статусно.»
-              </p>
-              <div className={styles.caseState}>
-                <div className={styles.caseStateItem}>
-                  <strong>Было (Запрос):</strong> Застой в финансах в Германии, долги, непонимание вектора развития.
-                </div>
-                <div className={styles.caseStateItem}>
-                  <strong>Результат:</strong> Рост дохода до 4200 € в месяц, закрытие кредитов за 4 месяца работы с Ольгой.
-                </div>
-              </div>
-              <div className={styles.clientMeta} style={{ marginTop: "20px" }}>
-                <div className={styles.avatar}>ЮК</div>
-                <div className={styles.clientInfo}>
-                  <h4>Юлия Краузе</h4>
-                  <p>Предприниматель (Мюнхен)</p>
-                </div>
-              </div>
-            </article>
+          <div className={styles.testimonialsSliderContainer}>
+            {/* Стрелка Влево */}
+            <button
+              onClick={prevTestimonial}
+              disabled={currentTestimonialIndex === 0}
+              className={`${styles.testimonialsSliderArrow} ${styles.testimonialsSliderArrowLeft} ${currentTestimonialIndex === 0 ? styles.testimonialsSliderArrowDisabled : ""}`}
+              aria-label="Предыдущий отзыв"
+            >
+              ‹
+            </button>
 
-            <article className={styles.testimonialCard}>
-              <div className={styles.quoteIcon}>
-                <svg width="45" height="45" fill="currentColor" viewBox="0 0 24 24" opacity="0.1">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.154c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
+            {/* Видимая область слайдера */}
+            <div className={styles.testimonialsSliderViewport}>
+              <div
+                className={styles.testimonialsSliderTrack}
+                style={{
+                  transform: `translateX(-${currentTestimonialIndex * (100 / visibleTestimonials)}%)`,
+                }}
+              >
+                {TESTIMONIALS.map((test) => (
+                  <div
+                    key={test.id}
+                    className={styles.testimonialsSliderSlide}
+                    style={{ width: `${100 / visibleTestimonials}%` }}
+                  >
+                    <article className={styles.testimonialCard}>
+                      <div className={styles.quoteIcon}>
+                        <svg width="45" height="45" fill="currentColor" viewBox="0 0 24 24" opacity="0.1">
+                          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.154c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                        </svg>
+                      </div>
+                      <p className={styles.testimonialText}>
+                        «{test.text}»
+                      </p>
+                      <div className={styles.clientMeta}>
+                        <div className={styles.avatar}>{test.avatar}</div>
+                        <div className={styles.clientInfo}>
+                          <h4>{test.author}</h4>
+                          <p>{test.role}</p>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                ))}
               </div>
-              <p className={styles.testimonialText}>
-                «Консультация по матрице судьбы буквально открыла мне глаза. Я наконец поняла, почему
-                сталкивалась с одними и теми же граблями в отношениях. Ольга дала очень четкие, жизненные
-                рекомендации без всякой воды. Огромная благодарность!»
-              </p>
-              <div className={styles.caseState}>
-                <div className={styles.caseStateItem}>
-                  <strong>Было (Запрос):</strong> Повторяющиеся токсичные сценарии в браке, хроническая усталость.
-                </div>
-                <div className={styles.caseStateItem}>
-                  <strong>Результат:</strong> Осознание кармических задач, выход из деструктивных связей, внутренний покой.
-                </div>
-              </div>
-              <div className={styles.clientMeta} style={{ marginTop: "20px" }}>
-                <div className={styles.avatar}>МС</div>
-                <div className={styles.clientInfo}>
-                  <h4>Марина Смирнова</h4>
-                  <p>Маркетолог (Штутгарт)</p>
-                </div>
-              </div>
-            </article>
+            </div>
 
-            <article className={styles.testimonialCard}>
-              <div className={styles.quoteIcon}>
-                <svg width="45" height="45" fill="currentColor" viewBox="0 0 24 24" opacity="0.1">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.154c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
-              </div>
-              <p className={styles.testimonialText}>
-                «Прошел курс "Практическая нумерология". Очень удобный формат: личный кабинет работает
-                шустро, плеер Kinescope отличный, методички информативные. Доступы Ольга выдала сразу
-                после подтверждения заказа. Рекомендую всем, кто хочет разобраться глубоко.»
-              </p>
-              <div className={styles.caseState}>
-                <div className={styles.caseStateItem}>
-                  <strong>Было (Запрос):</strong> Непонимание талантов ребенка, частые ссоры с сыном-подростком.
-                </div>
-                <div className={styles.caseStateItem}>
-                  <strong>Результат:</strong> Составлена детская матрица, поняли характер сына, отдали в робототехнику, дома мир.
-                </div>
-              </div>
-              <div className={styles.clientMeta} style={{ marginTop: "20px" }}>
-                <div className={styles.avatar}>ДВ</div>
-                <div className={styles.clientInfo}>
-                  <h4>Дмитрий Волков</h4>
-                  <p>Практикующий психолог (Берлин)</p>
-                </div>
-              </div>
-            </article>
+            {/* Стрелка Вправо */}
+            <button
+              onClick={nextTestimonial}
+              disabled={currentTestimonialIndex >= TESTIMONIALS.length - visibleTestimonials}
+              className={`${styles.testimonialsSliderArrow} ${styles.testimonialsSliderArrowRight} ${currentTestimonialIndex >= TESTIMONIALS.length - visibleTestimonials ? styles.testimonialsSliderArrowDisabled : ""}`}
+              aria-label="Следующий отзыв"
+            >
+              ›
+            </button>
+          </div>
+
+          {/* Пагинация (индикаторы) */}
+          <div className={styles.testimonialsSliderPagination}>
+            {Array.from({ length: Math.max(0, TESTIMONIALS.length - visibleTestimonials + 1) }).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentTestimonialIndex(idx)}
+                className={`${styles.testimonialsSliderDot} ${currentTestimonialIndex === idx ? styles.testimonialsSliderDotActive : ""}`}
+                aria-label={`Перейти к отзыву ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
       </section>
