@@ -612,3 +612,32 @@
   box-shadow: 0 6px 12px rgba(107, 29, 47, 0.2);
   transform: translateY(-1px);
 }
+
+/* --- Стили переключателя вкладок --- */
+.tabsContainer {
+  display: flex;
+  gap: 12px;
+  border-bottom: 2px solid var(--color-gray-border);
+  padding-bottom: 0px;
+  margin-top: 10px;
+}
+
+.tabBtn {
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-gray);
+  text-decoration: none !important;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  margin-bottom: -2px; /* Накладываем на границу контейнера */
+}
+
+.tabBtn:hover {
+  color: var(--color-primary);
+}
+
+.tabBtnActive {
+  color: #6b1d2f !important;
+  border-bottom-color: #6b1d2f;
+}
