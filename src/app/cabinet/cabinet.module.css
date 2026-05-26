@@ -191,21 +191,24 @@
 
 /* --- Страница урока (Лейаут с боковым меню) --- */
 .lessonLayout {
-  display: flex;
-  min-height: 100vh;
-  background-color: #faf6f4;
+  display: grid;
+  grid-template-columns: 1.1fr 2fr;
+  gap: 30px;
+  align-items: start;
+  background-color: transparent;
+  min-height: auto;
 }
 
 /* Боковой сайдбар с уроками */
 .sidebar {
-  width: 700px;
+  width: 100%;
   background-color: var(--color-light);
-  border-right: 1px solid var(--color-gray-border);
+  border: 1px solid var(--color-gray-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-premium);
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  overflow: hidden;
   z-index: 10;
   transition: transform var(--transition-medium);
 }
@@ -298,9 +301,9 @@
 
 /* Основной контент урока */
 .lessonContent {
-  flex-grow: 1;
-  padding: 40px;
-  overflow-y: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .lessonHeader {
@@ -353,10 +356,9 @@
 
 /* Текстовая секция и файлы */
 .lessonMeta {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 40px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .lessonDescription {
@@ -467,6 +469,7 @@
 
 @media (max-width: 768px) {
   .lessonLayout {
+    display: flex;
     flex-direction: column;
   }
 

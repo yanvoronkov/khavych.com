@@ -331,10 +331,24 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }));
   };
 
-  const handleFileUrlChange = (index: number, value: string) => {
+  const handleFileTitleChange = (index: number, newTitle: string) => {
     setLessonForm((prev) => {
       const updated = [...prev.fileUrls];
-      updated[index] = value;
+      const current = updated[index] || "";
+      const parts = current.split(":::");
+      const currentUrl = parts.length > 1 ? parts[1] : parts[0];
+      updated[index] = newTitle.trim() ? `${newTitle.trim()}:::${currentUrl}` : currentUrl;
+      return { ...prev, fileUrls: updated };
+    });
+  };
+
+  const handleFileUrlChange = (index: number, newUrl: string) => {
+    setLessonForm((prev) => {
+      const updated = [...prev.fileUrls];
+      const current = updated[index] || "";
+      const parts = current.split(":::");
+      const currentTitle = parts.length > 1 ? parts[0] : "";
+      updated[index] = currentTitle ? `${currentTitle}:::${newUrl}` : newUrl;
       return { ...prev, fileUrls: updated };
     });
   };
@@ -2051,71 +2065,94 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                     {lessonForm.fileUrls.map((url, idx) => {
                       const isUploading = !!lessonFileUploading[idx];
                       const progress = lessonFileProgress[idx] || 0;
+                      const parts = url.split(":::");
+                      const fileTitle = parts.length > 1 ? parts[0] : "";
+                      const fileUrl = parts.length > 1 ? parts[1] : parts[0];
+
                       return (
-                        <div key={idx} style={{ position: "relative", paddingBottom: isUploading ? "4px" : "0" }}>
-                          <div style={{ display: "flex", gap: "8px" }}>
+                        <div key={idx} style={{ position: "relative", borderBottom: "1px solid #f0f0f0", paddingBottom: isUploading ? "16px" : "12px", marginBottom: "6px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
                             <input
                               type="text"
-                              placeholder="Например: https://my-host.com/files/material.pdf"
-                              value={url}
-                              onChange={(e) => handleFileUrlChange(idx, e.target.value)}
+                              placeholder="Название материала (например: Рабочая тетрадь, Методичка)"
+                              value={fileTitle}
+                              onChange={(e) => handleFileTitleChange(idx, e.target.value)}
                               disabled={isUploading}
                               style={{
-                                flexGrow: 1,
+                                width: "100%",
                                 padding: "8px 12px",
                                 fontSize: "13px",
                                 borderRadius: "6px",
                                 border: "1px solid var(--color-gray-border)",
-                              }}
-                            />
-
-                            <input
-                              type="file"
-                              id={`lesson-file-input-${idx}`}
-                              style={{ display: "none" }}
-                              onChange={(e) => handleLessonFileUpload(idx, e)}
-                              disabled={isUploading}
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() => document.getElementById(`lesson-file-input-${idx}`)?.click()}
-                              disabled={isUploading}
-                              style={{
-                                padding: "0 12px",
-                                backgroundColor: "#fbfbf9",
-                                border: "1px solid var(--color-gray-border)",
-                                color: "var(--color-primary)",
-                                borderRadius: "6px",
-                                cursor: isUploading ? "not-allowed" : "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "13px",
+                                backgroundColor: "#fffaf7",
                                 fontWeight: 600,
-                                transition: "all 0.2s"
                               }}
-                              title="Загрузить файл"
-                            >
-                              {isUploading ? "⏳ Загрузка..." : "📤 Загрузить файл"}
-                            </button>
+                            />
 
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveFileUrlInput(idx)}
-                              disabled={lessonForm.fileUrls.length === 1 || isUploading}
-                              style={{
-                                padding: "0 10px",
-                                backgroundColor: "#fff",
-                                border: "1px solid #c62828",
-                                color: "#c62828",
-                                borderRadius: "6px",
-                                cursor: (lessonForm.fileUrls.length === 1 || isUploading) ? "not-allowed" : "pointer",
-                                opacity: (lessonForm.fileUrls.length === 1 || isUploading) ? 0.3 : 1,
-                              }}
-                            >
-                              &times;
-                            </button>
+                            <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                              <input
+                                type="text"
+                                placeholder="Ссылка на файл (или загрузите с компьютера)..."
+                                value={fileUrl}
+                                onChange={(e) => handleFileUrlChange(idx, e.target.value)}
+                                disabled={isUploading}
+                                style={{
+                                  flexGrow: 1,
+                                  padding: "8px 12px",
+                                  fontSize: "13px",
+                                  borderRadius: "6px",
+                                  border: "1px solid var(--color-gray-border)",
+                                }}
+                              />
+
+                              <input
+                                type="file"
+                                id={`lesson-file-input-${idx}`}
+                                style={{ display: "none" }}
+                                onChange={(e) => handleLessonFileUpload(idx, e)}
+                                disabled={isUploading}
+                              />
+
+                              <button
+                                type="button"
+                                onClick={() => document.getElementById(`lesson-file-input-${idx}`)?.click()}
+                                disabled={isUploading}
+                                style={{
+                                  padding: "0 12px",
+                                  backgroundColor: "#fbfbf9",
+                                  border: "1px solid var(--color-gray-border)",
+                                  color: "var(--color-primary)",
+                                  borderRadius: "6px",
+                                  cursor: isUploading ? "not-allowed" : "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "13px",
+                                  fontWeight: 600,
+                                  transition: "all 0.2s"
+                                }}
+                                title="Загрузить файл"
+                              >
+                                {isUploading ? "⏳ Загрузка..." : "📤 Загрузить файл"}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveFileUrlInput(idx)}
+                                disabled={lessonForm.fileUrls.length === 1 || isUploading}
+                                style={{
+                                  padding: "0 10px",
+                                  backgroundColor: "#fff",
+                                  border: "1px solid #c62828",
+                                  color: "#c62828",
+                                  borderRadius: "6px",
+                                  cursor: (lessonForm.fileUrls.length === 1 || isUploading) ? "not-allowed" : "pointer",
+                                  opacity: (lessonForm.fileUrls.length === 1 || isUploading) ? 0.3 : 1,
+                                }}
+                              >
+                                &times;
+                              </button>
+                            </div>
                           </div>
 
                           {isUploading && (
