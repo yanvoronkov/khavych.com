@@ -10,6 +10,86 @@ import { Header } from "src/components/Header";
 // Принудительно устанавливаем динамический рендеринг
 export const dynamic = "force-dynamic";
 
+interface ParsedVideo {
+  type: "youtube" | "ok" | "direct" | "iframe";
+  url: string;
+}
+
+/**
+ * Анализирует переданную ссылку на видео и возвращает её тип и подготовленный URL.
+ * Поддерживает YouTube, Одноклассники (OK.ru), прямые ссылки на видеофайлы и Kinescope.
+ * 
+ * @param url Исходная ссылка на видео
+ * @returns Объект с типом видео и обработанным URL
+ */
+function parseVideoUrl(url: string | null | undefined): ParsedVideo {
+  if (!url) return { type: "iframe", url: "" };
+
+  const trimmed = url.trim();
+
+  // 1. YouTube
+  // Поддерживаемые форматы:
+  // - https://www.youtube.com/watch?v=XXXXXX
+  // - https://youtube.com/watch?v=XXXXXX
+  // - https://youtu.be/XXXXXX
+  // - https://www.youtube.com/embed/XXXXXX
+  // - https://youtube.com/embed/XXXXXX
+  const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+  const ytMatch = trimmed.match(ytRegex);
+  if (ytMatch && ytMatch[1]) {
+    return {
+      type: "youtube",
+      url: `https://www.youtube.com/embed/${ytMatch[1]}`
+    };
+  }
+
+  // 2. OK.ru (Одноклассники)
+  // Поддерживаемые форматы:
+  // - https://ok.ru/video/XXXXXX
+  // - https://www.ok.ru/video/XXXXXX
+  // - https://m.ok.ru/video/XXXXXX
+  // - https://ok.ru/videoembed/XXXXXX
+  const okRegex = /(?:ok\.ru|m\.ok\.ru)\/(?:video|videoembed)\/(\d+)/;
+  const okMatch = trimmed.match(okRegex);
+  if (okMatch && okMatch[1]) {
+    return {
+      type: "ok",
+      url: `https://ok.ru/videoembed/${okMatch[1]}`
+    };
+  }
+
+  // 3. Прямая ссылка на видеофайл (обычный хостинг, Vercel Blob и т.д.)
+  // Проверяем расширения файлов или наличие ключевых слов
+  const isDirectVideo = 
+    /\.(mp4|webm|ogg|mov|m4v)(?:\?|$)/i.test(trimmed) || 
+    trimmed.includes("public.blob.vercel-storage.com") ||
+    trimmed.includes("/video/");
+
+  if (isDirectVideo) {
+    return {
+      type: "direct",
+      url: trimmed
+    };
+  }
+
+  // 4. По умолчанию - встраивание через iframe (Kinescope, RuTube, Vimeo и готовые iframe-коды)
+  // Если это Kinescope без /embed/, автоматически добавляем его для лучшей совместимости
+  if (trimmed.includes("kinescope.io") && !trimmed.includes("/embed/")) {
+    const kinescopeId = trimmed.split("/").pop();
+    if (kinescopeId) {
+      return {
+        type: "iframe",
+        url: `https://kinescope.io/embed/${kinescopeId}`
+      };
+    }
+  }
+
+  return {
+    type: "iframe",
+    url: trimmed
+  };
+}
+
 /**
  * Интерфейс параметров страницы просмотра курса
  */
@@ -152,16 +232,30 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
               <h1 className={styles.lessonTitle}>{activeLesson.title}</h1>
             </div>
 
-            {/* Видео плеер Kinescope */}
+            {/* Видео плеер (поддерживает YouTube, OK.ru, обычный хостинг и Kinescope) */}
             <div className={styles.videoContainer}>
-              {activeLesson.videoUrl ? (
-                <iframe
-                  src={activeLesson.videoUrl}
-                  className={styles.videoIframe}
-                  allow="autoplay; fullscreen; picture-in-picture; encrypted-media;"
-                  allowFullScreen
-                />
-              ) : (
+              {activeLesson.videoUrl ? (() => {
+                const parsed = parseVideoUrl(activeLesson.videoUrl);
+                if (parsed.type === "direct") {
+                  return (
+                    <video
+                      src={parsed.url}
+                      className={styles.videoIframe}
+                      controls
+                      controlsList="nodownload"
+                      playsInline
+                    />
+                  );
+                }
+                return (
+                  <iframe
+                    src={parsed.url}
+                    className={styles.videoIframe}
+                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media;"
+                    allowFullScreen
+                  />
+                );
+              })() : (
                 <div className={styles.noVideo}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

@@ -2012,14 +2012,14 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                   />
                 </div>
 
-                {/* Ссылка на Kinescope */}
+                {/* Ссылка на видео */}
                 <div>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
-                    Ссылка на видеоплеер Kinescope (iframe)
+                    Ссылка на видео (YouTube, OK.ru, Kinescope, Vercel Blob или MP4)
                   </label>
                   <input
                     type="text"
-                    placeholder="Например: https://embed.kinescope.io/video/..."
+                    placeholder="Например: https://www.youtube.com/watch?v=... или https://ok.ru/video/..."
                     value={lessonForm.videoUrl}
                     onChange={(e) => setLessonForm((prev) => ({ ...prev, videoUrl: e.target.value }))}
                     style={{
@@ -2030,8 +2030,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                       border: "1px solid var(--color-gray-border)",
                     }}
                   />
-                  <span style={{ fontSize: "11px", color: "var(--color-gray)", marginTop: "4px", display: "block" }}>
-                    Скопируйте в Kinescope код вставки iframe и укажите его URL
+                  <span style={{ fontSize: "11px", color: "var(--color-gray)", marginTop: "4px", display: "block", lineHeight: "1.4" }}>
+                    Поддерживаются ссылки на <strong>YouTube</strong>, <strong>Одноклассники (ok.ru)</strong>, <strong>Kinescope</strong>, а также прямые ссылки на видеофайлы (<strong>MP4/WebM</strong>) с любых хостингов или облачных хранилищ.
                   </span>
                 </div>
 
