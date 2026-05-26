@@ -362,7 +362,6 @@
   align-items: center;
   width: 100%;
   margin-top: 40px;
-  padding: 0 50px; /* Отступы по бокам для стрелочек */
 }
 
 .sliderViewport {
@@ -545,7 +544,6 @@
   align-items: center;
   width: 100%;
   margin-top: 40px;
-  padding: 0 50px; /* Отступы по бокам для стрелочек */
 }
 
 .testimonialsSliderViewport {
@@ -711,7 +709,7 @@
 
 .footerGrid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1.5fr;
+  grid-template-columns: 1.5fr 1.2fr;
   gap: 60px;
   margin-bottom: 60px;
 }
@@ -773,8 +771,19 @@
 }
 
 .contactIcon {
-  color: #ffbe3b;
+  color: #ffffff;
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contactIcon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .socials {
