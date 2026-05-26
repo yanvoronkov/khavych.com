@@ -21,6 +21,7 @@ const productUpdateSchema = z.object({
   imageUrl: z.string().nullable().optional(),
   category: z.enum(["BRACELET", "COURSE", "CONSULTATION"]),
   subCategory: z.string().nullable().optional(),
+  courseId: z.string().nullable().optional(),
   features: z.object({
     ru: z.array(z.string()).optional(),
     de: z.array(z.string()).optional(),
@@ -85,6 +86,7 @@ export async function PATCH(
         imageUrl: validatedData.imageUrl,
         category: validatedData.category,
         subCategory: validatedData.subCategory,
+        courseId: validatedData.courseId,
         features: validatedData.features || { ru: [], de: [] },
         isAvailable: validatedData.isAvailable ?? existingProduct.isAvailable,
       },

@@ -6,9 +6,10 @@ import { IDBProduct } from "./AdminClient";
 
 interface AdminProductsProps {
   initialProducts: any[];
+  courses: any[];
 }
 
-export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts }) => {
+export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, courses }) => {
   const [products, setProducts] = useState<any[]>(initialProducts);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
@@ -33,6 +34,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
   const [category, setCategory] = useState<"BRACELET" | "COURSE" | "CONSULTATION">("BRACELET");
   const [subCategory, setSubCategory] = useState<string>("");
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [courseId, setCourseId] = useState<string>("");
 
   // Особенности товара (features)
   const [featuresRu, setFeaturesRu] = useState<string[]>([]);
@@ -64,6 +66,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     setCategory("BRACELET");
     setSubCategory("");
     setImageUrl("");
+    setCourseId("");
     setFeaturesRu([]);
     setFeaturesDe([]);
     setNewFeature("");
@@ -94,6 +97,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
     setCategory(product.category);
     setSubCategory(product.subCategory || "");
     setImageUrl(product.imageUrl || "");
+    setCourseId(product.courseId || "");
     setFeaturesRu(pFeatures?.ru || []);
     setFeaturesDe(pFeatures?.de || []);
     setNewFeature("");
@@ -126,6 +130,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
             : products.find(p => p.id === id).description,
           price: products.find(p => p.id === id).price,
           category: products.find(p => p.id === id).category,
+          courseId: products.find(p => p.id === id).courseId || null,
         }),
       });
 
@@ -258,6 +263,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
       imageUrl: imageUrl || null,
       category,
       subCategory: category === "CONSULTATION" && subCategory ? subCategory : null,
+      courseId: category === "COURSE" && courseId ? courseId : null,
       features: {
         ru: featuresRu,
         de: featuresDe.length > 0 ? featuresDe : featuresRu,
@@ -710,7 +716,38 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts })
                   )}
                 </div>
 
-               
+                {/* Выбор курса для категории COURSE */}
+                {category === "COURSE" && (
+                  <div className={styles.formGroup} style={{ marginBottom: "20px" }}>
+                    <label className={styles.formLabel}>Привязанный онлайн-курс *</label>
+                    <select
+                      className={styles.formInput}
+                      value={courseId}
+                      onChange={(e) => setCourseId(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        border: "1px solid var(--color-gray-border)",
+                        borderRadius: "8px",
+                        backgroundColor: "#fff",
+                        color: "var(--color-dark)",
+                        fontSize: "14px",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <option value="">-- Выберите курс из списка --</option>
+                      {courses.map((course) => (
+                        <option key={course.id} value={course.id}>
+                          {course.title}
+                        </option>
+                      ))}
+                    </select>
+                    <p style={{ fontSize: "11px", color: "var(--color-gray)", marginTop: "4px" }}>
+                      При покупке этого товара пользователю автоматически откроется доступ к выбранному курсу.
+                    </p>
+                  </div>
+                )}
 
                 {/* Цены */}
                 <div className={styles.formRow}>

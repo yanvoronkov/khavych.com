@@ -57,6 +57,7 @@ model Course {
   updatedAt   DateTime     @updatedAt
   lessons     Lesson[]     // Уроки курса
   accesses    UserAccess[] // Пользователи, имеющие доступ к курсу
+  products    Product[]    // Связанные товары в магазине
 }
 
 /// Уроки внутри курсов
@@ -103,8 +104,12 @@ model Product {
   subCategory String?  // "NUMEROLOGY" | "TAROT" | "WAX" | "LADING"
   features    Json?    // JSON вида: { "ru": ["...", "..."], "en": ["...", "..."] }
   isAvailable Boolean  @default(true)
+  courseId    String?  // Ссылка на привязанный курс (для категории COURSE)
+  course      Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([courseId])
 }
 
 /// Заказы клиентов

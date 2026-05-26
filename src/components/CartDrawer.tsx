@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "src/context/CartContext";
 import { z } from "zod";
 import styles from "./CartDrawer.module.css";
+
+declare global {
+  interface Window {
+    paypal?: any;
+  }
+}
 
 // Схема валидации заказа с помощью Zod
 const checkoutSchema = z.object({
@@ -32,8 +38,8 @@ export const CartDrawer: React.FC = () => {
     clearCart,
   } = useCart();
 
-  // Режимы работы: "CART" (список товаров), "CHECKOUT" (ввод данных), "SUCCESS" (успешный заказ)
-  const [mode, setMode] = useState<"CART" | "CHECKOUT" | "SUCCESS">("CART");
+  // Режимы работы: "CART" (список товаров), "CHECKOUT" (ввод данных), "PAYMENT" (выбор оплаты), "SUCCESS" (успешный заказ)
+  const [mode, setMode] = useState<"CART" | "CHECKOUT" | "PAYMENT" | "SUCCESS">("CART");
   const [formData, setFormData] = useState<CheckoutFormData>({
     name: "",
     email: "",
@@ -42,6 +48,104 @@ export const CartDrawer: React.FC = () => {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const [createdOrderId, setCreatedOrderId] = useState<string>("");
+  const [paypalLoaded, setPaypalLoaded] = useState<boolean>(false);
+  const [paymentMethod, setPaymentMethod] = useState<"PAYPAL" | "MANUAL" | null>(null);
+
+  // Функция для динамической загрузки скрипта PayPal
+  const loadPaypalSdk = async () => {
+    if (window.paypal) {
+      setPaypalLoaded(true);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/orders/paypal/config");
+      const data = await res.json();
+      const clientId = data.paypalClientId;
+
+      if (!clientId) {
+        console.error("PayPal Client ID не настроен на сервере");
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
+      script.async = true;
+      script.onload = () => {
+        setPaypalLoaded(true);
+      };
+      document.body.appendChild(script);
+    } catch (err) {
+      console.error("Ошибка загрузки PayPal SDK:", err);
+    }
+  };
+
+  // Эффект отрисовки кнопок PayPal
+  useEffect(() => {
+    if (mode === "PAYMENT" && paymentMethod === "PAYPAL" && paypalLoaded && createdOrderId) {
+      const container = document.getElementById("paypal-button-container");
+      if (container) {
+        container.innerHTML = ""; // Очищаем контейнер от старых кнопок
+      }
+
+      if (window.paypal) {
+        window.paypal.Buttons({
+          style: {
+            layout: 'vertical',
+            color:  'gold',
+            shape:  'rect',
+            label:  'paypal'
+          },
+          createOrder: async () => {
+            try {
+              const res = await fetch("/api/orders/paypal/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: createdOrderId }),
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.message || "Ошибка инициализации PayPal");
+              return data.paypalOrderId;
+            } catch (err: any) {
+              alert(err.message || "Не удалось инициализировать оплату PayPal");
+              throw err;
+            }
+          },
+          onApprove: async (data: any) => {
+            setIsSubmitting(true);
+            try {
+              const res = await fetch("/api/orders/paypal/capture", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  orderId: createdOrderId,
+                  paypalOrderId: data.orderID,
+                }),
+              });
+              const result = await res.json();
+              if (!res.ok) throw new Error(result.message || "Ошибка подтверждения оплаты");
+              
+              // Успех! Очищаем корзину и показываем экран успеха
+              clearCart();
+              setMode("SUCCESS");
+              setFormData({ name: "", email: "", phone: "", address: "" });
+              setPaymentMethod(null);
+            } catch (err: any) {
+              alert(err.message || "Ошибка при списании средств через PayPal. Свяжитесь с поддержкой.");
+            } finally {
+              setIsSubmitting(false);
+            }
+          },
+          onError: (err: any) => {
+            console.error("PayPal Error:", err);
+            alert("Произошла ошибка при проведении транзакции PayPal. Пожалуйста, попробуйте еще раз.");
+          }
+        }).render("#paypal-button-container");
+      }
+    }
+  }, [mode, paymentMethod, paypalLoaded, createdOrderId]);
 
   // Проверяем, есть ли в корзине физические товары (браслеты), требующие доставки
   const hasBracelets = items.some((item) => item.product.category === "BRACELET");
@@ -131,10 +235,11 @@ export const CartDrawer: React.FC = () => {
         throw new Error(result.message || "Ошибка при создании заказа");
       }
 
-      // 3. Успешный заказ
-      clearCart();
-      setMode("SUCCESS");
-      setFormData({ name: "", email: "", phone: "", address: "" });
+      // Сохраняем ID созданного заказа и открываем платежную зону
+      setCreatedOrderId(result.orderId);
+      loadPaypalSdk();
+      setMode("PAYMENT");
+      setPaymentMethod("PAYPAL");
     } catch (err: unknown) {
       if (err instanceof z.ZodError) {
         // Записываем ошибки валидации Zod
@@ -179,6 +284,7 @@ export const CartDrawer: React.FC = () => {
           <h2 className={styles.title}>
             {mode === "CART" && "Ваша корзина"}
             {mode === "CHECKOUT" && "Оформление заказа"}
+            {mode === "PAYMENT" && "Оплата заказа"}
             {mode === "SUCCESS" && "Заказ принят!"}
           </h2>
           <button className={styles.closeBtn} onClick={handleCloseDrawer} aria-label="Закрыть">
@@ -221,7 +327,7 @@ export const CartDrawer: React.FC = () => {
               </div>
               <h3 className={styles.successTitle}>Успешно оформлено!</h3>
               <p className={styles.successDesc}>
-                Информация о вашем заказе отправлена Ольге в Telegram. Она свяжется с вами по указанному телефону или почте для выставления счета.
+                Благодарим за заказ! Если вы оплатили онлайн через PayPal, доступ к обучению уже выслан вам на Email. Если вы выбрали ручной перевод, Ольга свяжется с вами для подтверждения!
               </p>
               <button className="btn btn-primary" onClick={handleCloseDrawer}>
                 Отлично
@@ -329,6 +435,92 @@ export const CartDrawer: React.FC = () => {
                 </div>
               ))}
             </div>
+          ) : mode === "PAYMENT" ? (
+            /* Экран выбора и совершения оплаты */
+            <div className={styles.paymentContainer}>
+              <div className={styles.paymentHeader}>
+                <h4 style={{ fontWeight: 700, fontSize: "14px", color: "#6b1d2f", margin: 0 }}>Заказ успешно создан!</h4>
+                <p style={{ fontSize: "13px", color: "var(--color-gray)", marginTop: "4px", margin: "4px 0 0 0" }}>
+                  Сумма к оплате: <strong>{total.toLocaleString("de-DE")} €</strong>
+                </p>
+              </div>
+
+              <div className={styles.paymentMethods}>
+                <div 
+                  className={`${styles.paymentMethodCard} ${paymentMethod === "PAYPAL" ? styles.paymentMethodCardActive : ""}`}
+                  onClick={() => {
+                    setPaymentMethod("PAYPAL");
+                    loadPaypalSdk();
+                  }}
+                >
+                  <div className={styles.paymentMethodRadio}>
+                    <input type="radio" checked={paymentMethod === "PAYPAL"} readOnly />
+                    <strong>Онлайн-оплата PayPal</strong>
+                  </div>
+                  <p style={{ fontSize: "12px", color: "var(--color-gray)", marginTop: "6px", margin: "6px 0 0 0" }}>
+                    Мгновенный безопасный платеж. Доступ к онлайн-курсам открывается автоматически сразу после завершения оплаты!
+                  </p>
+                </div>
+
+                <div 
+                  className={`${styles.paymentMethodCard} ${paymentMethod === "MANUAL" ? styles.paymentMethodCardActive : ""}`}
+                  onClick={() => setPaymentMethod("MANUAL")}
+                >
+                  <div className={styles.paymentMethodRadio}>
+                    <input type="radio" checked={paymentMethod === "MANUAL"} readOnly />
+                    <strong>Ручной перевод на карту</strong>
+                  </div>
+                  <p style={{ fontSize: "12px", color: "var(--color-gray)", marginTop: "6px", margin: "6px 0 0 0" }}>
+                    Оплата прямым переводом. Ольга Хавич свяжется с вами по WhatsApp или почте и предоставит реквизиты перевода.
+                  </p>
+                </div>
+              </div>
+
+              {/* Отображение зоны оплаты в зависимости от выбранного метода */}
+              {paymentMethod === "PAYPAL" && (
+                <div style={{ marginTop: "20px", minHeight: "100px" }}>
+                  {!paypalLoaded ? (
+                    <div style={{ textAlign: "center", padding: "20px", color: "var(--color-primary)", fontWeight: 600 }}>
+                      Загрузка кнопок PayPal...
+                    </div>
+                  ) : (
+                    <div id="paypal-button-container" style={{ width: "100%" }}></div>
+                  )}
+                </div>
+              )}
+
+              {paymentMethod === "MANUAL" && (
+                <div style={{ marginTop: "20px", padding: "16px", backgroundColor: "#fffcfc", border: "1px solid #f2e2e4", borderRadius: "10px" }}>
+                  <p style={{ fontSize: "13px", lineHeight: "1.5", margin: 0 }}>
+                    Вы выбрали ручной перевод на карту. Ольга Хавич отправит вам реквизиты перевода в течение короткого времени. После оплаты она вручную подтвердит платеж, и вам откроется доступ к обучению!
+                  </p>
+                  <button 
+                    type="button"
+                    className="btn btn-primary" 
+                    style={{ width: "100%", marginTop: "16px", background: "linear-gradient(135deg, #6b1d2f 0%, #4a101d 100%)", color: "#fff", border: "none" }}
+                    onClick={() => {
+                      clearCart();
+                      setMode("SUCCESS");
+                      setFormData({ name: "", email: "", phone: "", address: "" });
+                      setPaymentMethod(null);
+                    }}
+                  >
+                    Я понял, ожидаю связи
+                  </button>
+                </div>
+              )}
+
+              <span 
+                className={styles.backToCartBtn} 
+                style={{ display: "block", textAlign: "center", marginTop: "16px", cursor: "pointer", textDecoration: "underline", fontSize: "13px" }}
+                onClick={() => {
+                  setMode("CHECKOUT");
+                  setPaymentMethod(null);
+                }}
+              >
+                Вернуться назад
+              </span>
+            </div>
           ) : (
             /* Режим заполнения контактных данных (Checkout) */
             <form className={styles.checkoutForm} onSubmit={handleSubmitOrder}>
@@ -407,7 +599,7 @@ export const CartDrawer: React.FC = () => {
         </div>
 
         {/* Подвал панели (Footer - только для режимов CART и CHECKOUT) */}
-        {mode !== "SUCCESS" && items.length > 0 && (
+        {mode !== "SUCCESS" && mode !== "PAYMENT" && items.length > 0 && (
           <div className={styles.footer}>
             <div className={styles.summaryRow}>
               <span>Итого:</span>

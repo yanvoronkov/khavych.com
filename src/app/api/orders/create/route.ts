@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
+import { sendOrderCreatedEmail } from "src/lib/email";
 
 // Схема валидации входящего запроса на создание заказа с помощью Zod
 const orderCreateSchema = z.object({
@@ -60,6 +61,17 @@ export async function POST(request: Request) {
 
     // 3. Отправка уведомления в Telegram Ольге
     await sendTelegramNotification(validatedData, order.id);
+
+    // 4. Отправка подтверждения на почту клиенту
+    sendOrderCreatedEmail({
+      toEmail: validatedData.customerEmail,
+      customerName: validatedData.customerName,
+      orderId: order.id,
+      items: validatedData.items,
+      totalAmount: validatedData.totalAmount,
+    }).catch((err) => {
+      logger.error({ err, orderId: order.id }, "Ошибка отправки письма о создании заказа");
+    });
 
     return NextResponse.json({
       success: true,

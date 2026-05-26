@@ -318,3 +318,59 @@
   color: var(--color-gray);
   max-width: 320px;
 }
+
+/* Стили выбора и проведения оплаты */
+.paymentContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.paymentHeader {
+  background-color: #faf6f5;
+  border-left: 4px solid #bfa054;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.paymentMethods {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.paymentMethodCard {
+  border: 1px solid var(--color-gray-border);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: all 0.25s ease;
+}
+
+.paymentMethodCard:hover {
+  border-color: var(--color-primary);
+  background-color: #fffcfc;
+}
+
+.paymentMethodCardActive {
+  border-color: var(--color-primary);
+  background-color: #fff9fa;
+  box-shadow: 0 4px 12px rgba(107, 29, 47, 0.05);
+}
+
+.paymentMethodRadio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.paymentMethodRadio input {
+  accent-color: var(--color-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+

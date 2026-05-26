@@ -21,6 +21,7 @@ const productSchema = z.object({
   imageUrl: z.string().nullable().optional(),
   category: z.enum(["BRACELET", "COURSE", "CONSULTATION"]),
   subCategory: z.string().nullable().optional(),
+  courseId: z.string().nullable().optional(),
   features: z.object({
     ru: z.array(z.string()).optional(),
     de: z.array(z.string()).optional(),
@@ -99,6 +100,7 @@ export async function POST(request: Request) {
         imageUrl: validatedData.imageUrl,
         category: validatedData.category,
         subCategory: validatedData.subCategory,
+        courseId: validatedData.courseId,
         features: featuresJson,
         isAvailable: validatedData.isAvailable ?? true,
       },
