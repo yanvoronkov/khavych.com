@@ -58,6 +58,8 @@
   padding: 4px;
   border-radius: 10px;
   border: 1px solid rgba(107, 29, 47, 0.08);
+  flex-wrap: wrap;
+
 }
 
 .filterTab {

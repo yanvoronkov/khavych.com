@@ -1150,7 +1150,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                           )}
                         </td>
                         <td style={{ padding: "20px 24px", textAlign: "center" }}>
-                          <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+                          <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
                             <button
                               onClick={() => {
                                 setSelectedCourseId("");

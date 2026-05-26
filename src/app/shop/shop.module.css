@@ -59,7 +59,7 @@
   transition: var(--transition-fast);
 }
 
-.filterBtn:hover {
+.filterBtn:not(.filterBtnActive):hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
@@ -257,7 +257,7 @@
   transition: var(--transition-fast);
 }
 
-.subFilterBtn:hover {
+.subFilterBtn:not(.subFilterBtnActive):hover {
   color: var(--color-accent-dark);
 }
 
