@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { getServerSession } from "src/lib/auth";
 import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
-import { sendWelcomeEmail } from "src/lib/email";
+import { sendWelcomeEmail, sendOrderCancelledEmail } from "src/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -184,6 +184,15 @@ export async function PUT(
 
       if (newStatus === "CANCELLED") {
         await sendTelegramStatusNotification(order, "CANCELLED");
+
+        // Отправка Email клиенту об отмене
+        sendOrderCancelledEmail({
+          toEmail: order.customerEmail,
+          customerName: order.customerName,
+          orderId: order.id,
+        }).catch((err) => {
+          logger.error({ err, orderId: order.id }, "Ошибка при отправке письма об отмене заказа");
+        });
       }
     }
 

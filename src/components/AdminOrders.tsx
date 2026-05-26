@@ -173,6 +173,19 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ showNotification }) =>
     }
   };
 
+  // Копирование ссылки на оплату для неоплаченного заказа
+  const handleCopyPaymentLink = (orderId: string) => {
+    const payUrl = `${window.location.origin}/shop?payOrder=${orderId}`;
+    navigator.clipboard.writeText(payUrl)
+      .then(() => {
+        showNotification("Ссылка на оплату успешно скопирована в буфер обмена!", "success");
+      })
+      .catch((err) => {
+        console.error("Ошибка при копировании ссылки:", err);
+        showNotification("Не удалось скопировать ссылку в буфер обмена", "error");
+      });
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerRow}>
@@ -339,13 +352,22 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ showNotification }) =>
                           </button>
 
                           {order.status === "PENDING" && (
-                            <button
-                              className={`${styles.actionBtn} ${styles.payBtn}`}
-                              onClick={() => handleUpdateStatus(order.id, "PAID")}
-                              disabled={isChangingStatus === order.id}
-                            >
-                              {isChangingStatus === order.id ? "..." : "Оплачен"}
-                            </button>
+                            <>
+                              <button
+                                className={styles.actionBtn}
+                                onClick={() => handleCopyPaymentLink(order.id)}
+                                title="Скопировать ссылку на оплату для клиента"
+                              >
+                                🔗 Ссылка
+                              </button>
+                              <button
+                                className={`${styles.actionBtn} ${styles.payBtn}`}
+                                onClick={() => handleUpdateStatus(order.id, "PAID")}
+                                disabled={isChangingStatus === order.id}
+                              >
+                                {isChangingStatus === order.id ? "..." : "Оплачен"}
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
@@ -412,6 +434,28 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ showNotification }) =>
                   <div className={styles.sectionTitle}>Адрес доставки (Браслеты)</div>
                   <div style={{ backgroundColor: "#fcf9f8", padding: "12px", border: "1px solid var(--color-gray-border)", borderRadius: "8px", fontSize: "14px", fontWeight: 600 }}>
                     📍 {selectedOrder.customerAddress}
+                  </div>
+                </div>
+              )}
+
+              {/* Ссылка на оплату для неоплаченного заказа */}
+              {selectedOrder.status === "PENDING" && (
+                <div>
+                  <div className={styles.sectionTitle}>Ссылка на оплату заказа</div>
+                  <div style={{ display: "flex", gap: "10px", alignItems: "center", backgroundColor: "#faf6f5", padding: "12px", border: "1px solid var(--color-gray-border)", borderRadius: "8px" }}>
+                    <input 
+                      type="text" 
+                      readOnly 
+                      value={typeof window !== "undefined" ? `${window.location.origin}/shop?payOrder=${selectedOrder.id}` : ""} 
+                      style={{ flex: 1, padding: "8px 12px", border: "1px solid var(--color-gray-border)", borderRadius: "6px", fontSize: "13px", fontFamily: "monospace", backgroundColor: "#fff" }} 
+                    />
+                    <button 
+                      className={styles.actionBtn} 
+                      style={{ padding: "8px 14px", whiteSpace: "nowrap" }}
+                      onClick={() => handleCopyPaymentLink(selectedOrder.id)}
+                    >
+                      Копировать
+                    </button>
                   </div>
                 </div>
               )}

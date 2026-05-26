@@ -36,6 +36,7 @@ export const CartDrawer: React.FC = () => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    addToCart,
   } = useCart();
 
   // Режимы работы: "CART" (список товаров), "CHECKOUT" (ввод данных), "PAYMENT" (выбор оплаты), "SUCCESS" (успешный заказ)
@@ -52,6 +53,83 @@ export const CartDrawer: React.FC = () => {
   const [createdOrderId, setCreatedOrderId] = useState<string>("");
   const [paypalLoaded, setPaypalLoaded] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState<"PAYPAL" | "MANUAL" | null>(null);
+
+  // Восстановление неоплаченного заказа при переходе по ссылке
+  const restoreOrderSession = async (orderId: string) => {
+    try {
+      setIsSubmitting(true);
+      const res = await fetch(`/api/orders/${orderId}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Не удалось загрузить данные заказа");
+      }
+
+      const order = data.order;
+      
+      if (order.status !== "PENDING") {
+        const statusText = order.status === "PAID" ? "ОПЛАЧЕН" : "ОТМЕНЕН";
+        alert(`Этот заказ уже имеет статус: ${statusText}. Восстановление оплаты невозможно.`);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+      }
+
+      // Восстанавливаем данные покупателя
+      setFormData({
+        name: order.customerName,
+        email: order.customerEmail,
+        phone: "",
+        address: "",
+      });
+
+      // Парсим товары заказа
+      let orderItems: any[] = [];
+      if (typeof order.items === "string") {
+        orderItems = JSON.parse(order.items);
+      } else if (Array.isArray(order.items)) {
+        orderItems = order.items;
+      }
+
+      // Очищаем корзину и добавляем товары из заказа
+      clearCart();
+      
+      orderItems.forEach((item) => {
+        addToCart({
+          id: item.id,
+          name: item.name,
+          description: "",
+          price: item.price,
+          imageUrl: null,
+          category: item.category,
+          isAvailable: true,
+        });
+      });
+
+      setCreatedOrderId(order.id);
+      loadPaypalSdk();
+      setMode("PAYMENT");
+      setPaymentMethod("PAYPAL");
+      setIsCartOpen(true);
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Ошибка при восстановлении сессии оплаты");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Прослушиваем query-параметр payOrder для восстановления сессии оплаты
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const payOrderId = params.get("payOrder");
+      if (payOrderId) {
+        restoreOrderSession(payOrderId);
+      }
+    }
+  }, []);
 
   // Функция для динамической загрузки скрипта PayPal
   const loadPaypalSdk = async () => {
@@ -498,11 +576,23 @@ export const CartDrawer: React.FC = () => {
                     type="button"
                     className="btn btn-primary" 
                     style={{ width: "100%", marginTop: "16px", background: "linear-gradient(135deg, #6b1d2f 0%, #4a101d 100%)", color: "#fff", border: "none" }}
-                    onClick={() => {
-                      clearCart();
-                      setMode("SUCCESS");
-                      setFormData({ name: "", email: "", phone: "", address: "" });
-                      setPaymentMethod(null);
+                    onClick={async () => {
+                      setIsSubmitting(true);
+                      try {
+                        await fetch("/api/orders/manual-notify", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ orderId: createdOrderId }),
+                        });
+                      } catch (err) {
+                        console.error("Ошибка при отправке уведомления о ручной оплате:", err);
+                      } finally {
+                        setIsSubmitting(false);
+                        clearCart();
+                        setMode("SUCCESS");
+                        setFormData({ name: "", email: "", phone: "", address: "" });
+                        setPaymentMethod(null);
+                      }
                     }}
                   >
                     Я понял, ожидаю связи
