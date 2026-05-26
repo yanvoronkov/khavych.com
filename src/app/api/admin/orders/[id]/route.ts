@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { getServerSession } from "src/lib/auth";
 import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
-import { sendWelcomeEmail, sendOrderCancelledEmail } from "src/lib/email";
+import { sendOrderPaidEmail, sendOrderCancelledEmail } from "src/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -163,13 +163,16 @@ export async function PUT(
         // Ссылка на личный кабинет
         const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://khavich.com"}/cabinet`;
 
-        sendWelcomeEmail({
+        sendOrderPaidEmail({
           toEmail: emailLower,
           customerName: order.customerName,
+          orderId: order.id,
+          items: orderItems,
+          totalAmount: Number(order.totalAmount),
           temporaryPassword: isNewUser ? temporaryPassword : undefined,
           loginUrl,
         }).catch((err) => {
-          logger.error({ err, email: emailLower }, "Ошибка при отправке приветственного письма клиенту");
+          logger.error({ err, email: emailLower }, "Ошибка при отправке письма об успешной оплате клиенту");
         });
       });
 

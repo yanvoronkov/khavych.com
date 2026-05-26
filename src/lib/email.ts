@@ -582,4 +582,254 @@ export async function sendOrderCancelledEmail({
   }
 }
 
+interface ISendOrderPaidEmailParams {
+  toEmail: string;
+  customerName: string;
+  orderId: string;
+  items: IOrderEmailItem[];
+  totalAmount: number;
+  temporaryPassword?: string;
+  loginUrl: string;
+}
+
+/**
+ * Универсальная отправка подтверждения оплаты заказа.
+ * В зависимости от состава заказа шлет либо приветствие в школу (для курсов),
+ * либо информацию о подготовке амулета/проведении консультации.
+ */
+export async function sendOrderPaidEmail({
+  toEmail,
+  customerName,
+  orderId,
+  items,
+  totalAmount,
+  temporaryPassword,
+  loginUrl,
+}: ISendOrderPaidEmailParams): Promise<boolean> {
+  if (!resend) {
+    logger.warn(
+      { toEmail, orderId },
+      "Resend API Key не настроен. Отправка подтверждения оплаты заказа пропущена."
+    );
+    return false;
+  }
+
+  try {
+    const hasCourse = items.some((item) => item.category === "COURSE");
+
+    if (hasCourse) {
+      // Если есть хотя бы один курс, используем полноценный шаблон школы с учетными данными
+      return await sendWelcomeEmail({
+        toEmail,
+        customerName,
+        temporaryPassword,
+        loginUrl,
+      });
+    }
+
+    // Если в заказе только браслеты и/или консультации (без курсов)
+    const subject = `Ваш заказ №${orderId.substring(0, 8)} на сайте Ольги Хавич успешно оплачен!`;
+
+    // Формируем строки таблицы товаров
+    const itemsHtml = items
+      .map(
+        (item) => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #eae0db; font-size: 14px;">
+            <strong>${item.name}</strong><br>
+            <span style="font-size: 12px; color: #888888;">Категория: ${
+              item.category === "CONSULTATION" ? "Услуга/Консультация" : "Амулет"
+            }</span>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #eae0db; text-align: center; font-size: 14px;">
+            ${item.quantity} шт.
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #eae0db; text-align: right; font-weight: 600; font-size: 14px;">
+            ${(item.price * item.quantity).toLocaleString("de-DE")} €
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+
+    // Описываем дальнейшие действия на основе категорий товаров
+    const hasBracelet = items.some((item) => item.category === "BRACELET");
+    const hasConsultation = items.some((item) => item.category === "CONSULTATION");
+
+    let nextStepsHtml = "";
+    if (hasBracelet && hasConsultation) {
+      nextStepsHtml = `
+        <strong>🔮 Что будет дальше:</strong><br>
+        1. <strong>Амулетный браслет</strong>: Ольга Хавич приступит к изготовлению вашего персонального амулета и отправит его по вашему адресу в кратчайшие сроки. Трек-номер для отслеживания мы вышлем на ваш Email.<br>
+        2. <strong>Консультация</strong>: Ольга свяжется с вами по указанному телефону (WhatsApp) или почте в ближайшее время, чтобы согласовать удобные дату и время вашей встречи.
+      `;
+    } else if (hasBracelet) {
+      nextStepsHtml = `
+        <strong>🔮 Что будет дальше:</strong><br>
+        Ольга Хавич приступила к изготовлению вашего индивидуального амулетного браслета. После готовности мы надежно упакуем и отправим его по указанному вами адресу. На вашу электронную почту будет отправлено отдельное уведомление с трек-номером для отслеживания посылки.
+      `;
+    } else if (hasConsultation) {
+      nextStepsHtml = `
+        <strong>🔮 Что будет дальше:</strong><br>
+        Оплата успешно зачислена. Ольга Хавич свяжется с вами по указанному номеру телефона (через WhatsApp) или по электронной почте в ближайшее время, чтобы согласовать удобные дату и время проведения вашей личной консультации.
+      `;
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>${subject}</title>
+          <style>
+            body {
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+              background-color: #fcf9f6;
+              color: #2b2b2b;
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              border: 1px solid #eae0db;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 4px 12px rgba(107, 29, 47, 0.05);
+            }
+            .header {
+              background-color: #6b1d2f; /* Бордовый */
+              padding: 40px 20px;
+              text-align: center;
+              border-bottom: 3px solid #d4af37; /* Золотой */
+            }
+            .header h1 {
+              color: #ffffff;
+              margin: 0;
+              font-size: 24px;
+              font-weight: 700;
+              letter-spacing: 0.5px;
+            }
+            .content {
+              padding: 40px 30px;
+              line-height: 1.6;
+            }
+            .greeting {
+              font-size: 18px;
+              font-weight: 700;
+              color: #6b1d2f;
+              margin-bottom: 20px;
+            }
+            .order-details {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 25px 0;
+            }
+            .order-details th {
+              background-color: #fbf7f5;
+              color: #6b1d2f;
+              text-align: left;
+              padding: 12px;
+              font-size: 13px;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              border-bottom: 2px solid #eae0db;
+            }
+            .total-row {
+              background-color: #fcf9f6;
+              font-weight: 700;
+              font-size: 16px;
+              color: #6b1d2f;
+            }
+            .info-block {
+              background-color: #fdfaf7;
+              border-left: 4px solid #d4af37;
+              padding: 20px;
+              margin: 25px 0;
+              border-radius: 4px;
+              font-size: 14px;
+            }
+            .footer {
+              background-color: #fbf7f5;
+              padding: 25px;
+              text-align: center;
+              font-size: 12px;
+              color: #888888;
+              border-top: 1px solid #eae0db;
+            }
+            .footer p {
+              margin: 5px 0;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>ОЛЬГА ХАВИЧ</h1>
+            </div>
+            <div class="content">
+              <div class="greeting">Здравствуйте, ${customerName}!</div>
+              <p>Мы рады сообщить, что ваш заказ успешно оплачен! Благодарим вас за доверие и выбор наших продуктов силы.</p>
+              
+              <div style="font-size: 15px; margin: 20px 0; padding-bottom: 10px; border-bottom: 1px solid #eae0db;">
+                <strong>Номер заказа:</strong> #${orderId.substring(0, 8)}<br>
+                <strong>Статус:</strong> <span style="color: #2e7d32; font-weight: 700;">ОПЛАЧЕН</span><br>
+                <strong>Дата оплаты:</strong> ${new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
+              </div>
+
+              <table class="order-details">
+                <thead>
+                  <tr>
+                    <th style="width: 60%;">Товар</th>
+                    <th style="width: 20%; text-align: center;">Кол-во</th>
+                    <th style="width: 20%; text-align: right;">Сумма</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHtml}
+                  <tr class="total-row">
+                    <td colspan="2" style="padding: 15px 12px; text-align: right;">Оплачено:</td>
+                    <td style="padding: 15px 12px; text-align: right; font-size: 18px;">${totalAmount.toLocaleString("de-DE")} €</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="info-block">
+                ${nextStepsHtml}
+              </div>
+
+              <p style="margin-top: 30px;">Если у вас возникнут какие-либо вопросы или потребуется изменить контактные данные, просто ответьте на это письмо.</p>
+              <p style="font-weight: 600; color: #6b1d2f; margin-top: 25px;">С уважением,<br>Ольга Хавич и команда онлайн-школы</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Ольга Хавич. Все права защищены.</p>
+              <p>Это автоматическое письмо, пожалуйста, не отвечайте на него напрямую, если у вас нет вопросов.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: toEmail,
+      subject: subject,
+      html: html,
+    });
+
+    if (response.error) {
+      logger.error({ error: response.error, toEmail, orderId }, "Ошибка Resend API при отправке подтверждения оплаты заказа");
+      return false;
+    }
+
+    logger.info({ toEmail, orderId, id: response.data?.id }, "Подтверждение оплаты заказа успешно отправлено через Resend");
+    return true;
+  } catch (error: any) {
+    logger.error({ error, toEmail, orderId }, "Внутренняя ошибка при отправке подтверждения оплаты заказа");
+    return false;
+  }
+}
+
 
