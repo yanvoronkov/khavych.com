@@ -162,7 +162,7 @@ export async function POST(request: Request) {
       certificate,
     });
   } catch (error: any) {
-    logger.error({ error }, "Ошибка при обработке выдачи сертификата");
+    logger.error({ errorMsg: error.message, errorStack: error.stack }, "Ошибка при обработке выдачи сертификата");
     return NextResponse.json(
       {
         error: true,

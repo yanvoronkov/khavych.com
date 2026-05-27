@@ -51,8 +51,8 @@ export function CertificateModal({
     const updateScale = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        // 1120px — базовая ширина нашего бланка (формат А4)
-        const computedScale = Math.min((containerWidth - 24) / 1120, 1);
+        // 1060px — базовая ширина нашего бланка
+        const computedScale = Math.min((containerWidth - 24) / 1060, 1);
         setScale(computedScale > 0 ? computedScale : 1);
       }
     };
@@ -104,15 +104,15 @@ export function CertificateModal({
       setGenerationStep("Создание PDF-документа...");
       const imgData = canvas.toDataURL("image/png");
 
-      // Размеры бланка 1120x792 в px
+      // Размеры бланка 1060x792 в px
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "px",
-        format: [1120, 792],
+        format: [1060, 792],
         compress: true,
       });
 
-      pdf.addImage(imgData, "PNG", 0, 0, 1120, 792);
+      pdf.addImage(imgData, "PNG", 0, 0, 1060, 792);
 
       setGenerationStep("Сохранение в вашем личном кабинете...");
       const pdfBlob = pdf.output("blob");
@@ -140,7 +140,7 @@ export function CertificateModal({
       }
 
       setGenerationStep("Скачивание файла...");
-      
+
       // Автоматическое скачивание файла на компьютер
       pdf.save(`Сертификат Ольга Хавич - ${courseTitle}.pdf`);
 
@@ -223,32 +223,6 @@ export function CertificateModal({
           <div className={styles.footerLeft}>
             <span className={styles.infoLabel}>Дата выдачи</span>
             <span className={styles.infoValue}>{formattedDate}</span>
-          </div>
-
-          <div className={styles.footerCenter}>
-            {/* Роскошная золотая печать */}
-            <svg className={styles.goldSeal} viewBox="0 0 100 100">
-              <defs>
-                <radialGradient id="gold-grad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#fff8d4" />
-                  <stop offset="25%" stopColor="#e8c350" />
-                  <stop offset="70%" stopColor="#b38719" />
-                  <stop offset="100%" stopColor="#7a5500" />
-                </radialGradient>
-              </defs>
-              <path
-                fill="url(#gold-grad)"
-                d="M50 5 C55 3 60 7 64 6 C69 5 73 9 76 12 C80 15 79 21 82 25 C84 29 89 31 90 36 C91 41 88 46 88 51 C88 56 91 61 90 66 C89 71 84 73 82 77 C79 81 80 87 76 90 C73 93 69 97 64 96 C60 95 55 99 50 97 C45 99 40 95 36 96 C31 97 27 93 24 90 C20 87 21 81 18 77 C16 73 11 71 10 66 C9 61 12 56 12 51 C12 46 9 41 10 36 C11 31 16 29 18 25 C21 21 20 15 24 12 C27 9 31 5 36 6 C40 7 45 3 50 5 Z"
-              />
-              <circle cx="50" cy="50" r="35" fill="none" stroke="#fff1bd" strokeWidth="1.5" strokeDasharray="3,3" />
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#fff1bd" strokeWidth="0.8" />
-              {/* Эмблема солнца/звезды по центру */}
-              <polygon
-                points="50,32 54,44 66,44 57,51 60,63 50,56 40,63 43,51 34,44 46,44"
-                fill="#fff1bd"
-              />
-              <circle cx="50" cy="50" r="4" fill="#7a5500" />
-            </svg>
           </div>
 
           <div className={styles.footerRight}>
