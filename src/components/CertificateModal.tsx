@@ -208,7 +208,7 @@ export function CertificateModal({
             </svg>
           </div>
           <p className={styles.schoolName}>
-            Международная Школа Духовного Развития и Нумерологии
+            Школа Духовного развития Ольги Хавич
           </p>
         </div>
 
@@ -241,30 +241,7 @@ export function CertificateModal({
           </div>
 
           <div className={styles.footerRight}>
-            <span className={styles.infoLabel}>Эксперт</span>
-            <div className={styles.signatureContainer}>
-              {/* Векторная подпись Ольги Хавич */}
-              <svg width="150" height="60" viewBox="0 0 150 60" className={styles.signatureImage}>
-                <path
-                  d="M 10 40 C 30 10, 40 10, 50 30 C 60 50, 70 50, 80 20 C 90 5, 100 5, 110 35 C 115 45, 120 45, 130 30 C 135 20, 140 20, 145 35 M 30 35 L 120 35"
-                  fill="none"
-                  stroke="#1c2d5a"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity="0.85"
-                />
-                <path
-                  d="M 40 20 C 50 0, 70 0, 60 30 C 50 50, 90 50, 100 15"
-                  fill="none"
-                  stroke="#d4af37"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  opacity="0.75"
-                />
-              </svg>
-              <div className={styles.signatureLine} />
-            </div>
+            <span className={styles.infoLabel}>Преподаватель</span>
             <span className={styles.infoValue}>Ольга Хавич</span>
           </div>
         </div>

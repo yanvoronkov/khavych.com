@@ -283,7 +283,7 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 15px;
-  padding: 0 20px;
+  padding: 20px 95px;
   box-sizing: border-box;
 }
 
@@ -315,15 +315,6 @@
   font-size: 14px;
   font-weight: 600;
   color: #333;
-}
-
-.signatureContainer {
-  position: relative;
-  height: 40px;
-  width: 180px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
 }
 
 .signatureImage {
