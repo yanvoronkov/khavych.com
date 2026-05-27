@@ -216,7 +216,7 @@ export default async function CabinetPage(props: {
                     <div className={styles.cardContent}>
                       <h3>{course.title}</h3>
                       <p>{course.description}</p>
-                      
+
                       <div className={styles.cardFooter}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                           <span className={styles.lessonsCount}>
@@ -244,11 +244,11 @@ export default async function CabinetPage(props: {
                             </a>
                           ) : (
                             <span className={styles.certificateNotIssuedBadge}>
-                              🎓 Сертификат не получен
+                              🎓 Сертификат
                             </span>
                           )}
                         </div>
-                        
+
                         {/* Ссылка на уроки курса */}
                         <Link
                           href={`/cabinet/course/${course.id}`}

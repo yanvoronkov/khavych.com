@@ -289,7 +289,7 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
                   >
                     <path d="M23 7a2 2 0 0 0-2.45-1.45L16 7V5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2l4.55 1.45A2 2 0 0 0 23 17V7z" />
                   </svg>
-                  <span>Видео для этого урока временно отсутствует</span>
+                  <span>Это занятие без видео</span>
                 </div>
               )}
             </div>
@@ -299,7 +299,10 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
               {/* Описание урока */}
               <div className={styles.lessonDescription}>
                 <h4>Описание занятия</h4>
-                <p>{activeLesson.description}</p>
+                <div
+                  className={styles.lessonText}
+                  dangerouslySetInnerHTML={{ __html: activeLesson.description }}
+                />
               </div>
 
               {/* Прикрепленные материалы для скачивания */}
