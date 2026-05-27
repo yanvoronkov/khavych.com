@@ -354,7 +354,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
             <span>🎨</span> Оформление именного сертификата
           </h2>
           <p className={styles.cardSubtitle}>
-            Загрузка фонового рисунка для сертификатов учеников (альбомная ориентация 16:9)
+            Загрузка фонового рисунка для сертификатов учеников (альбомная ориентация 2400x1792px)
           </p>
         </div>
 
@@ -370,8 +370,8 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
           <div className={styles.infoBlockText}>
             Для идеального рендеринга и высокого качества печати:
             <ul style={{ margin: "8px 0 0 16px", padding: 0, display: "flex", flexDirection: "column", gap: "4px" }}>
-              <li>Используйте изображение с точными пропорциями <b>16:9</b> (например, <b>1920x1080</b> или <b>1024x576</b> пикселей).</li>
-              <li>Рекомендуемый формат: качественный <b>JPG</b> с умеренным сжатием или <b>PNG</b>.</li>
+              <li>Используйте изображение с точным разрешением <b>2400x1792</b> пикселей (соотношение сторон ~4:3).</li>
+              <li>Рекомендуемый формат: качественный <b>PNG</b> или <b>JPG</b> без сильного сжатия.</li>
               <li>Максимальный размер файла: <b>5 МБ</b>.</li>
               <li>Фон должен быть неброским, чтобы золотые и темные надписи (имя ученика, название курса) легко читались.</li>
             </ul>
@@ -387,7 +387,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
               style={{
                 width: "100%",
                 maxWidth: "600px",
-                aspectRatio: "16 / 9",
+                aspectRatio: "2400 / 1792",
                 borderRadius: "8px",
                 border: "2px dashed #ccc",
                 backgroundColor: "#f9f9f9",

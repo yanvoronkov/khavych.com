@@ -139,17 +139,17 @@
   align-items: center;
 }
 
-/* Сам бланк сертификата. Фиксированные размеры 1024x576 для идеального 16:9 */
+/* Сам бланк сертификата. Фиксированные размеры 2400x1792 */
 .certificateBlank {
-  width: 1024px;
-  height: 576px;
+  width: 2400px;
+  height: 1792px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
   position: relative;
-  padding: 40px;
+  padding: 100px;
   box-sizing: border-box;
   flex-shrink: 0;
   user-select: none;
@@ -160,14 +160,14 @@
   width: 100%;
   height: 100%;
   position: relative;
-  padding: 6px;
+  padding: 18px;
   box-sizing: border-box;
 }
 
 .borderInner {
   width: 100%;
   height: 100%;
-  padding: 24px 40px;
+  padding: 80px 100px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -193,20 +193,20 @@
 /* Содержимое бланка */
 .certHeader {
   text-align: center;
-  margin-top: 15px;
+  margin-top: 45px;
 }
 
 .schoolLogo {
   display: flex;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 30px;
 }
 
 .schoolName {
   font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
+  font-size: 26px;
   font-weight: 600;
-  letter-spacing: 4px;
+  letter-spacing: 9px;
   color: #8a7355;
   text-transform: uppercase;
   margin: 0;
@@ -214,54 +214,54 @@
 
 .certTitleBlock {
   text-align: center;
-  margin: 15px 0;
+  margin: 50px 0;
 }
 
 .certTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 44px;
+  font-size: 110px;
   font-weight: 700;
-  letter-spacing: 6px;
+  letter-spacing: 14px;
   color: #1a1a1a;
   text-transform: uppercase;
-  margin: 0 0 -35px 0;
+  margin: 0 0 -85px 0;
 }
 
 .certSubtitle {
   font-family: 'Playfair Display', serif;
   font-style: italic;
-  font-size: 27px;
+  font-size: 65px;
   color: #777;
-  margin: 0;
+  margin: 85px 0 0 0;
 }
 
 .recipientBlock {
   width: 80%;
   text-align: center;
-  margin: 10px 0;
+  margin: 30px 0;
 }
 
 .recipientName {
   font-family: 'Great Vibes', cursive, 'Playfair Display', serif;
-  font-size: 48px;
+  font-size: 115px;
   color: #b58d3d;
   margin: 0;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.4);
-  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.4);
+  padding-bottom: 25px;
   line-height: 1.1;
-  min-height: 60px;
+  min-height: 144px;
   word-break: break-word;
 }
 
 .courseBlock {
   text-align: center;
   max-width: 85%;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
 }
 
 .courseText {
   font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
+  font-size: 34px;
   color: #555;
   line-height: 1.6;
   margin: 0;
@@ -269,10 +269,10 @@
 
 .courseName {
   font-family: 'Playfair Display', serif;
-  font-size: 22px;
+  font-size: 55px;
   font-weight: 700;
   color: #1a1a1a;
-  margin-top: 8px;
+  margin-top: 20px;
   display: block;
 }
 
@@ -281,15 +281,15 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 15px;
-  padding: 20px 95px;
+  margin-bottom: 45px;
+  padding: 50px 220px;
   box-sizing: border-box;
 }
 
 .footerLeft, .footerRight {
   display: flex;
   flex-direction: column;
-  width: 250px;
+  width: 600px;
 }
 
 .footerLeft {
@@ -303,35 +303,35 @@
 
 .infoLabel {
   font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
+  font-size: 26px;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 5px;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
 }
 
 .infoValue {
   font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
+  font-size: 34px;
   font-weight: 600;
   color: #333;
 }
 
 .signatureImage {
   position: absolute;
-  bottom: -10px;
-  right: 10px;
-  width: 130px;
+  bottom: -25px;
+  right: 25px;
+  width: 310px;
   height: auto;
   pointer-events: none;
   opacity: 0.9;
 }
 
 .signatureLine {
-  width: 180px;
+  width: 430px;
   border-top: 1px solid rgba(0,0,0,0.15);
   text-align: right;
-  padding-top: 5px;
-  margin-top: 5px;
+  padding-top: 12px;
+  margin-top: 12px;
 }
 
 /* Действия в модалке */

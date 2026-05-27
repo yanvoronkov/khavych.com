@@ -66,8 +66,8 @@ export function CertificateModal({
     const updateScale = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        // 1024px — базовая ширина нашего бланка 16:9
-        const computedScale = Math.min((containerWidth - 24) / 1024, 1);
+        // 2400px — базовая ширина нашего бланка
+        const computedScale = Math.min((containerWidth - 24) / 2400, 1);
         setScale(computedScale > 0 ? computedScale : 1);
       }
     };
@@ -119,15 +119,15 @@ export function CertificateModal({
       setGenerationStep("Создание PDF-документа...");
       const imgData = canvas.toDataURL("image/png");
 
-      // Размеры бланка 1024x576 в px (16:9)
+      // Размеры бланка 2400x1792 в px
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "px",
-        format: [1024, 576],
+        format: [2400, 1792],
         compress: true,
       });
 
-      pdf.addImage(imgData, "PNG", 0, 0, 1024, 576);
+      pdf.addImage(imgData, "PNG", 0, 0, 2400, 1792);
 
       setGenerationStep("Сохранение в вашем личном кабинете...");
       const pdfBlob = pdf.output("blob");
@@ -191,7 +191,7 @@ export function CertificateModal({
         <div className={styles.certHeader}>
           <div className={styles.schoolLogo}>
             {/* Изящная золотая мандала/солнце */}
-            <svg width="45" height="45" viewBox="0 0 100 100" fill="none">
+            <svg width="110" height="110" viewBox="0 0 100 100" fill="none">
               <circle cx="50" cy="50" r="40" stroke="#d4af37" strokeWidth="1.5" />
               <circle cx="50" cy="50" r="32" stroke="#d4af37" strokeWidth="0.8" strokeDasharray="4 2" />
               <path
@@ -311,7 +311,7 @@ export function CertificateModal({
               <div className={styles.previewContainer} ref={containerRef}>
                 <span className={styles.previewLabel}>Живой предпросмотр сертификата</span>
                 {/* Адаптивная обертка с масштабированием */}
-                <div className={styles.scaleWrapper} style={{ height: `${576 * scale}px` }}>
+                <div className={styles.scaleWrapper} style={{ height: `${1792 * scale}px` }}>
                   <div
                     className={styles.certificateBlank}
                     style={{
