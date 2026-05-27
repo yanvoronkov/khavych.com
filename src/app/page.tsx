@@ -266,7 +266,7 @@ export default function Home() {
             {/* Блок заголовка */}
             <div className={styles.heroTitleArea}>
               <h1 className={styles.heroTitle} id="main-title">
-                Ольга Хавич, духовный целитель, таролог <br />
+                Ольга Хавич, духовный целитель, таролог,<br />
                 <span>нумеролог</span>
               </h1>
             </div>
@@ -983,7 +983,7 @@ export default function Home() {
               className="btn btn-primary"
               style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 28px" }}
             >
-              <span>💬 Связаться в WhatsApp</span>
+              <span>Связаться в WhatsApp</span>
             </a>
             <a
               href="https://t.me/Bluesky_blue_blue"
@@ -992,7 +992,7 @@ export default function Home() {
               className="btn btn-secondary"
               style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 28px", borderColor: "rgba(255,255,255,0.2)" }}
             >
-              <span>✈ Связаться в Telegram</span>
+              <span>Связаться в Telegram</span>
             </a>
           </div>
         </div>
@@ -1035,13 +1035,13 @@ export default function Home() {
               </span>
               <span>@numerologin.khavych</span>
             </a>
-            <a href="https://tiktok.com/@numerologin1" target="_blank" rel="noopener noreferrer" className={styles.contactItem} style={{ textDecoration: "none", color: "inherit" }}>
+            <a href="https://tiktok.com/@magja_moja" target="_blank" rel="noopener noreferrer" className={styles.contactItem} style={{ textDecoration: "none", color: "inherit" }}>
               <span className={styles.contactIcon}>
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12.525.02c1.31-.03 2.61-.01 3.91-.02.08 1.53.63 3.02 1.63 4.19 1.11 1.23 2.69 1.98 4.33 2.19v3.9c-1.39-.06-2.75-.54-3.89-1.37-.73-.55-1.33-1.26-1.78-2.07v7.57c.01 2.2-.76 4.38-2.19 6.02-1.52 1.77-3.77 2.85-6.11 2.99-2.52.12-5.08-.75-6.84-2.56-1.85-1.92-2.72-4.63-2.39-7.29.35-2.77 2.05-5.28 4.62-6.42 1.72-.75 3.65-.92 5.48-.48v4.03c-1.04-.36-2.2-.28-3.17.26-.97.55-1.68 1.54-1.94 2.63-.33 1.34-.03 2.8.82 3.88.88 1.1 2.27 1.71 3.68 1.63 1.4-.04 2.7-.82 3.42-2.02.48-.82.68-1.78.65-2.73V.02h-.03z" />
                 </svg>
               </span>
-              <span>@numerologin1</span>
+              <span>@magja_moja</span>
             </a>
           </div>
         </div>

@@ -25,6 +25,13 @@ export default async function CabinetPage(props: {
     redirect("/login");
   }
 
+  // Загружаем выданные сертификаты пользователя
+  const userCertificates = await db.certificate.findMany({
+    where: {
+      userId: session.userId,
+    },
+  });
+
   const searchParams = await props.searchParams;
   const activeTab = searchParams.tab || "learning";
 
@@ -48,6 +55,7 @@ export default async function CabinetPage(props: {
     courses = dbCourses.map((c) => ({
       ...c,
       expiresAt: null, // У администратора полный бессрочный доступ
+      certificate: userCertificates.find((cert: any) => cert.courseId === c.id) || null,
     }));
   } else {
     const accesses = await db.userAccess.findMany({
@@ -77,6 +85,7 @@ export default async function CabinetPage(props: {
     courses = accesses.map((access) => ({
       ...access.course,
       expiresAt: access.expiresAt,
+      certificate: userCertificates.find((cert: any) => cert.courseId === access.course.id) || null,
     }));
   }
 
@@ -220,6 +229,22 @@ export default async function CabinetPage(props: {
                           ) : (
                             <span className={styles.expiresBadge} style={{ color: "#785c12", backgroundColor: "#fff9e6", borderColor: "#f5e6cc" }}>
                               ♾️ Бессрочно
+                            </span>
+                          )}
+                          {/* Индикация статуса сертификата */}
+                          {course.certificate ? (
+                            <a
+                              href={course.certificate.pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.certificateIssuedBadge}
+                              title="Нажмите, чтобы открыть или скачать ваш сертификат"
+                            >
+                              🏆 Сертификат выдан
+                            </a>
+                          ) : (
+                            <span className={styles.certificateNotIssuedBadge}>
+                              🎓 Сертификат не получен
                             </span>
                           )}
                         </div>

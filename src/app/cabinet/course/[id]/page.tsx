@@ -6,6 +6,7 @@ import { db } from "src/lib/db";
 import { isAccessActive } from "src/lib/access";
 import styles from "../../cabinet.module.css";
 import { Header } from "src/components/Header";
+import { CertificateSection } from "src/components/CertificateSection";
 
 // Принудительно устанавливаем динамический рендеринг
 export const dynamic = "force-dynamic";
@@ -156,6 +157,16 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
 
   const lessons = course.lessons;
 
+  // Загружаем сертификат пользователя для этого курса
+  const certificate = await db.certificate.findUnique({
+    where: {
+      userId_courseId: {
+        userId: session.userId,
+        courseId: courseId,
+      },
+    },
+  });
+
   if (lessons.length === 0) {
     return (
       <div className={styles.lessonLayout} style={{ justifyContent: "center", alignItems: "center", padding: "40px" }}>
@@ -223,6 +234,14 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
                 );
               })}
             </nav>
+
+            {/* Блок выдачи и скачивания сертификата */}
+            <CertificateSection
+              courseId={courseId}
+              courseTitle={course.title}
+              defaultUserName={session.name}
+              initialPdfUrl={certificate ? certificate.pdfUrl : null}
+            />
           </aside>
 
           {/* Основной контент активного урока */}

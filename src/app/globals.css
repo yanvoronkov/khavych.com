@@ -117,7 +117,7 @@ button, input, select, textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 28px;
+  padding: 6px 12px;
   font-weight: 600;
   font-family: var(--font-title);
   border-radius: var(--radius-md);
