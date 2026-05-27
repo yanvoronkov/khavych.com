@@ -33,7 +33,11 @@ export function CertificateModal({
 
   // 1. Динамическое подключение шрифтов и загрузка активного фона
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setIsSuccess(false);
+      setIssuedPdfUrl("");
+      return;
+    }
 
     if (!fontsLoadedRef.current) {
       const link = document.createElement("link");
