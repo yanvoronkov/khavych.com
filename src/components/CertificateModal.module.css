@@ -146,6 +146,8 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
   position: relative;
   padding: 40px;
   box-sizing: border-box;
@@ -222,13 +224,13 @@
   letter-spacing: 6px;
   color: #1a1a1a;
   text-transform: uppercase;
-  margin: 0 0 6px 0;
+  margin: 0 0 -35px 0;
 }
 
 .certSubtitle {
   font-family: 'Playfair Display', serif;
   font-style: italic;
-  font-size: 17px;
+  font-size: 27px;
   color: #777;
   margin: 0;
 }

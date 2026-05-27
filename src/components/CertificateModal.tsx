@@ -107,9 +107,9 @@ export function CertificateModal({
       // Ждем 300мс, чтобы убедиться, что все шрифты полностью применились к скрытому макету
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Рендерим элемент в canvas с коэффициентом масштабирования scale: 2 (для высокой плотности пикселей и отличного качества печати)
+      // Рендерим элемент в canvas с коэффициентом масштабирования scale: 3 (для максимальной плотности пикселей и кристального качества)
       const canvas = await html2canvas(element, {
-        scale: 2.5,
+        scale: 3,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
