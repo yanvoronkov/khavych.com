@@ -8,6 +8,47 @@ import { logger } from "src/lib/logger";
 export const dynamic = "force-dynamic";
 
 /**
+ * Обработчик GET запроса для получения URL фонового изображения сертификата.
+ * Доступен только для авторизованных пользователей.
+ * 
+ * Путь: /api/cabinet/certificates
+ */
+export async function GET() {
+  try {
+    const session = await getServerSession();
+    if (!session) {
+      return NextResponse.json(
+        {
+          error: true,
+          code: "UNAUTHORIZED",
+          message: "Вы должны быть авторизованы, чтобы получить настройки сертификата",
+        },
+        { status: 401 }
+      );
+    }
+
+    const bgSetting = await db.setting.findUnique({
+      where: { key: "certificateBgUrl" },
+    });
+
+    return NextResponse.json({
+      success: true,
+      backgroundUrl: bgSetting?.value || "/images/cert-bg.jpeg",
+    });
+  } catch (error: any) {
+    logger.error({ error }, "Ошибка при получении фона сертификата");
+    return NextResponse.json(
+      {
+        error: true,
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Не удалось получить настройки фона сертификата",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * Обработчик POST запроса для сохранения выданного именного сертификата.
  * Доступен только для авторизованных пользователей, имеющих доступ к соответствующему курсу.
  * Загружает PDF-файл в Vercel Blob и создает/обновляет запись в БД.

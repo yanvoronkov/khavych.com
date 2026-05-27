@@ -139,11 +139,10 @@
   align-items: center;
 }
 
-/* Сам бланк сертификата. Фиксированные размеры 1120x792 для идеального A4 */
+/* Сам бланк сертификата. Фиксированные размеры 1024x576 для идеального 16:9 */
 .certificateBlank {
-  width: 1120px;
-  height: 792px;
-  background-image: url("/images/cert-bg.png");
+  width: 1024px;
+  height: 576px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -158,7 +157,6 @@
 .borderOuter {
   width: 100%;
   height: 100%;
-  border: 2px solid #d4af37;
   position: relative;
   padding: 6px;
   box-sizing: border-box;
@@ -167,19 +165,17 @@
 .borderInner {
   width: 100%;
   height: 100%;
-  border: 6px double #d4af37;
-  padding: 30px 45px;
+  padding: 24px 40px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   position: relative;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.90) 0%, rgba(255, 251, 242, 0.82) 100%);
 }
 
 /* Декоративные уголки */
-.cornerTopLeft, .cornerTopRight, .cornerBottomLeft, .cornerBottomRight {
+/* .cornerTopLeft, .cornerTopRight, .cornerBottomLeft, .cornerBottomRight {
   position: absolute;
   width: 40px;
   height: 40px;
@@ -190,7 +186,7 @@
 .cornerTopLeft { top: 12px; left: 12px; border-right: none; border-bottom: none; }
 .cornerTopRight { top: 12px; right: 12px; border-left: none; border-bottom: none; }
 .cornerBottomLeft { bottom: 12px; left: 12px; border-right: none; border-top: none; }
-.cornerBottomRight { bottom: 12px; right: 12px; border-left: none; border-top: none; }
+.cornerBottomRight { bottom: 12px; right: 12px; border-left: none; border-top: none; } */
 
 /* Содержимое бланка */
 .certHeader {
@@ -221,12 +217,12 @@
 
 .certTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 56px;
+  font-size: 44px;
   font-weight: 700;
   letter-spacing: 6px;
   color: #1a1a1a;
   text-transform: uppercase;
-  margin: 0 0 10px 0;
+  margin: 0 0 6px 0;
   background: linear-gradient(135deg, #111111 0%, #8a7355 50%, #111111 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -235,7 +231,7 @@
 .certSubtitle {
   font-family: 'Playfair Display', serif;
   font-style: italic;
-  font-size: 20px;
+  font-size: 17px;
   color: #777;
   margin: 0;
 }
@@ -248,33 +244,33 @@
 
 .recipientName {
   font-family: 'Great Vibes', cursive, 'Playfair Display', serif;
-  font-size: 64px;
+  font-size: 48px;
   color: #b58d3d;
   margin: 0;
   border-bottom: 1px solid rgba(212, 175, 55, 0.4);
-  padding-bottom: 15px;
+  padding-bottom: 10px;
   line-height: 1.1;
-  min-height: 80px;
+  min-height: 60px;
   word-break: break-word;
 }
 
 .courseBlock {
   text-align: center;
   max-width: 85%;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .courseText {
   font-family: 'Montserrat', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   color: #555;
-  line-height: 1.8;
+  line-height: 1.6;
   margin: 0;
 }
 
 .courseName {
   font-family: 'Playfair Display', serif;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   color: #1a1a1a;
   margin-top: 8px;
@@ -309,7 +305,6 @@
 .infoLabel {
   font-family: 'Montserrat', sans-serif;
   font-size: 11px;
-  color: #999;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 5px;
@@ -324,7 +319,7 @@
 
 .signatureContainer {
   position: relative;
-  height: 50px;
+  height: 40px;
   width: 180px;
   display: flex;
   align-items: flex-end;
@@ -333,9 +328,9 @@
 
 .signatureImage {
   position: absolute;
-  bottom: -5px;
+  bottom: -10px;
   right: 10px;
-  width: 150px;
+  width: 130px;
   height: auto;
   pointer-events: none;
   opacity: 0.9;
@@ -347,20 +342,6 @@
   text-align: right;
   padding-top: 5px;
   margin-top: 5px;
-}
-
-/* Печать по центру футера */
-.footerCenter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 200px;
-}
-
-.goldSeal {
-  width: 100px;
-  height: 100px;
-  filter: drop-shadow(0 4px 10px rgba(212, 175, 55, 0.3));
 }
 
 /* Действия в модалке */

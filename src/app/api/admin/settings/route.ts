@@ -11,6 +11,7 @@ const settingsSchema = z.object({
   action: z.enum(["save", "testTelegram"]).optional().default("save"),
   telegramBotToken: z.string().optional().nullable(),
   telegramChatId: z.string().optional().nullable(),
+  certificateBgUrl: z.string().optional().nullable(),
 });
 
 /**
@@ -46,6 +47,7 @@ export async function GET() {
       settings: {
         telegramBotToken: settings.telegramBotToken || "",
         telegramChatId: settings.telegramChatId || "",
+        certificateBgUrl: settings.certificateBgUrl || "",
       },
     });
   } catch (error: any) {
@@ -129,33 +131,35 @@ export async function POST(request: Request) {
     }
 
     // --- СЦЕНАРИЙ 2: Сохранение настроек в БД ---
-    const tokenVal = validatedData.telegramBotToken?.trim() || "";
-    const chatIdVal = validatedData.telegramChatId?.trim() || "";
-
-    if (!tokenVal || !chatIdVal) {
-      return NextResponse.json(
-        {
-          error: true,
-          code: "BAD_REQUEST",
-          message: "Для сохранения настроек необходимо заполнить оба поля: Токен бота и ID чата",
-        },
-        { status: 400 }
-      );
+    // Сохраняем токен Telegram, если передан
+    if (validatedData.telegramBotToken !== undefined) {
+      const tokenVal = validatedData.telegramBotToken?.trim() || "";
+      await db.setting.upsert({
+        where: { key: "telegramBotToken" },
+        update: { value: tokenVal },
+        create: { key: "telegramBotToken", value: tokenVal },
+      });
     }
 
-    // Сохраняем токен
-    await db.setting.upsert({
-      where: { key: "telegramBotToken" },
-      update: { value: tokenVal },
-      create: { key: "telegramBotToken", value: tokenVal },
-    });
+    // Сохраняем chat ID Telegram, если передан
+    if (validatedData.telegramChatId !== undefined) {
+      const chatIdVal = validatedData.telegramChatId?.trim() || "";
+      await db.setting.upsert({
+        where: { key: "telegramChatId" },
+        update: { value: chatIdVal },
+        create: { key: "telegramChatId", value: chatIdVal },
+      });
+    }
 
-    // Сохраняем chat ID
-    await db.setting.upsert({
-      where: { key: "telegramChatId" },
-      update: { value: chatIdVal },
-      create: { key: "telegramChatId", value: chatIdVal },
-    });
+    // Сохраняем URL фона сертификата, если передан
+    if (validatedData.certificateBgUrl !== undefined) {
+      const bgUrlVal = validatedData.certificateBgUrl?.trim() || "";
+      await db.setting.upsert({
+        where: { key: "certificateBgUrl" },
+        update: { value: bgUrlVal },
+        create: { key: "certificateBgUrl", value: bgUrlVal },
+      });
+    }
 
     logger.info("Настройки уведомлений Telegram успешно сохранены в базе данных");
 

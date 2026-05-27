@@ -26,11 +26,12 @@ export function CertificateModal({
   const [isSuccess, setIsSuccess] = useState(false);
   const [issuedPdfUrl, setIssuedPdfUrl] = useState("");
   const [scale, setScale] = useState(1);
+  const [backgroundUrl, setBackgroundUrl] = useState("");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fontsLoadedRef = useRef(false);
 
-  // 1. Динамическое подключение изысканных шрифтов от Google Fonts
+  // 1. Динамическое подключение шрифтов и загрузка активного фона
   useEffect(() => {
     if (!isOpen) return;
 
@@ -42,6 +43,20 @@ export function CertificateModal({
       document.head.appendChild(link);
       fontsLoadedRef.current = true;
     }
+
+    const fetchBg = async () => {
+      try {
+        const response = await fetch("/api/cabinet/certificates");
+        const data = await response.json();
+        if (response.ok && data.backgroundUrl) {
+          setBackgroundUrl(data.backgroundUrl);
+        }
+      } catch (error) {
+        console.error("Ошибка при загрузке фонового изображения сертификата:", error);
+      }
+    };
+
+    fetchBg();
   }, [isOpen]);
 
   // 2. Расчет масштабирования бланка, чтобы он гармонично помещался на экранах любого размера
@@ -51,8 +66,8 @@ export function CertificateModal({
     const updateScale = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        // 1060px — базовая ширина нашего бланка
-        const computedScale = Math.min((containerWidth - 24) / 1060, 1);
+        // 1024px — базовая ширина нашего бланка 16:9
+        const computedScale = Math.min((containerWidth - 24) / 1024, 1);
         setScale(computedScale > 0 ? computedScale : 1);
       }
     };
@@ -104,15 +119,15 @@ export function CertificateModal({
       setGenerationStep("Создание PDF-документа...");
       const imgData = canvas.toDataURL("image/png");
 
-      // Размеры бланка 1060x792 в px
+      // Размеры бланка 1024x576 в px (16:9)
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "px",
-        format: [1060, 792],
+        format: [1024, 576],
         compress: true,
       });
 
-      pdf.addImage(imgData, "PNG", 0, 0, 1060, 792);
+      pdf.addImage(imgData, "PNG", 0, 0, 1024, 576);
 
       setGenerationStep("Сохранение в вашем личном кабинете...");
       const pdfBlob = pdf.output("blob");
@@ -319,13 +334,14 @@ export function CertificateModal({
               <div className={styles.previewContainer} ref={containerRef}>
                 <span className={styles.previewLabel}>Живой предпросмотр сертификата</span>
                 {/* Адаптивная обертка с масштабированием */}
-                <div className={styles.scaleWrapper} style={{ height: `${792 * scale}px` }}>
+                <div className={styles.scaleWrapper} style={{ height: `${576 * scale}px` }}>
                   <div
                     className={styles.certificateBlank}
                     style={{
                       transform: `scale(${scale})`,
                       transformOrigin: "center center",
                       position: "absolute",
+                      backgroundImage: `url(${backgroundUrl || "/images/cert-bg.jpeg"})`,
                     }}
                   >
                     {renderCertificateContent()}
@@ -361,7 +377,11 @@ export function CertificateModal({
         {/* Скрытый полноразмерный макет для html2canvas.
             Отрендерен без CSS-масштабирования (1:1), чтобы скриншот получился максимально четким и качественным. */}
         <div style={{ position: "absolute", left: "-9999px", top: "-9999px", overflow: "hidden" }}>
-          <div id="certificate-pdf-target" className={styles.certificateBlank}>
+          <div
+            id="certificate-pdf-target"
+            className={styles.certificateBlank}
+            style={{ backgroundImage: `url(${backgroundUrl || "/images/cert-bg.jpeg"})` }}
+          >
             {renderCertificateContent()}
           </div>
         </div>
