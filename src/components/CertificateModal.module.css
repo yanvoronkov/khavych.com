@@ -143,7 +143,10 @@
 .certificateBlank {
   width: 1120px;
   height: 792px;
-  background: radial-gradient(circle, #fffdfa 0%, #f9f5ed 100%);
+  background-image: url("/images/cert-bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   position: relative;
   padding: 40px;
   box-sizing: border-box;
@@ -172,7 +175,7 @@
   align-items: center;
   justify-content: space-between;
   position: relative;
-  background: radial-gradient(circle, #ffffff 0%, #fffbf2 100%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.90) 0%, rgba(255, 251, 242, 0.82) 100%);
 }
 
 /* Декоративные уголки */
@@ -400,6 +403,7 @@
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -505,4 +509,15 @@
   margin: 0 0 30px 0;
   max-width: 450px;
   line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .modalActions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+  .modalActions button {
+    width: 100%;
+    justify-content: center;
+  }
 }
