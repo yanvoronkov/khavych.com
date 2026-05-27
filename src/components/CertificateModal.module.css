@@ -223,9 +223,6 @@
   color: #1a1a1a;
   text-transform: uppercase;
   margin: 0 0 6px 0;
-  background: linear-gradient(135deg, #111111 0%, #8a7355 50%, #111111 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .certSubtitle {
