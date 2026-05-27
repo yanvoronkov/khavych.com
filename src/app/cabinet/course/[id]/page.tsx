@@ -251,48 +251,53 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
               <h1 className={styles.lessonTitle}>{activeLesson.title}</h1>
             </div>
 
-            {/* Видео плеер (поддерживает YouTube, OK.ru, обычный хостинг и Kinescope) */}
-            <div className={styles.videoContainer}>
-              {activeLesson.videoUrl ? (() => {
-                const parsed = parseVideoUrl(activeLesson.videoUrl);
-                if (parsed.type === "direct") {
+            {/* Видео плеер или красивая плашка, если видео нет */}
+            {activeLesson.videoUrl ? (
+              <div className={styles.videoContainer}>
+                {(() => {
+                  const parsed = parseVideoUrl(activeLesson.videoUrl);
+                  if (parsed.type === "direct") {
+                    return (
+                      <video
+                        src={parsed.url}
+                        className={styles.videoIframe}
+                        controls
+                        controlsList="nodownload"
+                        playsInline
+                      />
+                    );
+                  }
                   return (
-                    <video
+                    <iframe
                       src={parsed.url}
                       className={styles.videoIframe}
-                      controls
-                      controlsList="nodownload"
-                      playsInline
+                      allow="autoplay; fullscreen; picture-in-picture; encrypted-media;"
+                      allowFullScreen
                     />
                   );
-                }
-                return (
-                  <iframe
-                    src={parsed.url}
-                    className={styles.videoIframe}
-                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media;"
-                    allowFullScreen
-                  />
-                );
-              })() : (
-                <div className={styles.noVideo}>
+                })()}
+              </div>
+            ) : (
+              <div className={styles.noVideoBanner}>
+                <div className={styles.noVideoIcon}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="48"
-                    height="48"
+                    width="20"
+                    height="20"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1.5"
+                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     viewBox="0 0 24 24"
                   >
                     <path d="M23 7a2 2 0 0 0-2.45-1.45L16 7V5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2l4.55 1.45A2 2 0 0 0 23 17V7z" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
-                  <span>Это занятие без видео</span>
                 </div>
-              )}
-            </div>
+                <span className={styles.noVideoText}>Это занятие без видео</span>
+              </div>
+            )}
 
             {/* Детали урока: описание и прикрепленные файлы */}
             <div className={styles.lessonMeta}>

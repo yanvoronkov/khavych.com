@@ -390,6 +390,37 @@
   gap: 12px;
 }
 
+.noVideoBanner {
+  background: linear-gradient(135deg, #fdfbf9 0%, #f6ece7 100%);
+  border: 1px solid #e8dad2;
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 35px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.03);
+}
+
+.noVideoIcon {
+  font-size: 20px;
+  color: #b58d3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212, 175, 55, 0.08);
+  padding: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.noVideoText {
+  font-family: var(--font-title);
+  font-size: 15px;
+  font-weight: 600;
+  color: #5c4f49;
+}
+
 /* Текстовая секция и файлы */
 .lessonMeta {
   display: flex;
