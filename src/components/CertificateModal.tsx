@@ -117,7 +117,8 @@ export function CertificateModal({
       });
 
       setGenerationStep("Создание PDF-документа...");
-      const imgData = canvas.toDataURL("image/png");
+      // Используем JPEG с качеством 0.9 для достижения идеальной четкости и уменьшения размера файла до ~700-900 КБ
+      const imgData = canvas.toDataURL("image/jpeg", 0.9);
 
       // Размеры бланка 2400x1792 в px
       const pdf = new jsPDF({
@@ -127,7 +128,7 @@ export function CertificateModal({
         compress: true,
       });
 
-      pdf.addImage(imgData, "PNG", 0, 0, 2400, 1792);
+      pdf.addImage(imgData, "JPEG", 0, 0, 2400, 1792);
 
       setGenerationStep("Сохранение в вашем личном кабинете...");
       const pdfBlob = pdf.output("blob");
