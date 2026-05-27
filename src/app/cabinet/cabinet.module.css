@@ -518,10 +518,6 @@
     border-bottom: 1px solid var(--color-gray-border);
   }
 
-  .lessonContent {
-    padding: 24px;
-  }
-
   .lessonTitle {
     font-size: 20px;
   }

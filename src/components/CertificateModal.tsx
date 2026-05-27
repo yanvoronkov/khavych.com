@@ -27,6 +27,7 @@ export function CertificateModal({
   const [issuedPdfUrl, setIssuedPdfUrl] = useState("");
   const [scale, setScale] = useState(1);
   const [backgroundUrl, setBackgroundUrl] = useState("");
+  const [error, setError] = useState<string>("");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fontsLoadedRef = useRef(false);
@@ -36,6 +37,7 @@ export function CertificateModal({
     if (!isOpen) {
       setIsSuccess(false);
       setIssuedPdfUrl("");
+      setError("");
       return;
     }
 
@@ -94,6 +96,7 @@ export function CertificateModal({
 
     try {
       setIsGenerating(true);
+      setError("");
       setGenerationStep("Подготовка макета сертификата...");
 
       // Импортируем библиотеки динамически только при клике, чтобы уменьшить размер базового бандла
@@ -169,7 +172,7 @@ export function CertificateModal({
       onSuccess(data.certificate.pdfUrl);
     } catch (error: any) {
       console.error("Ошибка при генерации сертификата:", error);
-      alert(error.message || "Произошла ошибка при создании сертификата. Пожалуйста, попробуйте еще раз.");
+      setError(error.message || "Произошла ошибка при создании сертификата. Пожалуйста, попробуйте еще раз.");
     } finally {
       setIsGenerating(false);
       setGenerationStep("");
@@ -330,6 +333,26 @@ export function CertificateModal({
                   </div>
                 </div>
               </div>
+
+              {error && (
+                <div style={{
+                  color: "#d32f2f",
+                  backgroundColor: "#ffebee",
+                  padding: "12px 16px",
+                  borderRadius: "8px",
+                  marginBottom: "16px",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  display: "flex",
+                  gap: "8px",
+                  alignItems: "center",
+                  border: "1px solid rgba(211, 47, 47, 0.2)",
+                  fontFamily: "var(--font-montserrat, sans-serif)",
+                }}>
+                  <span>⚠️</span>
+                  <div>{error}</div>
+                </div>
+              )}
 
               <div className={styles.modalActions}>
                 <button className={styles.cancelBtn} onClick={onClose} disabled={isGenerating}>

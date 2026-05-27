@@ -1,16 +1,35 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { ConfirmModal } from "./ConfirmModal";
 import styles from "./AdminProducts.module.css";
 import { IDBProduct } from "./AdminClient";
 
 interface AdminProductsProps {
   initialProducts: any[];
   courses: any[];
+  showNotification?: (text: string, type: "success" | "error") => void;
 }
 
-export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, courses }) => {
+export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, courses, showNotification }) => {
   const [products, setProducts] = useState<any[]>(initialProducts);
+
+  // --- СОСТОЯНИЕ ДЛЯ КАСТОМНОГО ДИАЛОГА ПОДТВЕРЖДЕНИЯ ---
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    danger?: boolean;
+    confirmText?: string;
+    cancelText?: string;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    danger: false,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
 
@@ -152,7 +171,11 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, c
 
     const file = files[0];
     if (!file.type.startsWith("image/")) {
-      alert("Пожалуйста, выберите графический файл (изображение)");
+      if (showNotification) {
+        showNotification("Пожалуйста, выберите графический файл (изображение)", "error");
+      } else {
+        alert("Пожалуйста, выберите графический файл (изображение)");
+      }
       return;
     }
 
@@ -180,7 +203,11 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, c
       setImageUrl(data.url);
       setUploadProgress(100);
     } catch (err: any) {
-      alert(err.message || "Не удалось загрузить изображение");
+      if (showNotification) {
+        showNotification(err.message || "Не удалось загрузить изображение", "error");
+      } else {
+        alert(err.message || "Не удалось загрузить изображение");
+      }
     } finally {
       setIsUploading(false);
       setTimeout(() => setUploadProgress(0), 1000);
@@ -188,24 +215,42 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, c
   };
 
   // Удаление товара (DELETE)
-  const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Вы уверены, что хотите удалить этот товар? Это действие нельзя отменить.")) return;
+  const handleDeleteProduct = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Удаление товара",
+      message: "Вы уверены, что хотите удалить этот товар? Это действие нельзя отменить.",
+      danger: true,
+      confirmText: "Удалить",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/products/${id}`, {
+            method: "DELETE",
+          });
 
-    try {
-      const res = await fetch(`/api/admin/products/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        setProducts(prev => prev.filter(p => p.id !== id));
-      } else {
-        const data = await res.json();
-        alert(data.message || "Не удалось удалить товар");
+          if (res.ok) {
+            setProducts(prev => prev.filter(p => p.id !== id));
+            if (showNotification) {
+              showNotification("Товар успешно удален!", "success");
+            }
+          } else {
+            const data = await res.json();
+            if (showNotification) {
+              showNotification(data.message || "Не удалось удалить товар", "error");
+            } else {
+              alert(data.message || "Не удалось удалить товар");
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          if (showNotification) {
+            showNotification("Произошла ошибка при попытке удаления товара", "error");
+          } else {
+            alert("Произошла ошибка при попытке удаления товара");
+          }
+        }
       }
-    } catch (err) {
-      console.error(err);
-      alert("Произошла ошибка при попытке удаления товара");
-    }
+    });
   };
 
   // Добавление новой особенности товара
@@ -867,6 +912,11 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, c
           </div>
         </div>
       )}
+      {/* Кастомный диалог подтверждения */}
+      <ConfirmModal
+        {...confirmModal}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };

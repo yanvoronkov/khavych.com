@@ -205,7 +205,10 @@ export const CartDrawer: React.FC = () => {
               if (!res.ok) throw new Error(data.message || "Ошибка инициализации PayPal");
               return data.paypalOrderId;
             } catch (err: any) {
-              alert(err.message || "Не удалось инициализировать оплату PayPal");
+              setCustomAlert({
+                title: "Оплата PayPal",
+                message: err.message || "Не удалось инициализировать оплату PayPal"
+              });
               throw err;
             }
           },
@@ -229,14 +232,20 @@ export const CartDrawer: React.FC = () => {
               setFormData({ name: "", email: "", phone: "", address: "" });
               setPaymentMethod(null);
             } catch (err: any) {
-              alert(err.message || "Ошибка при списании средств через PayPal. Свяжитесь с поддержкой.");
+              setCustomAlert({
+                title: "Ошибка оплаты",
+                message: err.message || "Ошибка при списании средств через PayPal. Свяжитесь с поддержкой."
+              });
             } finally {
               setIsSubmitting(false);
             }
           },
           onError: (err: any) => {
             console.error("PayPal Error:", err);
-            alert("Произошла ошибка при проведении транзакции PayPal. Пожалуйста, попробуйте еще раз.");
+            setCustomAlert({
+              title: "Ошибка PayPal",
+              message: "Произошла ошибка при проведении транзакции PayPal. Пожалуйста, попробуйте еще раз."
+            });
           }
         }).render("#paypal-button-container");
       }
@@ -347,7 +356,10 @@ export const CartDrawer: React.FC = () => {
         setErrors(fieldErrors);
       } else {
         console.error("Ошибка при оформлении заказа:", err);
-        alert(err instanceof Error ? err.message : "Произошла непредвиденная ошибка");
+        setCustomAlert({
+          title: "Ошибка оформления",
+          message: err instanceof Error ? err.message : "Произошла непредвиденная ошибка"
+        });
       }
     } finally {
       setIsSubmitting(false);

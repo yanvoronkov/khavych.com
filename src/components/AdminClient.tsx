@@ -6,6 +6,7 @@ import styles from "../app/cabinet/cabinet.module.css";
 import { AdminProducts } from "./AdminProducts";
 import { AdminSettings } from "./AdminSettings";
 import { AdminOrders } from "./AdminOrders";
+import { ConfirmModal } from "./ConfirmModal";
 
 // --- ИНТЕРФЕЙСЫ ТИПИЗАЦИИ ---
 
@@ -72,6 +73,23 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   // --- СОСТОЯНИЕ (STATE) ---
 
   const [activeTab, setActiveTab] = useState<"users" | "courses" | "products" | "orders" | "settings">("users");
+
+  // --- СОСТОЯНИЕ ДЛЯ КАСТОМНОГО ДИАЛОГА ПОДТВЕРЖДЕНИЯ ---
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    danger?: boolean;
+    confirmText?: string;
+    cancelText?: string;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    danger: false,
+  });
   const [users, setUsers] = useState<IAdminUser[]>(initialUsers);
   const [localCourses, setLocalCourses] = useState<IAdminCourse[]>(courses);
 
@@ -249,49 +267,56 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }
   };
 
-  const handleRevokeAccess = async (courseId: string) => {
+  const handleRevokeAccess = (courseId: string) => {
     if (!accessModalUser) return;
-    if (!confirm("Вы действительно хотите отозвать доступ к этому курсу?")) return;
+    setConfirmModal({
+      isOpen: true,
+      title: "Отозвать доступ к курсу",
+      message: "Вы действительно хотите отозвать доступ к этому курсу?",
+      danger: true,
+      confirmText: "Отозвать",
+      onConfirm: async () => {
+        setActionLoading(true);
+        setMessage(null);
 
-    setActionLoading(true);
-    setMessage(null);
+        try {
+          const response = await fetch("/api/admin/grant-access", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: accessModalUser.id,
+              courseId,
+              grant: false,
+            }),
+          });
 
-    try {
-      const response = await fetch("/api/admin/grant-access", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: accessModalUser.id,
-          courseId,
-          grant: false,
-        }),
-      });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || "Ошибка при отзыве доступа");
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Ошибка при отзыве доступа");
+          // Обновляем состояние на клиенте
+          setUsers((prevUsers) =>
+            prevUsers.map((u) => {
+              if (u.id === accessModalUser.id) {
+                return { ...u, accesses: u.accesses.filter((a) => a.courseId !== courseId) };
+              }
+              return u;
+            })
+          );
 
-      // Обновляем состояние на клиенте
-      setUsers((prevUsers) =>
-        prevUsers.map((u) => {
-          if (u.id === accessModalUser.id) {
-            return { ...u, accesses: u.accesses.filter((a) => a.courseId !== courseId) };
-          }
-          return u;
-        })
-      );
+          // Обновляем текущего пользователя в модалке
+          setAccessModalUser((prev) => {
+            if (!prev) return null;
+            return { ...prev, accesses: prev.accesses.filter((a) => a.courseId !== courseId) };
+          });
 
-      // Обновляем текущего пользователя в модалке
-      setAccessModalUser((prev) => {
-        if (!prev) return null;
-        return { ...prev, accesses: prev.accesses.filter((a) => a.courseId !== courseId) };
-      });
-
-      showNotification("Доступ успешно отозван", "success");
-    } catch (err: unknown) {
-      showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
-    } finally {
-      setActionLoading(false);
-    }
+          showNotification("Доступ успешно отозван", "success");
+        } catch (err: unknown) {
+          showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
+        } finally {
+          setActionLoading(false);
+        }
+      },
+    });
   };
 
   // --- CRUD УРОКОВ (API) ---
@@ -431,36 +456,43 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }
   };
 
-  const handleDeleteLesson = async (courseId: string, lessonId: string) => {
-    if (!confirm("Вы действительно хотите удалить этот урок? Восстановление будет невозможно.")) return;
+  const handleDeleteLesson = (courseId: string, lessonId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Удаление урока",
+      message: "Вы действительно хотите удалить этот урок? Восстановление будет невозможно.",
+      danger: true,
+      confirmText: "Удалить",
+      onConfirm: async () => {
+        setActionLoading(true);
+        setMessage(null);
 
-    setActionLoading(true);
-    setMessage(null);
+        try {
+          const response = await fetch(`/api/admin/lessons/${lessonId}`, {
+            method: "DELETE",
+          });
 
-    try {
-      const response = await fetch(`/api/admin/lessons/${lessonId}`, {
-        method: "DELETE",
-      });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || "Ошибка при удалении урока");
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Ошибка при удалении урока");
+          // Обновляем состояние на клиенте
+          setLocalCourses((prevCourses) =>
+            prevCourses.map((c) => {
+              if (c.id === courseId) {
+                return { ...c, lessons: c.lessons.filter((l) => l.id !== lessonId) };
+              }
+              return c;
+            })
+          );
 
-      // Обновляем состояние на клиенте
-      setLocalCourses((prevCourses) =>
-        prevCourses.map((c) => {
-          if (c.id === courseId) {
-            return { ...c, lessons: c.lessons.filter((l) => l.id !== lessonId) };
-          }
-          return c;
-        })
-      );
-
-      showNotification("Урок успешно удален!", "success");
-    } catch (err: unknown) {
-      showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
-    } finally {
-      setActionLoading(false);
-    }
+          showNotification("Урок успешно удален!", "success");
+        } catch (err: unknown) {
+          showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
+        } finally {
+          setActionLoading(false);
+        }
+      },
+    });
   };
 
   // Изменение порядка уроков кнопочками Вверх/Вниз
@@ -552,7 +584,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
     const file = files[0];
     if (!file.type.startsWith("image/")) {
-      alert("Пожалуйста, выберите графический файл (изображение)");
+      showNotification("Пожалуйста, выберите графический файл (изображение)", "error");
       return;
     }
 
@@ -580,7 +612,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       setCourseModal((prev) => ({ ...prev, imageUrl: data.url }));
       setCourseImageUploadProgress(100);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Не удалось загрузить изображение");
+      showNotification(err instanceof Error ? err.message : "Не удалось загрузить изображение", "error");
     } finally {
       setCourseImageUploading(false);
       setTimeout(() => setCourseImageUploadProgress(0), 1000);
@@ -596,7 +628,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     // Проверка размера файла перед отправкой (макс. 4.5 МБ для Vercel Serverless Function payload limit)
     const MAX_SIZE = 4.5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      alert("Размер файла превышает 4.5 МБ. Для больших файлов рекомендуется использовать внешние ссылки (Google Диск, Яндекс.Диск) или сжать текущий файл перед загрузкой.");
+      showNotification("Размер файла превышает 4.5 МБ. Для больших файлов рекомендуется использовать внешние ссылки или сжать его перед загрузкой.", "error");
       e.target.value = "";
       return;
     }
@@ -605,7 +637,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     const dangerousExtensions = ["exe", "bat", "cmd", "sh", "js", "ts", "html", "htm", "lnk", "vbs", "com", "scr"];
     if (dangerousExtensions.includes(fileExtension || "")) {
-      alert("Загрузка исполняемых файлов и веб-страниц запрещена в целях безопасности.");
+      showNotification("Загрузка исполняемых файлов и веб-страниц запрещена в целях безопасности.", "error");
       e.target.value = "";
       return;
     }
@@ -636,7 +668,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       handleFileUrlChange(index, data.url);
       setLessonFileProgress((prev) => ({ ...prev, [index]: 100 }));
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Не удалось загрузить файл");
+      showNotification(err instanceof Error ? err.message : "Не удалось загрузить файл", "error");
     } finally {
       setLessonFileUploading((prev) => ({ ...prev, [index]: false }));
       setTimeout(() => {
@@ -704,29 +736,35 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }
   };
 
-  const handleDeleteCourse = async (courseId: string, title: string) => {
-    const confirmed = confirm(`Вы действительно хотите безвозвратно удалить курс «${title}»?\nВсе уроки этого курса будут удалены автоматически!`);
-    if (!confirmed) return;
+  const handleDeleteCourse = (courseId: string, title: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Удаление курса",
+      message: `Вы действительно хотите безвозвратно удалить курс «${title}»?\nВсе уроки этого курса будут удалены автоматически!`,
+      danger: true,
+      confirmText: "Удалить курс",
+      onConfirm: async () => {
+        setActionLoading(true);
+        setMessage(null);
 
-    setActionLoading(true);
-    setMessage(null);
+        try {
+          const response = await fetch(`/api/admin/courses/${courseId}`, {
+            method: "DELETE",
+          });
 
-    try {
-      const response = await fetch(`/api/admin/courses/${courseId}`, {
-        method: "DELETE",
-      });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || "Ошибка при удалении курса");
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Ошибка при удалении курса");
-
-      // Обновляем локальное состояние курсов
-      setLocalCourses((prevCourses) => prevCourses.filter((c) => c.id !== courseId));
-      showNotification("Курс успешно удален!", "success");
-    } catch (err: unknown) {
-      showNotification(err instanceof Error ? err.message : "Не удалось удалить курс", "error");
-    } finally {
-      setActionLoading(false);
-    }
+          // Обновляем локальное состояние курсов
+          setLocalCourses((prevCourses) => prevCourses.filter((c) => c.id !== courseId));
+          showNotification("Курс успешно удален!", "success");
+        } catch (err: unknown) {
+          showNotification(err instanceof Error ? err.message : "Не удалось удалить курс", "error");
+        } finally {
+          setActionLoading(false);
+        }
+      },
+    });
   };
 
   // --- УПРАВЛЕНИЕ УЧЕНИКАМИ (API) ---
@@ -780,7 +818,23 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         setUsers((prevUsers) => [result.user, ...prevUsers]);
 
         // Показываем алерт с временным паролем
-        alert(`🎉 Ученик успешно добавлен!\n\n🔑 Временный пароль для входа: ${result.defaultPassword}\nПожалуйста, передайте этот пароль ученику.`);
+        // Показываем красивый диалог с паролем и возможностью скопировать его в 1 клик
+        setConfirmModal({
+          isOpen: true,
+          title: "🎉 Ученик успешно добавлен!",
+          message: `🔑 Временный пароль для входа: ${result.defaultPassword}\n\nПожалуйста, передайте этот пароль ученику.`,
+          confirmText: "📋 Скопировать пароль",
+          cancelText: "Закрыть",
+          danger: false,
+          onConfirm: () => {
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(result.defaultPassword);
+              showNotification("Пароль успешно скопирован в буфер обмена!", "success");
+            } else {
+              showNotification(`Пароль ученика: ${result.defaultPassword}`, "success");
+            }
+          }
+        });
 
         showNotification("Ученик успешно создан", "success");
       } else {
@@ -815,29 +869,36 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if (!confirm("Вы действительно хотите удалить этого ученика? Все его доступы и заказы будут безвозвратно удалены.")) return;
+  const handleDeleteUser = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Удаление ученика",
+      message: "Вы действительно хотите удалить этого ученика? Все его доступы и заказы будут безвозвратно удалены.",
+      danger: true,
+      confirmText: "Удалить",
+      onConfirm: async () => {
+        setActionLoading(true);
+        setMessage(null);
 
-    setActionLoading(true);
-    setMessage(null);
+        try {
+          const response = await fetch(`/api/admin/users/${id}`, {
+            method: "DELETE",
+          });
 
-    try {
-      const response = await fetch(`/api/admin/users/${id}`, {
-        method: "DELETE",
-      });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || "Ошибка при удалении ученика");
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Ошибка при удалении ученика");
+          // Обновляем состояние на клиенте
+          setUsers((prevUsers) => prevUsers.filter((u) => u.id !== id));
 
-      // Обновляем состояние на клиенте
-      setUsers((prevUsers) => prevUsers.filter((u) => u.id !== id));
-
-      showNotification("Ученик успешно удален из базы данных", "success");
-    } catch (err: unknown) {
-      showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
-    } finally {
-      setActionLoading(false);
-    }
+          showNotification("Ученик успешно удален из базы данных", "success");
+        } catch (err: unknown) {
+          showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
+        } finally {
+          setActionLoading(false);
+        }
+      },
+    });
   };
 
   // --- ФИЛЬТРАЦИЯ ДАННЫХ УЧЕНИКОВ ---
@@ -1465,7 +1526,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
       {/* --- ТАБ 3: ТОВАРЫ МАГАЗИНА --- */}
       {activeTab === "products" && (
-        <AdminProducts initialProducts={initialProducts} courses={localCourses} />
+        <AdminProducts initialProducts={initialProducts} courses={localCourses} showNotification={showNotification} />
       )}
 
       {/* --- ТАБ 3.5: УПРАВЛЕНИЕ ЗАКАЗАМИ --- */}
@@ -2592,6 +2653,12 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
           </div>
         </div>
       )}
+
+      {/* Кастомный диалог подтверждения */}
+      <ConfirmModal
+        {...confirmModal}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
 
       {/* --- ГЛОБАЛЬНЫЕ СТИЛИ (CSS) ДЛЯ АНИМАЦИЙ И СПИННЕРОВ --- */}
       <style jsx global>{`
