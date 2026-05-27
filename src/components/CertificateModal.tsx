@@ -34,12 +34,12 @@ export function CertificateModal({
 
   // 1. Динамическое подключение шрифтов и загрузка активного фона
   useEffect(() => {
-    if (!isOpen) {
-      setIsSuccess(false);
-      setIssuedPdfUrl("");
-      setError("");
-      return;
-    }
+    if (!isOpen) return;
+
+    // Сбрасываем статус при каждом новом открытии модального окна
+    setIsSuccess(false);
+    setIssuedPdfUrl("");
+    setError("");
 
     if (!fontsLoadedRef.current) {
       const link = document.createElement("link");
