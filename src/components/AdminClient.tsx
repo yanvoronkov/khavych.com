@@ -2402,7 +2402,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                     }}
                   />
 
-                  {/* Загрузка файла */}
+                  {/* Загрузка файла в виде красивой плашки */}
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <input
                       type="file"
@@ -2412,39 +2412,66 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                       id="course-image-file-input"
                     />
 
-                    <button
-                      type="button"
+                    <div
+                      className={styles.imageUploadArea}
                       onClick={() => document.getElementById("course-image-file-input")?.click()}
-                      disabled={courseImageUploading}
-                      className="btn btn-secondary"
-                      style={{
-                        padding: "8px 12px",
-                        fontSize: "12px",
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
+                      style={{ marginTop: "4px" }}
                     >
-                      {courseImageUploading ? "Загрузка..." : "📤 Загрузить файл изображения"}
-                    </button>
+                      {courseImageUploading && (
+                        <div className={styles.progressBar} style={{ width: `${courseImageUploadProgress}%` }}></div>
+                      )}
 
-                    {courseImageUploading && (
-                      <div style={{ width: "100%", backgroundColor: "#eee", borderRadius: "4px", height: "6px", overflow: "hidden" }}>
-                        <div style={{ width: `${courseImageUploadProgress}%`, backgroundColor: "var(--color-primary)", height: "100%", transition: "width 0.2s" }} />
-                      </div>
-                    )}
-
-                    {courseModal.imageUrl && (
-                      <div style={{ marginTop: "10px", border: "1px solid var(--color-gray-border)", borderRadius: "6px", padding: "8px", display: "flex", justifyContent: "center", backgroundColor: "#fafafa" }}>
-                        <img
-                          src={courseModal.imageUrl}
-                          alt="Превью курса"
-                          style={{ maxHeight: "120px", objectFit: "contain", borderRadius: "4px" }}
-                        />
-                      </div>
-                    )}
+                      {courseModal.imageUrl ? (
+                        <div
+                          style={{
+                            position: "relative",
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <img src={courseModal.imageUrl} alt="Превью" className={styles.uploadPreview} />
+                          <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "12px" }}>
+                            <span
+                              style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                              onClick={() => document.getElementById("course-image-file-input")?.click()}
+                            >
+                              Заменить
+                            </span>
+                            <span style={{ color: "var(--color-gray-border)", fontSize: "12px" }}>|</span>
+                            <span
+                              style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                              onClick={() => setCourseModal((prev) => ({ ...prev, imageUrl: "" }))}
+                            >
+                              Удалить
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={styles.uploadPlaceholder}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            viewBox="0 0 24 24"
+                          >
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                          </svg>
+                          <span>Загрузить изображение курса</span>
+                          <span style={{ fontSize: "11px", color: "var(--color-gray)" }}>
+                            Рекомендуется формат JPEG/PNG, размер до 5 МБ
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

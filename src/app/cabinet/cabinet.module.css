@@ -708,3 +708,50 @@
   color: #6b1d2f !important;
   border-bottom-color: #6b1d2f;
 }
+
+/* Блок загрузки картинок (как на карточке товара магазина) */
+.imageUploadArea {
+  border: 2px dashed var(--color-gray-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s);
+  background-color: var(--color-gray-light, #fafafa);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.imageUploadArea:hover {
+  border-color: #d4af37; /* золотистый акцент */
+  background-color: #fffdf5;
+}
+
+.uploadPreview {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.uploadPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-gray);
+  font-size: 13px;
+}
+
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: var(--color-primary);
+  transition: width 0.2s ease;
+}
