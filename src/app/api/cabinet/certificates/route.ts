@@ -33,7 +33,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      backgroundUrl: bgSetting?.value || "/images/cert-bg.jpeg",
+      backgroundUrl: bgSetting?.value || "/images/cert-bg.jpg",
     });
   } catch (error: any) {
     logger.error({ error }, "Ошибка при получении фона сертификата");

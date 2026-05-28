@@ -326,7 +326,7 @@ export function CertificateModal({
                       transform: `scale(${scale})`,
                       transformOrigin: "center center",
                       position: "absolute",
-                      backgroundImage: `url(${backgroundUrl || "/images/cert-bg.jpeg"})`,
+                      backgroundImage: `url(${backgroundUrl || "/images/cert-bg.jpg"})`,
                     }}
                   >
                     {renderCertificateContent()}
@@ -385,7 +385,7 @@ export function CertificateModal({
           <div
             id="certificate-pdf-target"
             className={styles.certificateBlank}
-            style={{ backgroundImage: `url(${backgroundUrl || "/images/cert-bg.jpeg"})` }}
+            style={{ backgroundImage: `url(${backgroundUrl || "/images/cert-bg.jpg"})` }}
           >
             {renderCertificateContent()}
           </div>
