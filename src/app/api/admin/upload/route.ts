@@ -96,7 +96,7 @@ export async function POST(request: Request) {
 
     // Заменяем все небезопасные символы в имени на подчеркивания
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const folder = uploadType === "document" ? "lessons" : "products";
+    const folder = (uploadType === "document" || uploadType === "lesson-cover") ? "lessons" : "products";
     const filename = `${folder}/${Date.now()}-${safeName}`;
     
     const blob = await put(filename, buffer, {

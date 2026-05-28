@@ -711,6 +711,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("uploadType", "lesson-cover");
 
       setLessonCoverUploadProgress(50);
 
