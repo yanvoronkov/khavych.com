@@ -28,6 +28,8 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
     certificateBgUrl: "",
   });
   
+  const [originalBgUrl, setOriginalBgUrl] = useState<string>("");
+  
   const [uploadingBg, setUploadingBg] = useState<boolean>(false);
   const [savingBg, setSavingBg] = useState<boolean>(false);
   const [bgMessage, setBgMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
@@ -58,11 +60,13 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
       }
       
       if (data.success && data.settings) {
+        const bgUrl = data.settings.certificateBgUrl || "";
         setSettings({
           telegramBotToken: data.settings.telegramBotToken || "",
           telegramChatId: data.settings.telegramChatId || "",
-          certificateBgUrl: data.settings.certificateBgUrl || "",
+          certificateBgUrl: bgUrl,
         });
+        setOriginalBgUrl(bgUrl);
       }
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Произошла неизвестная ошибка при загрузке";
@@ -166,6 +170,25 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
   };
 
   /**
+   * Удаление неиспользуемого файла из Vercel Blob через наше API
+   */
+  const deleteBlobFile = async (url: string) => {
+    try {
+      const response = await fetch("/api/admin/upload", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        console.error("Ошибка при удалении файла из Blob:", data.message);
+      }
+    } catch (err) {
+      console.error("Ошибка сети при удалении файла из Blob:", err);
+    }
+  };
+
+  /**
    * Загрузка фонового изображения сертификата на Vercel Blob
    */
   const handleUploadBg = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,6 +259,13 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
       if (!response.ok) {
         throw new Error(data.message || "Не удалось сохранить настройки оформления");
       }
+
+      // Если сохранение прошло успешно, удаляем старый кастомный фон из Vercel Blob
+      if (originalBgUrl && originalBgUrl !== settings.certificateBgUrl && originalBgUrl.includes(".public.blob.vercel-storage.com")) {
+        await deleteBlobFile(originalBgUrl);
+      }
+
+      setOriginalBgUrl(settings.certificateBgUrl);
 
       setBgMessage({ text: "Оформление сертификата успешно сохранено в базе данных!", type: "success" });
       showNotification("Оформление сертификата сохранено", "success");

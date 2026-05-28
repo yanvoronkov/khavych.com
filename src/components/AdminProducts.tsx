@@ -214,8 +214,28 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, c
     }
   };
 
+  /**
+   * Удаление файла из хранилища Vercel Blob
+   */
+  const deleteBlobFile = async (url: string) => {
+    try {
+      const response = await fetch("/api/admin/upload", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        console.error("Ошибка при удалении файла из Blob:", data.message);
+      }
+    } catch (err) {
+      console.error("Ошибка сети при удалении файла из Blob:", err);
+    }
+  };
+
   // Удаление товара (DELETE)
   const handleDeleteProduct = (id: string) => {
+    const productToDelete = products.find(p => p.id === id);
     setConfirmModal({
       isOpen: true,
       title: "Удаление товара",
@@ -230,6 +250,12 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, c
 
           if (res.ok) {
             setProducts(prev => prev.filter(p => p.id !== id));
+            
+            // Удаляем изображение товара из Vercel Blob
+            if (productToDelete?.imageUrl && productToDelete.imageUrl.includes(".public.blob.vercel-storage.com")) {
+              await deleteBlobFile(productToDelete.imageUrl);
+            }
+
             if (showNotification) {
               showNotification("Товар успешно удален!", "success");
             }
@@ -334,6 +360,12 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ initialProducts, c
       }
 
       if (editingProduct) {
+        // Удаляем старое изображение из Vercel Blob, если оно было изменено или стерто
+        const oldImg = editingProduct.imageUrl;
+        if (oldImg && oldImg !== payload.imageUrl && oldImg.includes(".public.blob.vercel-storage.com")) {
+          await deleteBlobFile(oldImg);
+        }
+
         // Обновляем в локальном стейте
         setProducts(prev => prev.map(p => p.id === editingProduct.id ? data.product : p));
       } else {

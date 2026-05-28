@@ -187,6 +187,25 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     setExpandedCourses((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
   };
 
+  /**
+   * Удаление файла из хранилища Vercel Blob
+   */
+  const deleteBlobFile = async (url: string) => {
+    try {
+      const response = await fetch("/api/admin/upload", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        console.error("Ошибка при удалении файла из Blob:", data.message);
+      }
+    } catch (err) {
+      console.error("Ошибка сети при удалении файла из Blob:", err);
+    }
+  };
+
   const showNotification = (text: string, type: "success" | "error") => {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 5000);
@@ -426,6 +445,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       } else {
         // Режим Редактирования (PUT)
         const lessonId = lessonModal.lesson?.id;
+        const oldLesson = lessonModal.lesson;
+
         const response = await fetch(`/api/admin/lessons/${lessonId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -456,6 +477,31 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         );
 
         showNotification("Урок успешно обновлен!", "success");
+
+        // Фоновое удаление замененных или удаленных файлов из Vercel Blob
+        if (oldLesson) {
+          // 1. Проверяем обложку видео
+          if (oldLesson.videoCoverUrl && oldLesson.videoCoverUrl !== lessonForm.videoCoverUrl && oldLesson.videoCoverUrl.includes(".public.blob.vercel-storage.com")) {
+            deleteBlobFile(oldLesson.videoCoverUrl);
+          }
+
+          // 2. Проверяем удаленные файлы (материалы урока)
+          const oldUrls = oldLesson.fileUrls.map((fu) => {
+            const parts = fu.split(":::");
+            return parts.length > 1 ? parts[1] : parts[0];
+          });
+
+          const newUrls = cleanFileUrls.map((fu) => {
+            const parts = fu.split(":::");
+            return parts.length > 1 ? parts[1] : parts[0];
+          });
+
+          for (const oldUrl of oldUrls) {
+            if (oldUrl && !newUrls.includes(oldUrl) && oldUrl.includes(".public.blob.vercel-storage.com")) {
+              deleteBlobFile(oldUrl);
+            }
+          }
+        }
       }
       setLessonModal({ isOpen: false, mode: "create", courseId: "" });
     } catch (err: unknown) {
@@ -466,6 +512,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   };
 
   const handleDeleteLesson = (courseId: string, lessonId: string) => {
+    const course = localCourses.find((c) => c.id === courseId);
+    const lessonToDelete = course?.lessons.find((l) => l.id === lessonId);
     setConfirmModal({
       isOpen: true,
       title: "Удаление урока",
@@ -495,6 +543,25 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
           );
 
           showNotification("Урок успешно удален!", "success");
+
+          // Фоновое удаление файлов урока из Vercel Blob
+          if (lessonToDelete) {
+            const urlsToDelete: string[] = [];
+            if (lessonToDelete.videoCoverUrl && lessonToDelete.videoCoverUrl.includes(".public.blob.vercel-storage.com")) {
+              urlsToDelete.push(lessonToDelete.videoCoverUrl);
+            }
+            for (const fileUrlItem of lessonToDelete.fileUrls) {
+              const parts = fileUrlItem.split(":::");
+              const url = parts.length > 1 ? parts[1] : parts[0];
+              if (url && url.includes(".public.blob.vercel-storage.com")) {
+                urlsToDelete.push(url);
+              }
+            }
+
+            for (const fileUrl of urlsToDelete) {
+              deleteBlobFile(fileUrl);
+            }
+          }
         } catch (err: unknown) {
           showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
         } finally {
@@ -762,6 +829,12 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         setLocalCourses((prevCourses) => [...prevCourses, result.course]);
         showNotification("Курс успешно создан!", "success");
       } else {
+        const oldCourse = localCourses.find((c) => c.id === courseModal.courseId);
+        const oldImg = oldCourse?.imageUrl;
+        if (oldImg && oldImg !== courseModal.imageUrl && oldImg.includes(".public.blob.vercel-storage.com")) {
+          await deleteBlobFile(oldImg);
+        }
+
         setLocalCourses((prevCourses) =>
           prevCourses.map((c) => {
             if (c.id === courseModal.courseId) {
@@ -787,6 +860,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   };
 
   const handleDeleteCourse = (courseId: string, title: string) => {
+    const courseToDelete = localCourses.find((c) => c.id === courseId);
     setConfirmModal({
       isOpen: true,
       title: "Удаление курса",
@@ -808,6 +882,32 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
           // Обновляем локальное состояние курсов
           setLocalCourses((prevCourses) => prevCourses.filter((c) => c.id !== courseId));
           showNotification("Курс успешно удален!", "success");
+
+          // Каскадное фоновое удаление файлов курса из Vercel Blob
+          if (courseToDelete) {
+            const urlsToDelete: string[] = [];
+
+            if (courseToDelete.imageUrl && courseToDelete.imageUrl.includes(".public.blob.vercel-storage.com")) {
+              urlsToDelete.push(courseToDelete.imageUrl);
+            }
+
+            for (const lesson of courseToDelete.lessons) {
+              if (lesson.videoCoverUrl && lesson.videoCoverUrl.includes(".public.blob.vercel-storage.com")) {
+                urlsToDelete.push(lesson.videoCoverUrl);
+              }
+              for (const fileUrlItem of lesson.fileUrls) {
+                const parts = fileUrlItem.split(":::");
+                const url = parts.length > 1 ? parts[1] : parts[0];
+                if (url && url.includes(".public.blob.vercel-storage.com")) {
+                  urlsToDelete.push(url);
+                }
+              }
+            }
+
+            for (const fileUrl of urlsToDelete) {
+              deleteBlobFile(fileUrl);
+            }
+          }
         } catch (err: unknown) {
           showNotification(err instanceof Error ? err.message : "Не удалось удалить курс", "error");
         } finally {

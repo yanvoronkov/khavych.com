@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "src/lib/auth";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 import { logger } from "src/lib/logger";
 
 // Отключаем кэширование и принудительно делаем роут динамическим
@@ -117,6 +117,78 @@ export async function POST(request: Request) {
         error: true,
         code: "INTERNAL_SERVER_ERROR",
         message: "Произошла внутренняя ошибка сервера при загрузке файла",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * Обработчик DELETE запроса для удаления неиспользуемых файлов из Vercel Blob.
+ * Доступен только для пользователей с ролью ADMIN.
+ * Путь: /api/admin/upload
+ */
+export async function DELETE(request: Request) {
+  try {
+    // 1. Проверяем сессию и роль администратора
+    const session = await getServerSession();
+
+    if (!session || session.role !== "ADMIN") {
+      logger.warn({ session }, "Несанкционированная попытка удаления файла");
+      return NextResponse.json(
+        {
+          error: true,
+          code: "FORBIDDEN",
+          message: "У вас нет прав для выполнения этого действия",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Считываем url файла из тела запроса
+    const { url } = await request.json();
+
+    if (!url || typeof url !== "string") {
+      return NextResponse.json(
+        {
+          error: true,
+          code: "BAD_REQUEST",
+          message: "Не указан URL файла для удаления",
+        },
+        { status: 400 }
+      );
+    }
+
+    // 3. Безопасность: проверяем, что URL принадлежит именно нашему Vercel Blob хранилищу
+    if (!url.includes(".public.blob.vercel-storage.com")) {
+      logger.warn({ url }, "Попытка удаления стороннего файла, отклонено в целях безопасности");
+      return NextResponse.json(
+        {
+          error: true,
+          code: "BAD_REQUEST",
+          message: "Разрешено удалять файлы только из хранилища Vercel Blob проекта",
+        },
+        { status: 400 }
+      );
+    }
+
+    // 4. Удаляем файл из Vercel Blob
+    await del(url);
+
+    logger.info({ url }, "Файл успешно удален из Vercel Blob");
+
+    return NextResponse.json({
+      success: true,
+      message: "Файл успешно удален",
+    });
+  } catch (error: any) {
+    logger.error({ error }, "Ошибка при удалении файла из Vercel Blob");
+    return NextResponse.json(
+      {
+        error: true,
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Произошла внутренняя ошибка сервера при удалении файла",
         details: error.message
       },
       { status: 500 }
