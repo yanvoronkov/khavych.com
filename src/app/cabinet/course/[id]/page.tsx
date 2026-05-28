@@ -264,6 +264,8 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
                         controls
                         controlsList="nodownload"
                         playsInline
+                        onContextMenu={(e) => e.preventDefault()}
+                        disablePictureInPicture
                       />
                     );
                   }
