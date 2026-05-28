@@ -16,6 +16,7 @@ export interface ILesson {
   title: string;
   description: string;
   videoUrl: string | null;
+  videoCoverUrl: string | null;
   fileUrls: string[];
   order: number;
   createdAt: string;
@@ -114,6 +115,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   });
   const [courseImageUploading, setCourseImageUploading] = useState<boolean>(false);
   const [courseImageUploadProgress, setCourseImageUploadProgress] = useState<number>(0);
+  const [lessonCoverUploading, setLessonCoverUploading] = useState<boolean>(false);
+  const [lessonCoverUploadProgress, setLessonCoverUploadProgress] = useState<number>(0);
 
   const [lessonFileUploading, setLessonFileUploading] = useState<Record<number, boolean>>({});
   const [lessonFileProgress, setLessonFileProgress] = useState<Record<number, number>>({});
@@ -165,12 +168,14 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     title: string;
     description: string;
     videoUrl: string;
+    videoCoverUrl: string;
     fileUrls: string[];
     order: number;
   }>({
     title: "",
     description: "",
     videoUrl: "",
+    videoCoverUrl: "",
     fileUrls: [""],
     order: 0,
   });
@@ -329,6 +334,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         title: "",
         description: "",
         videoUrl: "",
+        videoCoverUrl: "",
         fileUrls: [""],
         order: nextOrder,
       });
@@ -338,6 +344,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         title: lesson.title,
         description: lesson.description,
         videoUrl: lesson.videoUrl || "",
+        videoCoverUrl: lesson.videoCoverUrl || "",
         fileUrls: lesson.fileUrls.length > 0 ? [...lesson.fileUrls] : [""],
         order: lesson.order,
       });
@@ -395,6 +402,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             title: lessonForm.title,
             description: lessonForm.description,
             videoUrl: lessonForm.videoUrl || null,
+            videoCoverUrl: lessonForm.videoCoverUrl || null,
             fileUrls: cleanFileUrls,
             order: Number(lessonForm.order),
           }),
@@ -425,6 +433,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             title: lessonForm.title,
             description: lessonForm.description,
             videoUrl: lessonForm.videoUrl || null,
+            videoCoverUrl: lessonForm.videoCoverUrl || null,
             fileUrls: cleanFileUrls,
             order: Number(lessonForm.order),
           }),
@@ -616,6 +625,47 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     } finally {
       setCourseImageUploading(false);
       setTimeout(() => setCourseImageUploadProgress(0), 1000);
+    }
+  };
+
+  const handleLessonCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.startsWith("image/")) {
+      showNotification("Пожалуйста, выберите графический файл (изображение)", "error");
+      return;
+    }
+
+    setLessonCoverUploading(true);
+    setLessonCoverUploadProgress(20);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      setLessonCoverUploadProgress(50);
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      setLessonCoverUploadProgress(90);
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Ошибка при загрузке картинки");
+      }
+
+      setLessonForm((prev) => ({ ...prev, videoCoverUrl: data.url }));
+      setLessonCoverUploadProgress(100);
+    } catch (err: unknown) {
+      showNotification(err instanceof Error ? err.message : "Не удалось загрузить изображение", "error");
+    } finally {
+      setLessonCoverUploading(false);
+      setTimeout(() => setLessonCoverUploadProgress(0), 1000);
     }
   };
 
@@ -2100,6 +2150,85 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                   <span style={{ fontSize: "11px", color: "var(--color-gray)", marginTop: "4px", display: "block", lineHeight: "1.4" }}>
                     Поддерживаются ссылки на <strong>YouTube</strong>, <strong>Одноклассники (ok.ru)</strong>, <strong>Kinescope</strong>, а также прямые ссылки на видеофайлы (<strong>MP4/WebM</strong>) с любых хостингов или облачных хранилищ.
                   </span>
+                </div>
+
+                {/* Обложка для видео */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Обложка для видео (необязательно)
+                  </label>
+                  
+                  {/* Загрузка файла в виде красивой плашки */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLessonCoverUpload}
+                      style={{ display: "none" }}
+                      id="lesson-cover-file-input"
+                    />
+
+                    <div
+                      className={styles.imageUploadArea}
+                      onClick={() => document.getElementById("lesson-cover-file-input")?.click()}
+                      style={{ marginTop: "4px" }}
+                    >
+                      {lessonCoverUploading && (
+                        <div className={styles.progressBar} style={{ width: `${lessonCoverUploadProgress}%` }}></div>
+                      )}
+
+                      {lessonForm.videoCoverUrl ? (
+                        <div
+                          style={{
+                            position: "relative",
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <img src={lessonForm.videoCoverUrl} alt="Превью обложки" className={styles.uploadPreview} />
+                          <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "12px" }}>
+                            <span
+                              style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                              onClick={() => document.getElementById("lesson-cover-file-input")?.click()}
+                            >
+                              Заменить
+                            </span>
+                            <span style={{ color: "var(--color-gray-border)", fontSize: "12px" }}>|</span>
+                            <span
+                              style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                              onClick={() => setLessonForm((prev) => ({ ...prev, videoCoverUrl: "" }))}
+                            >
+                              Удалить
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={styles.uploadPlaceholder}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            viewBox="0 0 24 24"
+                          >
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                          </svg>
+                          <span>Загрузить обложку видео</span>
+                          <span style={{ fontSize: "11px", color: "var(--color-gray)" }}>
+                            Рекомендуется формат JPEG/PNG, размер до 5 МБ
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Порядковый номер */}

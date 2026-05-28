@@ -252,25 +252,16 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
               <h1 className={styles.lessonTitle}>{activeLesson.title}</h1>
             </div>
 
-            {/* Видео плеер или красивая плашка, если видео нет */}
             {activeLesson.videoUrl ? (
               <div className={styles.videoContainer}>
                 {(() => {
                   const parsed = parseVideoUrl(activeLesson.videoUrl);
-                  if (parsed.type === "direct") {
-                    return (
-                      <SecureVideoPlayer
-                        src={parsed.url}
-                        className={styles.videoIframe}
-                      />
-                    );
-                  }
                   return (
-                    <iframe
+                    <SecureVideoPlayer
                       src={parsed.url}
+                      type={parsed.type === "direct" ? "direct" : "iframe"}
+                      coverUrl={activeLesson.videoCoverUrl}
                       className={styles.videoIframe}
-                      allow="autoplay; fullscreen; picture-in-picture; encrypted-media;"
-                      allowFullScreen
                     />
                   );
                 })()}

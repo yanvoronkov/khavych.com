@@ -88,6 +88,7 @@ export default async function AdminPage() {
       title: l.title,
       description: l.description,
       videoUrl: l.videoUrl,
+      videoCoverUrl: l.videoCoverUrl,
       fileUrls: l.fileUrls,
       order: l.order,
       createdAt: l.createdAt.toISOString(),

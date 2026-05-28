@@ -9,6 +9,7 @@ const createLessonSchema = z.object({
   title: z.string().min(1, "Название урока не должно быть пустым"),
   description: z.string(),
   videoUrl: z.string().nullable().optional(),
+  videoCoverUrl: z.string().nullable().optional(),
   fileUrls: z.array(z.string()).default([]),
   order: z.number().int("Порядок должен быть целым числом").default(0),
 });
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     // 2. Валидация входных данных
     const body = await request.json();
     const validatedData = createLessonSchema.parse(body);
-    const { courseId, title, description, videoUrl, fileUrls, order } = validatedData;
+    const { courseId, title, description, videoUrl, videoCoverUrl, fileUrls, order } = validatedData;
 
     // 3. Создаем урок в базе данных
     const newLesson = await db.lesson.create({
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
         title,
         description,
         videoUrl: videoUrl || null,
+        videoCoverUrl: videoCoverUrl || null,
         fileUrls,
         order,
       },

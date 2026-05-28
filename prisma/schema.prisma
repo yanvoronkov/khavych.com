@@ -46,6 +46,7 @@ model Lesson {
   title       String
   description String
   videoUrl    String?
+  videoCoverUrl String?
   fileUrls    String[]
   order       Int
   createdAt   DateTime @default(now())

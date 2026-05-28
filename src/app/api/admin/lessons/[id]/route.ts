@@ -8,6 +8,7 @@ const updateLessonSchema = z.object({
   title: z.string().min(1, "Название урока не должно быть пустым").optional(),
   description: z.string().optional(),
   videoUrl: z.string().nullable().optional(),
+  videoCoverUrl: z.string().nullable().optional(),
   fileUrls: z.array(z.string()).optional(),
   order: z.number().int("Порядок должен быть целым числом").optional(),
 });
@@ -66,6 +67,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         title: validatedData.title,
         description: validatedData.description,
         videoUrl: validatedData.videoUrl !== undefined ? (validatedData.videoUrl || null) : undefined,
+        videoCoverUrl: validatedData.videoCoverUrl !== undefined ? (validatedData.videoCoverUrl || null) : undefined,
         fileUrls: validatedData.fileUrls,
         order: validatedData.order,
       },
