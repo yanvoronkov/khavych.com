@@ -7,6 +7,7 @@ import { isAccessActive } from "src/lib/access";
 import styles from "../../cabinet.module.css";
 import { Header } from "src/components/Header";
 import { CertificateSection } from "src/components/CertificateSection";
+import { SecureVideoPlayer } from "src/components/SecureVideoPlayer";
 
 // Принудительно устанавливаем динамический рендеринг
 export const dynamic = "force-dynamic";
@@ -258,14 +259,9 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
                   const parsed = parseVideoUrl(activeLesson.videoUrl);
                   if (parsed.type === "direct") {
                     return (
-                      <video
+                      <SecureVideoPlayer
                         src={parsed.url}
                         className={styles.videoIframe}
-                        controls
-                        controlsList="nodownload"
-                        playsInline
-                        onContextMenu={(e) => e.preventDefault()}
-                        disablePictureInPicture
                       />
                     );
                   }
