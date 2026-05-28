@@ -457,6 +457,21 @@
 .lessonText {
   font-size: 14px;
   color: #4a4a4a;
+  line-height: 1.6;
+}
+
+.lessonText ul,
+.lessonText ol {
+  padding-left: 20px;
+  margin: 12px 0;
+}
+
+.lessonText li {
+  margin-bottom: 8px;
+}
+
+.lessonText li:last-child {
+  margin-bottom: 0;
 }
 
 /* Файлы для скачивания */
