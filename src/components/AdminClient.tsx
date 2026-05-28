@@ -1445,11 +1445,17 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                                     textOverflow: "ellipsis",
                                   }}
                                 >
-                                  {lesson.description || "Без описания"}
+                                  {lesson.fileUrls && lesson.fileUrls.length > 0
+                                    ? `📁 Файлов: ${lesson.fileUrls.length}`
+                                    : "📁 Без файлов"}
                                 </div>
-                                {lesson.videoUrl && (
+                                {lesson.videoUrl ? (
                                   <div style={{ fontSize: "11px", color: "#2e7d32", marginTop: "4px", fontWeight: 600 }}>
                                     🎥 Видео прикреплено
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: "11px", color: "#757575", marginTop: "4px", fontWeight: 600 }}>
+                                    📹 Без видео
                                   </div>
                                 )}
                               </div>
