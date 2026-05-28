@@ -446,13 +446,17 @@
   padding-bottom: 10px;
 }
 
-.lessonDescription p,
-.lessonText {
+.lessonDescription p {
   font-size: 14px;
   color: #4a4a4a;
   line-height: 1.7;
-  margin: 0;
+  margin: 0 0 12px 0;
   white-space: pre-wrap;
+}
+
+.lessonText {
+  font-size: 14px;
+  color: #4a4a4a;
 }
 
 /* Файлы для скачивания */
