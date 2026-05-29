@@ -12,6 +12,7 @@ const settingsSchema = z.object({
   telegramBotToken: z.string().optional().nullable(),
   telegramChatId: z.string().optional().nullable(),
   certificateBgUrl: z.string().optional().nullable(),
+  yandexMetrikaId: z.string().optional().nullable(),
 });
 
 /**
@@ -48,6 +49,7 @@ export async function GET() {
         telegramBotToken: settings.telegramBotToken || "",
         telegramChatId: settings.telegramChatId || "",
         certificateBgUrl: settings.certificateBgUrl || "",
+        yandexMetrikaId: settings.yandexMetrikaId || "",
       },
     });
   } catch (error: any) {
@@ -175,7 +177,17 @@ export async function POST(request: Request) {
       });
     }
 
-    logger.info("Настройки уведомлений Telegram успешно сохранены в базе данных");
+    // Сохраняем ID счетчика Яндекс.Метрики, если передан
+    if (validatedData.yandexMetrikaId !== undefined) {
+      const metrikaVal = validatedData.yandexMetrikaId?.trim() || "";
+      await db.setting.upsert({
+        where: { key: "yandexMetrikaId" },
+        update: { value: metrikaVal },
+        create: { key: "yandexMetrikaId", value: metrikaVal },
+      });
+    }
+
+    logger.info("Системные настройки успешно сохранены в базе данных");
 
     return NextResponse.json({
       success: true,

@@ -14,6 +14,7 @@ interface ISettingsState {
   telegramBotToken: string;
   telegramChatId: string;
   certificateBgUrl: string;
+  yandexMetrikaId: string;
 }
 
 /**
@@ -26,6 +27,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
     telegramBotToken: "",
     telegramChatId: "",
     certificateBgUrl: "",
+    yandexMetrikaId: "",
   });
   
   const [originalBgUrl, setOriginalBgUrl] = useState<string>("");
@@ -65,6 +67,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
           telegramBotToken: data.settings.telegramBotToken || "",
           telegramChatId: data.settings.telegramChatId || "",
           certificateBgUrl: bgUrl,
+          yandexMetrikaId: data.settings.yandexMetrikaId || "",
         });
         setOriginalBgUrl(bgUrl);
       }
@@ -83,12 +86,15 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!settings.telegramBotToken.trim() || !settings.telegramChatId.trim()) {
+    const hasTelegram = settings.telegramBotToken.trim() && settings.telegramChatId.trim();
+    const hasMetrika = settings.yandexMetrikaId.trim();
+
+    if (!hasTelegram && !hasMetrika) {
       setLocalMessage({
-        text: "Для сохранения настроек необходимо заполнить оба поля: Токен бота и ID чата",
+        text: "Для сохранения необходимо настроить Telegram (токен + ID чата) или указать ID счетчика Яндекс.Метрики",
         type: "error",
       });
-      showNotification("Заполните оба обязательных поля", "error");
+      showNotification("Заполните поля настроек", "error");
       return;
     }
 
@@ -103,6 +109,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
           action: "save",
           telegramBotToken: settings.telegramBotToken,
           telegramChatId: settings.telegramChatId,
+          yandexMetrikaId: settings.yandexMetrikaId,
         }),
       });
       
@@ -358,6 +365,23 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
               Можно указать несколько Chat ID через запятую или пробел, чтобы бот отправлял дублирующие уведомления нескольким администраторам и в группу.
             </p>
           </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="yandexMetrikaId">
+            ID счетчика Яндекс.Метрики
+          </label>
+          <input
+            type="text"
+            id="yandexMetrikaId"
+            className={styles.formInput}
+            placeholder="Например: 109492282"
+            value={settings.yandexMetrikaId}
+            onChange={(e) => setSettings((prev) => ({ ...prev, yandexMetrikaId: e.target.value }))}
+          />
+          <p style={{ fontSize: "11px", color: "var(--color-gray)", marginTop: "4px", margin: 0 }}>
+            Введите только номер счетчика (цифры). Код счетчика будет автоматически встроен на все публичные страницы сайта.
+          </p>
+        </div>
 
           <div className={styles.actionsRow}>
             <button
