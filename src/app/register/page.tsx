@@ -16,6 +16,7 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [website, setWebsite] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -56,6 +57,7 @@ export default function RegisterPage() {
           email,
           phone,
           password,
+          website,
         }),
       });
 
@@ -182,6 +184,19 @@ export default function RegisterPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+            />
+          </div>
+
+          {/* Поле-приманка для ботов (Honeypot) */}
+          <div style={{ display: "none", position: "absolute", left: "-9999px", top: "-9999px" }} aria-hidden="true">
+            <label htmlFor="reg-website">Website</label>
+            <input
+              type="text"
+              id="reg-website"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
             />
           </div>
 

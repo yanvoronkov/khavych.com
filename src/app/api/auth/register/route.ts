@@ -10,6 +10,7 @@ const registerSchema = z.object({
   password: z.string().min(6, "Пароль должен быть не менее 6 символов"),
   name: z.string().min(2, "Имя должно быть не менее 2 символов"),
   phone: z.string().min(8, "Телефон должен быть не менее 8 цифр"),
+  website: z.string().optional(),
 });
 
 /**
@@ -22,6 +23,16 @@ export async function POST(request: Request) {
     
     // 1. Валидация входных данных
     const validatedData = registerSchema.parse(body);
+
+    // Проверка Honeypot поля: если оно заполнено, значит, регистрируется бот
+    if (validatedData.website) {
+      logger.warn({ email: validatedData.email }, "Регистрация отклонена: сработало Honeypot поле (бот)");
+      // Возвращаем статус 200, чтобы бот думал, что все прошло успешно, и не спамил повторно
+      return NextResponse.json({
+        success: true,
+        message: "Регистрация прошла успешно",
+      });
+    }
 
     // 2. Проверка, существует ли уже пользователь с таким email
     const existingUser = await db.user.findUnique({
