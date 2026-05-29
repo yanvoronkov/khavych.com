@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "src/context/CartContext";
+import { useLanguage } from "src/context/LanguageContext";
 import styles from "./Header.module.css";
 
 /**
@@ -14,6 +15,7 @@ import styles from "./Header.module.css";
 export const Header: React.FC = () => {
   const pathname = usePathname();
   const { count, setIsCartOpen } = useCart();
+  const { language, setLanguage, t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   // Флаги определения страниц для условного рендеринга меню
@@ -27,7 +29,7 @@ export const Header: React.FC = () => {
         <button
           className={`${styles.mobileMenuBtn} ${isMenuOpen ? styles.mobileMenuBtnActive : ""}`}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Открыть меню"
+          aria-label={t("header", "ariaMenu")}
         >
           <span></span>
           <span></span>
@@ -39,46 +41,65 @@ export const Header: React.FC = () => {
           {isCabinet ? (
             <>
               <Link href="/" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-                Главная
+                {t("header", "home")}
               </Link>
               <Link href="/shop" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-                Магазин
+                {t("header", "shop")}
               </Link>
             </>
           ) : isShop ? (
             <>
               <Link href="/" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-                Главная
+                {t("header", "home")}
               </Link>
             </>
           ) : (
             <>
               <Link href="/#about" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-                Обо мне
+                {t("header", "about")}
               </Link>
               <Link href="/#services" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-                Услуги
+                {t("header", "services")}
               </Link>
               <Link href="/shop" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-                Магазин
+                {t("header", "shop")}
               </Link>
               <Link href="/#testimonials" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-                Отзывы
+                {t("header", "testimonials")}
               </Link>
               <Link href="/#skills" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>
-                Сертификаты
+                {t("header", "certificates")}
               </Link>
             </>
           )}
         </nav>
 
-        {/* Действия справа (Корзина и Кабинет) */}
+        {/* Действия справа (Переключатель языков, Корзина и Кабинет) */}
         <div className={styles.actions}>
+          {/* Переключатель языков с премиальным дизайном */}
+          <div className={styles.langSelector}>
+            <button
+              className={`${styles.langBtn} ${language === "ru" ? styles.langBtnActive : ""}`}
+              onClick={() => setLanguage("ru")}
+              title="Русский"
+            >
+              RU
+            </button>
+            <span className={styles.langDivider}>/</span>
+            <button
+              className={`${styles.langBtn} ${language === "de" ? styles.langBtnActive : ""}`}
+              onClick={() => setLanguage("de")}
+              title="Deutsch"
+            >
+              DE
+            </button>
+          </div>
+
           {/* Кнопка корзины */}
           <button
             className={styles.cartBtn}
             onClick={() => setIsCartOpen(true)}
-            aria-label="Открыть корзину"
+            aria-label={t("header", "ariaCart")}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -115,7 +136,7 @@ export const Header: React.FC = () => {
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-              <span>Кабинет</span>
+              <span>{t("header", "cabinet")}</span>
             </Link>
           )}
         </div>

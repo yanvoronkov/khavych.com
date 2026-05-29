@@ -9,8 +9,11 @@ export const dynamic = "force-dynamic";
 
 const createCourseSchema = z.object({
   title: z.string().min(1, "Название курса не должно быть пустым"),
+  titleDe: z.string().optional().nullable(),
   description: z.string().min(1, "Описание курса не должно быть пустым"),
+  descriptionDe: z.string().optional().nullable(),
   imageUrl: z.string().optional().nullable(),
+  imageUrlDe: z.string().optional().nullable(),
 });
 
 /**
@@ -39,8 +42,11 @@ export async function POST(request: Request) {
     const newCourse = await db.course.create({
       data: {
         title: validatedData.title.trim(),
+        titleDe: validatedData.titleDe?.trim() || null,
         description: validatedData.description.trim(),
+        descriptionDe: validatedData.descriptionDe?.trim() || null,
         imageUrl: validatedData.imageUrl?.trim() || null,
+        imageUrlDe: validatedData.imageUrlDe?.trim() || null,
         isPublished: true, // По умолчанию публикуем созданный курс
       },
       include: {

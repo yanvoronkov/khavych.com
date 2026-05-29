@@ -3,14 +3,19 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "src/context/LanguageContext";
 import styles from "../login/auth.module.css";
 
 /**
- * Компонент страницы регистрации ученика (/register).
+ * Компонент страницы регистрации нового ученика (/register).
+ * Поддерживает мультиязычность (RU/DE) на основе контекста useLanguage.
  * Позволяет новому пользователю создать учетную запись на сайте.
+ * 
+ * @returns JSX элемент интерактивной страницы регистрации.
  */
 export default function RegisterPage() {
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
@@ -34,14 +39,14 @@ export default function RegisterPage() {
 
     // 1. Проверка совпадения паролей
     if (password !== confirmPassword) {
-      setError("Пароли не совпадают");
+      setError(t("auth", "errorPasswordMismatch"));
       setIsSubmitting(false);
       return;
     }
 
     // 2. Проверка минимальной длины пароля
     if (password.length < 6) {
-      setError("Пароль должен содержать не менее 6 символов");
+      setError(t("auth", "validationPassword"));
       setIsSubmitting(false);
       return;
     }
@@ -64,7 +69,7 @@ export default function RegisterPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Ошибка при регистрации");
+        throw new Error(result.message || t("auth", "registerError"));
       }
 
       // Регистрация успешна
@@ -75,7 +80,7 @@ export default function RegisterPage() {
         router.push("/login");
       }, 3000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Произошла непредвиденная ошибка");
+      setError(err instanceof Error ? err.message : t("auth", "genericError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -90,15 +95,15 @@ export default function RegisterPage() {
               <span className="text-gold">OLGA KHAVYCH</span>
             </Link>
             <h2 className="text-gold" style={{ marginTop: "24px", marginBottom: "12px" }}>
-              Регистрация успешна!
+              {t("auth", "regSuccessTitle")}
             </h2>
             <p className={styles.subtitle}>
-              Вы успешно зарегистрировались. Сейчас вы будете перенаправлены на страницу входа...
+              {t("auth", "regSuccessDesc")}
             </p>
           </div>
           <div style={{ marginTop: "24px" }}>
             <Link href="/login" className="btn btn-primary" style={{ display: "inline-block", width: "100%" }}>
-              Перейти к входу вручную
+              {t("auth", "goToLoginManual")}
             </Link>
           </div>
         </div>
@@ -114,7 +119,7 @@ export default function RegisterPage() {
           <Link href="/" className={styles.logoText}>
             <span className="text-gold">OLGA KHAVYCH</span>
           </Link>
-          <p className={styles.subtitle}>Регистрация нового ученика</p>
+          <p className={styles.subtitle}>{t("auth", "registerTitle")}</p>
         </div>
 
         {/* Сообщение об ошибке */}
@@ -123,12 +128,12 @@ export default function RegisterPage() {
         {/* Форма регистрации */}
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="reg-name">Ваше Имя</label>
+            <label htmlFor="reg-name">{t("auth", "name")}</label>
             <input
               type="text"
               id="reg-name"
               className={styles.input}
-              placeholder="Иван Иванов"
+              placeholder={t("auth", "namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -136,12 +141,12 @@ export default function RegisterPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="reg-email">Ваш Email</label>
+            <label htmlFor="reg-email">{t("auth", "email")}</label>
             <input
               type="email"
               id="reg-email"
               className={styles.input}
-              placeholder="ivan@example.com"
+              placeholder={t("auth", "emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -149,12 +154,12 @@ export default function RegisterPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="reg-phone">Номер телефона</label>
+            <label htmlFor="reg-phone">{t("auth", "phone")}</label>
             <input
               type="tel"
               id="reg-phone"
               className={styles.input}
-              placeholder="+7 (999) 123-45-67"
+              placeholder={language === "ru" ? "+7 (999) 123-45-67" : "+49 123 456789"}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
@@ -162,12 +167,12 @@ export default function RegisterPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="reg-password">Пароль</label>
+            <label htmlFor="reg-password">{t("auth", "password")}</label>
             <input
               type="password"
               id="reg-password"
               className={styles.input}
-              placeholder="Минимум 6 символов"
+              placeholder={t("auth", "passwordMinLength")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -175,12 +180,12 @@ export default function RegisterPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="reg-confirm">Подтвердите пароль</label>
+            <label htmlFor="reg-confirm">{t("auth", "confirmPassword")}</label>
             <input
               type="password"
               id="reg-confirm"
               className={styles.input}
-              placeholder="••••••"
+              placeholder={t("auth", "passwordPlaceholder")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -206,15 +211,15 @@ export default function RegisterPage() {
             style={{ width: "100%", marginTop: "8px" }}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Регистрация..." : "Зарегистрироваться"}
+            {isSubmitting ? t("auth", "submitRegisterPending") : t("auth", "submitRegister")}
           </button>
         </form>
 
         {/* Ссылка на вход */}
         <p className={styles.switchText}>
-          Уже есть аккаунт?{" "}
+          {t("auth", "hasAccount")}{" "}
           <Link href="/login" className={styles.switchLink}>
-            Войти в кабинет
+            {t("auth", "goToLogin")}
           </Link>
         </p>
       </div>

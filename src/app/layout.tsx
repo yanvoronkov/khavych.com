@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat, Inter } from "next/font/google";
+import Script from "next/script";
 import { Providers } from "src/components/Providers";
 import { CartDrawer } from "src/components/CartDrawer";
 import { ScrollToTop } from "src/components/ScrollToTop";
@@ -86,8 +87,9 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://t.me" />
         {yandexMetrikaId && (
           <>
-            <script
-              type="text/javascript"
+            <Script
+              id="yandex-metrika"
+              strategy="afterInteractive"
               dangerouslySetInnerHTML={{
                 __html: `
                   (function(m,e,t,r,i,k,a){

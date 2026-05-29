@@ -3,15 +3,20 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "src/context/LanguageContext";
 import styles from "./auth.module.css";
 
 /**
  * Клиентский интерактивный компонент формы входа в личный кабинет.
+ * Поддерживает мультиязычность (RU/DE) на основе контекста useLanguage.
  * Обеспечивает ввод данных, отправку POST запроса авторизации
  * и перенаправление пользователя на основе его роли.
+ * 
+ * @returns JSX элемент интерактивной формы входа.
  */
 export default function LoginClient() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +24,8 @@ export default function LoginClient() {
 
   /**
    * Обработка отправки формы входа
+   * 
+   * @param e Событие отправки формы
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +44,7 @@ export default function LoginClient() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Неверный Email или пароль");
+        throw new Error(result.message || t("auth", "loginError"));
       }
 
       // Успешный вход: перенаправляем на основе роли пользователя
@@ -50,7 +57,7 @@ export default function LoginClient() {
       // Принудительно обновляем роутер для обновления состояния кук
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Произошла непредвиденная ошибка");
+      setError(err instanceof Error ? err.message : t("auth", "genericError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -64,7 +71,7 @@ export default function LoginClient() {
           <Link href="/" className={styles.logoText}>
             <span className="text-gold">OLGA KHAVYCH</span>
           </Link>
-          <p className={styles.subtitle}>Вход в личный кабинет ученика</p>
+          <p className={styles.subtitle}>{t("auth", "loginTitle")}</p>
         </div>
 
         {/* Сообщение об ошибке */}
@@ -73,12 +80,12 @@ export default function LoginClient() {
         {/* Форма входа */}
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="login-email">Ваш Email</label>
+            <label htmlFor="login-email">{t("auth", "email")}</label>
             <input
               type="email"
               id="login-email"
               className={styles.input}
-              placeholder="ivan@example.com"
+              placeholder={t("auth", "emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -86,12 +93,12 @@ export default function LoginClient() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="login-password">Пароль</label>
+            <label htmlFor="login-password">{t("auth", "password")}</label>
             <input
               type="password"
               id="login-password"
               className={styles.input}
-              placeholder="••••••"
+              placeholder={t("auth", "passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -104,15 +111,15 @@ export default function LoginClient() {
             style={{ width: "100%", marginTop: "8px" }}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Вход..." : "Войти в кабинет"}
+            {isSubmitting ? t("auth", "submitLoginPending") : t("auth", "submitLogin")}
           </button>
         </form>
 
         {/* Ссылка на регистрацию */}
         <p className={styles.switchText}>
-          Еще нет кабинета?{" "}
+          {t("auth", "noAccount")}{" "}
           <Link href="/register" className={styles.switchLink}>
-            Зарегистрироваться
+            {t("auth", "goToRegister")}
           </Link>
         </p>
       </div>

@@ -14,10 +14,15 @@ export interface ILesson {
   id: string;
   courseId: string;
   title: string;
+  titleDe?: string | null;
   description: string;
+  descriptionDe?: string | null;
   videoUrl: string | null;
+  videoUrlDe?: string | null;
   videoCoverUrl: string | null;
+  videoCoverUrlDe?: string | null;
   fileUrls: string[];
+  fileUrlsDe: string[];
   order: number;
   createdAt: string;
   updatedAt: string;
@@ -26,8 +31,11 @@ export interface ILesson {
 export interface IAdminCourse {
   id: string;
   title: string;
+  titleDe?: string | null;
   description: string;
+  descriptionDe?: string | null;
   imageUrl: string | null;
+  imageUrlDe?: string | null;
   isPublished: boolean;
   lessons: ILesson[];
   createdAt: string;
@@ -103,23 +111,40 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     mode: "create" | "edit";
     courseId: string;
     title: string;
+    titleDe: string;
     description: string;
+    descriptionDe: string;
     imageUrl: string;
+    imageUrlDe: string;
   }>({
     isOpen: false,
     mode: "create",
     courseId: "",
     title: "",
+    titleDe: "",
     description: "",
+    descriptionDe: "",
     imageUrl: "",
+    imageUrlDe: "",
   });
   const [courseImageUploading, setCourseImageUploading] = useState<boolean>(false);
   const [courseImageUploadProgress, setCourseImageUploadProgress] = useState<number>(0);
+  const [courseImageDeUploading, setCourseImageDeUploading] = useState<boolean>(false);
+  const [courseImageDeUploadProgress, setCourseImageDeUploadProgress] = useState<number>(0);
+  
   const [lessonCoverUploading, setLessonCoverUploading] = useState<boolean>(false);
   const [lessonCoverUploadProgress, setLessonCoverUploadProgress] = useState<number>(0);
+  const [lessonCoverDeUploading, setLessonCoverDeUploading] = useState<boolean>(false);
+  const [lessonCoverDeUploadProgress, setLessonCoverDeUploadProgress] = useState<number>(0);
 
   const [lessonFileUploading, setLessonFileUploading] = useState<Record<number, boolean>>({});
   const [lessonFileProgress, setLessonFileProgress] = useState<Record<number, number>>({});
+  const [lessonFileDeUploading, setLessonFileDeUploading] = useState<Record<number, boolean>>({});
+  const [lessonFileDeProgress, setLessonFileDeProgress] = useState<Record<number, number>>({});
+
+  // Состояния активных языковых вкладок в модальных окнах
+  const [courseActiveTab, setCourseActiveTab] = useState<"ru" | "de">("ru");
+  const [lessonActiveTab, setLessonActiveTab] = useState<"ru" | "de">("ru");
 
   // --- МОДАЛЬНОЕ ОКНО УПРАВЛЕНИЯ УЧЕНИКОМ ---
   const [userModal, setUserModal] = useState<{
@@ -168,17 +193,27 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
   const [lessonForm, setLessonForm] = useState<{
     title: string;
+    titleDe: string;
     description: string;
+    descriptionDe: string;
     videoUrl: string;
+    videoUrlDe: string;
     videoCoverUrl: string;
+    videoCoverUrlDe: string;
     fileUrls: string[];
+    fileUrlsDe: string[];
     order: number;
   }>({
     title: "",
+    titleDe: "",
     description: "",
+    descriptionDe: "",
     videoUrl: "",
+    videoUrlDe: "",
     videoCoverUrl: "",
+    videoCoverUrlDe: "",
     fileUrls: [""],
+    fileUrlsDe: [""],
     order: 0,
   });
 
@@ -353,22 +388,34 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       const nextOrder = course ? course.lessons.length + 1 : 1;
       setLessonForm({
         title: "",
+        titleDe: "",
         description: "",
+        descriptionDe: "",
         videoUrl: "",
+        videoUrlDe: "",
         videoCoverUrl: "",
+        videoCoverUrlDe: "",
         fileUrls: [""],
+        fileUrlsDe: [""],
         order: nextOrder,
       });
+      setLessonActiveTab("ru");
       setLessonModal({ isOpen: true, mode: "create", courseId });
     } else if (mode === "edit" && lesson) {
       setLessonForm({
         title: lesson.title,
+        titleDe: lesson.titleDe || "",
         description: lesson.description,
+        descriptionDe: lesson.descriptionDe || "",
         videoUrl: lesson.videoUrl || "",
+        videoUrlDe: lesson.videoUrlDe || "",
         videoCoverUrl: lesson.videoCoverUrl || "",
+        videoCoverUrlDe: lesson.videoCoverUrlDe || "",
         fileUrls: lesson.fileUrls.length > 0 ? [...lesson.fileUrls] : [""],
+        fileUrlsDe: lesson.fileUrlsDe && lesson.fileUrlsDe.length > 0 ? [...lesson.fileUrlsDe] : [""],
         order: lesson.order,
       });
+      setLessonActiveTab("ru");
       setLessonModal({ isOpen: true, mode: "edit", courseId, lesson });
     }
   };
@@ -406,12 +453,46 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     });
   };
 
+  const handleAddFileUrlDeInput = () => {
+    setLessonForm((prev) => ({ ...prev, fileUrlsDe: [...prev.fileUrlsDe, ""] }));
+  };
+
+  const handleRemoveFileUrlDeInput = (index: number) => {
+    setLessonForm((prev) => ({
+      ...prev,
+      fileUrlsDe: prev.fileUrlsDe.filter((_, idx) => idx !== index),
+    }));
+  };
+
+  const handleFileTitleDeChange = (index: number, newTitle: string) => {
+    setLessonForm((prev) => {
+      const updated = [...prev.fileUrlsDe];
+      const current = updated[index] || "";
+      const parts = current.split(":::");
+      const currentUrl = parts.length > 1 ? parts[1] : parts[0];
+      updated[index] = newTitle.trim() ? `${newTitle.trim()}:::${currentUrl}` : currentUrl;
+      return { ...prev, fileUrlsDe: updated };
+    });
+  };
+
+  const handleFileUrlDeChange = (index: number, newUrl: string) => {
+    setLessonForm((prev) => {
+      const updated = [...prev.fileUrlsDe];
+      const current = updated[index] || "";
+      const parts = current.split(":::");
+      const currentTitle = parts.length > 1 ? parts[0] : "";
+      updated[index] = currentTitle ? `${currentTitle}:::${newUrl}` : newUrl;
+      return { ...prev, fileUrlsDe: updated };
+    });
+  };
+
   const handleSaveLesson = async (e: React.FormEvent) => {
     e.preventDefault();
     setActionLoading(true);
     setMessage(null);
 
     const cleanFileUrls = lessonForm.fileUrls.filter((url) => url.trim() !== "");
+    const cleanFileUrlsDe = lessonForm.fileUrlsDe.filter((url) => url.trim() !== "");
 
     try {
       if (lessonModal.mode === "create") {
@@ -421,10 +502,15 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
           body: JSON.stringify({
             courseId: lessonModal.courseId,
             title: lessonForm.title,
+            titleDe: lessonForm.titleDe || null,
             description: lessonForm.description,
+            descriptionDe: lessonForm.descriptionDe || null,
             videoUrl: lessonForm.videoUrl || null,
+            videoUrlDe: lessonForm.videoUrlDe || null,
             videoCoverUrl: lessonForm.videoCoverUrl || null,
+            videoCoverUrlDe: lessonForm.videoCoverUrlDe || null,
             fileUrls: cleanFileUrls,
+            fileUrlsDe: cleanFileUrlsDe,
             order: Number(lessonForm.order),
           }),
         });
@@ -454,10 +540,15 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title: lessonForm.title,
+            titleDe: lessonForm.titleDe || null,
             description: lessonForm.description,
+            descriptionDe: lessonForm.descriptionDe || null,
             videoUrl: lessonForm.videoUrl || null,
+            videoUrlDe: lessonForm.videoUrlDe || null,
             videoCoverUrl: lessonForm.videoCoverUrl || null,
+            videoCoverUrlDe: lessonForm.videoCoverUrlDe || null,
             fileUrls: cleanFileUrls,
+            fileUrlsDe: cleanFileUrlsDe,
             order: Number(lessonForm.order),
           }),
         });
@@ -470,8 +561,8 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
           prevCourses.map((c) => {
             if (c.id === lessonModal.courseId) {
               const updatedLessons = c.lessons
-                .map((l) => (l.id === lessonId ? result.lesson : l))
-                .sort((a, b) => a.order - b.order);
+                  .map((l) => (l.id === lessonId ? result.lesson : l))
+                  .sort((a, b) => a.order - b.order);
               return { ...c, lessons: updatedLessons };
             }
             return c;
@@ -482,25 +573,42 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
 
         // Фоновое удаление замененных или удаленных файлов из Vercel Blob
         if (oldLesson) {
-          // 1. Проверяем обложку видео
+          // 1. Проверяем обложку видео (RU)
           if (oldLesson.videoCoverUrl && oldLesson.videoCoverUrl !== lessonForm.videoCoverUrl && oldLesson.videoCoverUrl.includes(".public.blob.vercel-storage.com")) {
             deleteBlobFile(oldLesson.videoCoverUrl);
           }
+          // Обложка видео (DE)
+          if (oldLesson.videoCoverUrlDe && oldLesson.videoCoverUrlDe !== lessonForm.videoCoverUrlDe && oldLesson.videoCoverUrlDe.includes(".public.blob.vercel-storage.com")) {
+            deleteBlobFile(oldLesson.videoCoverUrlDe);
+          }
 
-          // 2. Проверяем удаленные файлы (материалы урока)
+          // 2. Проверяем удаленные файлы (материалы урока RU)
           const oldUrls = oldLesson.fileUrls.map((fu) => {
             const parts = fu.split(":::");
             return parts.length > 1 ? parts[1] : parts[0];
           });
-
           const newUrls = cleanFileUrls.map((fu) => {
             const parts = fu.split(":::");
             return parts.length > 1 ? parts[1] : parts[0];
           });
-
           for (const oldUrl of oldUrls) {
             if (oldUrl && !newUrls.includes(oldUrl) && oldUrl.includes(".public.blob.vercel-storage.com")) {
               deleteBlobFile(oldUrl);
+            }
+          }
+
+          // Проверяем удаленные файлы (материалы урока DE)
+          const oldUrlsDe = (oldLesson.fileUrlsDe || []).map((fu) => {
+            const parts = fu.split(":::");
+            return parts.length > 1 ? parts[1] : parts[0];
+          });
+          const newUrlsDe = cleanFileUrlsDe.map((fu) => {
+            const parts = fu.split(":::");
+            return parts.length > 1 ? parts[1] : parts[0];
+          });
+          for (const oldUrlDe of oldUrlsDe) {
+            if (oldUrlDe && !newUrlsDe.includes(oldUrlDe) && oldUrlDe.includes(".public.blob.vercel-storage.com")) {
+              deleteBlobFile(oldUrlDe);
             }
           }
         }
@@ -509,6 +617,19 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     } catch (err: unknown) {
       showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
     } finally {
+      setLessonForm({
+        title: "",
+        titleDe: "",
+        description: "",
+        descriptionDe: "",
+        videoUrl: "",
+        videoUrlDe: "",
+        videoCoverUrl: "",
+        videoCoverUrlDe: "",
+        fileUrls: [""],
+        fileUrlsDe: [""],
+        order: 1,
+      });
       setActionLoading(false);
     }
   };
@@ -552,7 +673,17 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             if (lessonToDelete.videoCoverUrl && lessonToDelete.videoCoverUrl.includes(".public.blob.vercel-storage.com")) {
               urlsToDelete.push(lessonToDelete.videoCoverUrl);
             }
+            if (lessonToDelete.videoCoverUrlDe && lessonToDelete.videoCoverUrlDe.includes(".public.blob.vercel-storage.com")) {
+              urlsToDelete.push(lessonToDelete.videoCoverUrlDe);
+            }
             for (const fileUrlItem of lessonToDelete.fileUrls) {
+              const parts = fileUrlItem.split(":::");
+              const url = parts.length > 1 ? parts[1] : parts[0];
+              if (url && url.includes(".public.blob.vercel-storage.com")) {
+                urlsToDelete.push(url);
+              }
+            }
+            for (const fileUrlItem of (lessonToDelete.fileUrlsDe || [])) {
               const parts = fileUrlItem.split(":::");
               const url = parts.length > 1 ? parts[1] : parts[0];
               if (url && url.includes(".public.blob.vercel-storage.com")) {
@@ -635,24 +766,32 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
   // --- УПРАВЛЕНИЕ КУРСАМИ (API) ---
 
   const handleCreateCourseClick = () => {
+    setCourseActiveTab("ru");
     setCourseModal({
       isOpen: true,
       mode: "create",
       courseId: "",
       title: "",
+      titleDe: "",
       description: "",
+      descriptionDe: "",
       imageUrl: "",
+      imageUrlDe: "",
     });
   };
 
   const handleOpenCourseModal = (course: IAdminCourse) => {
+    setCourseActiveTab("ru");
     setCourseModal({
       isOpen: true,
       mode: "edit",
       courseId: course.id,
       title: course.title,
+      titleDe: course.titleDe || "",
       description: course.description || "",
+      descriptionDe: course.descriptionDe || "",
       imageUrl: course.imageUrl || "",
+      imageUrlDe: course.imageUrlDe || "",
     });
   };
 
@@ -697,6 +836,47 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }
   };
 
+  const handleCourseImageDeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.startsWith("image/")) {
+      showNotification("Пожалуйста, выберите графический файл (изображение)", "error");
+      return;
+    }
+
+    setCourseImageDeUploading(true);
+    setCourseImageDeUploadProgress(20);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      setCourseImageDeUploadProgress(50);
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      setCourseImageDeUploadProgress(90);
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Ошибка при загрузке картинки");
+      }
+
+      setCourseModal((prev) => ({ ...prev, imageUrlDe: data.url }));
+      setCourseImageDeUploadProgress(100);
+    } catch (err: unknown) {
+      showNotification(err instanceof Error ? err.message : "Не удалось загрузить изображение", "error");
+    } finally {
+      setCourseImageDeUploading(false);
+      setTimeout(() => setCourseImageDeUploadProgress(0), 1000);
+    }
+  };
+
   const handleLessonCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -736,6 +916,48 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     } finally {
       setLessonCoverUploading(false);
       setTimeout(() => setLessonCoverUploadProgress(0), 1000);
+    }
+  };
+
+  const handleLessonCoverDeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.startsWith("image/")) {
+      showNotification("Пожалуйста, выберите графический файл (изображение)", "error");
+      return;
+    }
+
+    setLessonCoverDeUploading(true);
+    setLessonCoverDeUploadProgress(20);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("uploadType", "lesson-cover");
+
+      setLessonCoverDeUploadProgress(50);
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      setLessonCoverDeUploadProgress(90);
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Ошибка при загрузке картинки");
+      }
+
+      setLessonForm((prev) => ({ ...prev, videoCoverUrlDe: data.url }));
+      setLessonCoverDeUploadProgress(100);
+    } catch (err: unknown) {
+      showNotification(err instanceof Error ? err.message : "Не удалось загрузить изображение", "error");
+    } finally {
+      setLessonCoverDeUploading(false);
+      setTimeout(() => setLessonCoverDeUploadProgress(0), 1000);
     }
   };
 
@@ -802,6 +1024,69 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     }
   };
 
+  const handleLessonFileDeUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+
+    // Проверка размера файла перед отправкой (макс. 4.5 МБ для Vercel Serverless Function payload limit)
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      showNotification("Размер файла превышает 4.5 МБ. Для больших файлов рекомендуется использовать внешние ссылки или сжать его перед загрузкой.", "error");
+      e.target.value = "";
+      return;
+    }
+
+    // Проверка на потенциально опасные расширения
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    const dangerousExtensions = ["exe", "bat", "cmd", "sh", "js", "ts", "html", "htm", "lnk", "vbs", "com", "scr"];
+    if (dangerousExtensions.includes(fileExtension || "")) {
+      showNotification("Загрузка исполняемых файлов и веб-страниц запрещена в целях безопасности.", "error");
+      e.target.value = "";
+      return;
+    }
+
+    setLessonFileDeUploading((prev) => ({ ...prev, [index]: true }));
+    setLessonFileDeProgress((prev) => ({ ...prev, [index]: 20 }));
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("uploadType", "document");
+
+      setLessonFileDeProgress((prev) => ({ ...prev, [index]: 50 }));
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      setLessonFileDeProgress((prev) => ({ ...prev, [index]: 90 }));
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Ошибка при загрузке файла");
+      }
+
+      // Обновляем URL в форме урока
+      handleFileUrlDeChange(index, data.url);
+      setLessonFileDeProgress((prev) => ({ ...prev, [index]: 100 }));
+    } catch (err: unknown) {
+      showNotification(err instanceof Error ? err.message : "Не удалось загрузить файл", "error");
+    } finally {
+      setLessonFileDeUploading((prev) => ({ ...prev, [index]: false }));
+      setTimeout(() => {
+        setLessonFileDeProgress((prev) => {
+          const updated = { ...prev };
+          delete updated[index];
+          return updated;
+        });
+      }, 1000);
+      e.target.value = "";
+    }
+  };
+
   const handleSaveCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     setActionLoading(true);
@@ -819,8 +1104,11 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: courseModal.title,
+          titleDe: courseModal.titleDe || null,
           description: courseModal.description,
+          descriptionDe: courseModal.descriptionDe || null,
           imageUrl: courseModal.imageUrl || null,
+          imageUrlDe: courseModal.imageUrlDe || null,
         }),
       });
 
@@ -837,6 +1125,10 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         if (oldImg && oldImg !== courseModal.imageUrl && oldImg.includes(".public.blob.vercel-storage.com")) {
           await deleteBlobFile(oldImg);
         }
+        const oldImgDe = oldCourse?.imageUrlDe;
+        if (oldImgDe && oldImgDe !== courseModal.imageUrlDe && oldImgDe.includes(".public.blob.vercel-storage.com")) {
+          await deleteBlobFile(oldImgDe);
+        }
 
         setLocalCourses((prevCourses) =>
           prevCourses.map((c) => {
@@ -844,8 +1136,11 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               return {
                 ...c,
                 title: result.course.title,
+                titleDe: result.course.titleDe,
                 description: result.course.description,
+                descriptionDe: result.course.descriptionDe,
                 imageUrl: result.course.imageUrl,
+                imageUrlDe: result.course.imageUrlDe,
               };
             }
             return c;
@@ -854,7 +1149,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         showNotification("Параметры курса успешно сохранены!", "success");
       }
 
-      setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", description: "", imageUrl: "" });
+      setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", titleDe: "", description: "", descriptionDe: "", imageUrl: "", imageUrlDe: "" });
     } catch (err: unknown) {
       showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
     } finally {
@@ -2189,51 +2484,91 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             </div>
 
             <form onSubmit={handleSaveLesson} style={{ padding: "24px" }}>
+              {/* Переключатель вкладок "Русский" / "Немецкий" */}
+              <div style={{ display: "flex", gap: "10px", borderBottom: "2px solid #eae0db", paddingBottom: "10px", marginBottom: "20px" }}>
+                <button
+                  type="button"
+                  onClick={() => setLessonActiveTab("ru")}
+                  style={{
+                    padding: "8px 16px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    border: "none",
+                    borderRadius: "6px",
+                    backgroundColor: lessonActiveTab === "ru" ? "var(--color-primary)" : "transparent",
+                    color: lessonActiveTab === "ru" ? "#fff" : "var(--color-dark)",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  🇷🇺 Русский
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLessonActiveTab("de")}
+                  style={{
+                    padding: "8px 16px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    border: "none",
+                    borderRadius: "6px",
+                    backgroundColor: lessonActiveTab === "de" ? "var(--color-primary)" : "transparent",
+                    color: lessonActiveTab === "de" ? "#fff" : "var(--color-dark)",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  🇩🇪 Немецкий (DE)
+                </button>
+              </div>
+
               {/* Поля формы */}
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
 
-                {/* Название */}
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
-                    Название урока *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Например: Занятие 1. Введение в тему"
-                    value={lessonForm.title}
-                    onChange={(e) => setLessonForm((prev) => ({ ...prev, title: e.target.value }))}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      fontSize: "14px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--color-gray-border)",
-                    }}
-                  />
-                </div>
+                {lessonActiveTab === "ru" && (
+                  <>
+                    {/* Название */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                        Название урока (RU) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Например: Занятие 1. Введение в тему"
+                        value={lessonForm.title}
+                        onChange={(e) => setLessonForm((prev) => ({ ...prev, title: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid var(--color-gray-border)",
+                        }}
+                      />
+                    </div>
 
-                {/* Описание */}
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
-                    Описание урока (что будут изучать, домашнее задание)
-                  </label>
-                  <textarea
-                    rows={4}
-                    placeholder="Подробный план урока или комментарий Ольги..."
-                    value={lessonForm.description}
-                    onChange={(e) => setLessonForm((prev) => ({ ...prev, description: e.target.value }))}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      fontSize: "14px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--color-gray-border)",
-                      resize: "vertical",
-                      fontFamily: "inherit",
-                    }}
-                  />
-                </div>
+                    {/* Описание */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                        Описание урока (RU) (что будут изучать, домашнее задание)
+                      </label>
+                      <textarea
+                        rows={3}
+                        placeholder="Подробный план урока или комментарий Ольги..."
+                        value={lessonForm.description}
+                        onChange={(e) => setLessonForm((prev) => ({ ...prev, description: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid var(--color-gray-border)",
+                          resize: "vertical",
+                          fontFamily: "inherit",
+                        }}
+                      />
+                    </div>
 
                 {/* Ссылка на видео */}
                 <div>
@@ -2337,26 +2672,6 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                   </div>
                 </div>
 
-                {/* Порядковый номер */}
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
-                    Порядковый номер в курсе *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min={1}
-                    value={lessonForm.order}
-                    onChange={(e) => setLessonForm((prev) => ({ ...prev, order: Number(e.target.value) }))}
-                    style={{
-                      width: "120px",
-                      padding: "10px 12px",
-                      fontSize: "14px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--color-gray-border)",
-                    }}
-                  />
-                </div>
 
                 {/* Прикрепленные материалы (PDF и др) */}
                 <div>
@@ -2491,6 +2806,314 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                     ➕ Добавить еще файл
                   </button>
                 </div>
+              </>
+            )}
+
+                {/* ВКЛАДКА: НЕМЕЦКИЙ */}
+                {lessonActiveTab === "de" && (
+                  <>
+                    {/* Название на немецком */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px", color: "#785c12" }}>
+                        Название урока (DE)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Например: Lektion 1. Einführung"
+                        value={lessonForm.titleDe}
+                        onChange={(e) => setLessonForm((prev) => ({ ...prev, titleDe: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid #e2d2bb",
+                          backgroundColor: "#fffdf9",
+                        }}
+                      />
+                    </div>
+
+                    {/* Описание на немецком */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px", color: "#785c12" }}>
+                        Описание урока (DE) (что будут изучать, домашнее задание)
+                      </label>
+                      <textarea
+                        rows={3}
+                        placeholder="Подробный план урока на немецком..."
+                        value={lessonForm.descriptionDe}
+                        onChange={(e) => setLessonForm((prev) => ({ ...prev, descriptionDe: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid #e2d2bb",
+                          resize: "vertical",
+                          fontFamily: "inherit",
+                          backgroundColor: "#fffdf9",
+                        }}
+                      />
+                    </div>
+
+                    {/* Ссылка на видео на немецком */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px", color: "#785c12" }}>
+                        Ссылка на видео (DE)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ссылка на немецкое видео..."
+                        value={lessonForm.videoUrlDe}
+                        onChange={(e) => setLessonForm((prev) => ({ ...prev, videoUrlDe: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid #e2d2bb",
+                          backgroundColor: "#fffdf9",
+                        }}
+                      />
+                    </div>
+
+                    {/* Обложка для видео на немецком */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px", color: "#785c12" }}>
+                        Обложка для видео (DE) (необязательно)
+                      </label>
+                      
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLessonCoverDeUpload}
+                          style={{ display: "none" }}
+                          id="lesson-cover-de-file-input"
+                        />
+
+                        <div
+                          className={styles.imageUploadArea}
+                          onClick={() => document.getElementById("lesson-cover-de-file-input")?.click()}
+                          style={{ marginTop: "4px", border: "1px dashed #e2d2bb", backgroundColor: "#fffdf9" }}
+                        >
+                          {lessonCoverDeUploading && (
+                            <div className={styles.progressBar} style={{ width: `${lessonCoverDeUploadProgress}%` }}></div>
+                          )}
+
+                          {lessonForm.videoCoverUrlDe ? (
+                            <div
+                              style={{
+                                position: "relative",
+                                width: "100%",
+                                height: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <img src={lessonForm.videoCoverUrlDe} alt="Превью обложки" className={styles.uploadPreview} />
+                              <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "12px" }}>
+                                <span
+                                  style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                                  onClick={() => document.getElementById("lesson-cover-de-file-input")?.click()}
+                                >
+                                  Заменить
+                                </span>
+                                <span style={{ color: "var(--color-gray-border)", fontSize: "12px" }}>|</span>
+                                <span
+                                  style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                                  onClick={() => setLessonForm((prev) => ({ ...prev, videoCoverUrlDe: "" }))}
+                                >
+                                  Удалить
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={styles.uploadPlaceholder}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                fill="none"
+                                stroke="#785c12"
+                                strokeWidth="1.5"
+                                viewBox="0 0 24 24"
+                              >
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                              </svg>
+                              <span style={{ color: "#785c12" }}>Загрузить обложку видео (DE)</span>
+                              <span style={{ fontSize: "11px", color: "var(--color-gray)" }}>
+                                Рекомендуется формат JPEG/PNG, размер до 5 МБ
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Прикрепленные материалы (PDF и др) на немецком */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px", color: "#785c12" }}>
+                        Ссылки на немецкие дополнительные материалы
+                      </label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        {lessonForm.fileUrlsDe.map((url, idx) => {
+                          const isUploading = !!lessonFileDeUploading[idx];
+                          const progress = lessonFileDeProgress[idx] || 0;
+                          const parts = url.split(":::");
+                          const fileTitle = parts.length > 1 ? parts[0] : "";
+                          const fileUrl = parts.length > 1 ? parts[1] : parts[0];
+
+                          return (
+                            <div key={idx} style={{ position: "relative", borderBottom: "1px solid #f2e6e1", paddingBottom: isUploading ? "16px" : "12px", marginBottom: "6px" }}>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                                <input
+                                  type="text"
+                                  placeholder="Название материала на немецком (например: Arbeitsblatt, Handout)"
+                                  value={fileTitle}
+                                  onChange={(e) => handleFileTitleDeChange(idx, e.target.value)}
+                                  disabled={isUploading}
+                                  style={{
+                                    width: "100%",
+                                    padding: "8px 12px",
+                                    fontSize: "13px",
+                                    borderRadius: "6px",
+                                    border: "1px solid #e2d2bb",
+                                    backgroundColor: "#fffdf9",
+                                    fontWeight: 600,
+                                  }}
+                                />
+
+                                <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                                  <input
+                                    type="text"
+                                    placeholder="Ссылка на файл..."
+                                    value={fileUrl}
+                                    onChange={(e) => handleFileUrlDeChange(idx, e.target.value)}
+                                    disabled={isUploading}
+                                    style={{
+                                      flexGrow: 1,
+                                      padding: "8px 12px",
+                                      fontSize: "13px",
+                                      borderRadius: "6px",
+                                      border: "1px solid #e2d2bb",
+                                      backgroundColor: "#fffdf9",
+                                    }}
+                                  />
+
+                                  <input
+                                    type="file"
+                                    id={`lesson-file-de-input-${idx}`}
+                                    style={{ display: "none" }}
+                                    onChange={(e) => handleLessonFileDeUpload(idx, e)}
+                                    disabled={isUploading}
+                                  />
+
+                                  <button
+                                    type="button"
+                                    onClick={() => document.getElementById(`lesson-file-de-input-${idx}`)?.click()}
+                                    disabled={isUploading}
+                                    style={{
+                                      padding: "0 12px",
+                                      backgroundColor: "#fffdf9",
+                                      border: "1px solid #e2d2bb",
+                                      color: "#785c12",
+                                      borderRadius: "6px",
+                                      cursor: isUploading ? "not-allowed" : "pointer",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      fontSize: "13px",
+                                      fontWeight: 600,
+                                      transition: "all 0.2s"
+                                    }}
+                                    title="Загрузить файл"
+                                  >
+                                    {isUploading ? "⏳ Загрузка..." : "📤 Загрузить файл"}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveFileUrlDeInput(idx)}
+                                    disabled={lessonForm.fileUrlsDe.length === 1 || isUploading}
+                                    style={{
+                                      padding: "0 10px",
+                                      backgroundColor: "#fff",
+                                      border: "1px solid #c62828",
+                                      color: "#c62828",
+                                      borderRadius: "6px",
+                                      cursor: (lessonForm.fileUrlsDe.length === 1 || isUploading) ? "not-allowed" : "pointer",
+                                      opacity: (lessonForm.fileUrlsDe.length === 1 || isUploading) ? 0.3 : 1,
+                                    }}
+                                  >
+                                    &times;
+                                  </button>
+                                </div>
+                              </div>
+
+                              {isUploading && (
+                                <div style={{
+                                  position: "absolute",
+                                  bottom: 0,
+                                  left: 0,
+                                  width: `${progress}%`,
+                                  height: "3px",
+                                  backgroundColor: "var(--color-primary)",
+                                  borderRadius: "3px",
+                                  transition: "width 0.2s"
+                                }} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAddFileUrlDeInput}
+                        disabled={Object.values(lessonFileDeUploading).some(Boolean)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: Object.values(lessonFileDeUploading).some(Boolean) ? "var(--color-gray-border)" : "#785c12",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          cursor: Object.values(lessonFileDeUploading).some(Boolean) ? "not-allowed" : "pointer",
+                          marginTop: "8px",
+                          padding: 0,
+                        }}
+                      >
+                        ➕ Добавить еще файл (DE)
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                <hr style={{ border: "none", borderTop: "1px solid #eae0db", margin: "10px 0" }} />
+
+                {/* Порядковый номер в курсе (глобальный) */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Порядковый номер в курсе *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={lessonForm.order}
+                    onChange={(e) => setLessonForm((prev) => ({ ...prev, order: Number(e.target.value) }))}
+                    style={{
+                      width: "120px",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                    }}
+                  />
+                </div>
 
               </div>
 
@@ -2563,7 +3186,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 {courseModal.mode === "create" ? "➕ Создание нового курса" : "✏️ Редактирование курса"}
               </h3>
               <button
-                onClick={() => setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", description: "", imageUrl: "" })}
+                onClick={() => setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", titleDe: "", description: "", descriptionDe: "", imageUrl: "", imageUrlDe: "" })}
                 style={{
                   border: "none",
                   background: "none",
@@ -2577,144 +3200,330 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             </div>
 
             <form onSubmit={handleSaveCourse} style={{ padding: "24px" }}>
+              {/* Переключатель вкладок "Русский" / "Немецкий" */}
+              <div style={{ display: "flex", gap: "10px", borderBottom: "2px solid #eae0db", paddingBottom: "10px", marginBottom: "20px" }}>
+                <button
+                  type="button"
+                  onClick={() => setCourseActiveTab("ru")}
+                  style={{
+                    padding: "8px 16px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    border: "none",
+                    borderRadius: "6px",
+                    backgroundColor: courseActiveTab === "ru" ? "var(--color-primary)" : "transparent",
+                    color: courseActiveTab === "ru" ? "#fff" : "var(--color-dark)",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  🇷🇺 Русский
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCourseActiveTab("de")}
+                  style={{
+                    padding: "8px 16px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    border: "none",
+                    borderRadius: "6px",
+                    backgroundColor: courseActiveTab === "de" ? "var(--color-primary)" : "transparent",
+                    color: courseActiveTab === "de" ? "#fff" : "var(--color-dark)",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  🇩🇪 Немецкий (DE)
+                </button>
+              </div>
+
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
 
-                {/* Название */}
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
-                    Название курса *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Например: Обучение Таро"
-                    value={courseModal.title}
-                    onChange={(e) => setCourseModal((prev) => ({ ...prev, title: e.target.value }))}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      fontSize: "14px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--color-gray-border)",
-                    }}
-                  />
-                </div>
-
-                {/* Описание курса */}
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
-                    Описание курса *
-                  </label>
-                  <textarea
-                    required
-                    placeholder="Введите описание программы обучения, ключевые темы и результаты курса..."
-                    rows={4}
-                    value={courseModal.description}
-                    onChange={(e) => setCourseModal((prev) => ({ ...prev, description: e.target.value }))}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      fontSize: "14px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--color-gray-border)",
-                      resize: "vertical",
-                      fontFamily: "inherit"
-                    }}
-                  />
-                </div>
-
-                {/* Ссылка на изображение */}
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
-                    Изображение для карточки магазина (URL)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Например: /public/tarot.png"
-                    value={courseModal.imageUrl}
-                    onChange={(e) => setCourseModal((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      fontSize: "14px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--color-gray-border)",
-                      marginBottom: "10px",
-                    }}
-                  />
-
-                  {/* Загрузка файла в виде красивой плашки */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleCourseImageUpload}
-                      style={{ display: "none" }}
-                      id="course-image-file-input"
-                    />
-
-                    <div
-                      className={styles.imageUploadArea}
-                      onClick={() => document.getElementById("course-image-file-input")?.click()}
-                      style={{ marginTop: "4px" }}
-                    >
-                      {courseImageUploading && (
-                        <div className={styles.progressBar} style={{ width: `${courseImageUploadProgress}%` }}></div>
-                      )}
-
-                      {courseModal.imageUrl ? (
-                        <div
-                          style={{
-                            position: "relative",
-                            width: "100%",
-                            height: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <img src={courseModal.imageUrl} alt="Превью" className={styles.uploadPreview} />
-                          <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "12px" }}>
-                            <span
-                              style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
-                              onClick={() => document.getElementById("course-image-file-input")?.click()}
-                            >
-                              Заменить
-                            </span>
-                            <span style={{ color: "var(--color-gray-border)", fontSize: "12px" }}>|</span>
-                            <span
-                              style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
-                              onClick={() => setCourseModal((prev) => ({ ...prev, imageUrl: "" }))}
-                            >
-                              Удалить
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className={styles.uploadPlaceholder}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="32"
-                            height="32"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            viewBox="0 0 24 24"
-                          >
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <polyline points="21 15 16 10 5 21"></polyline>
-                          </svg>
-                          <span>Загрузить изображение курса</span>
-                          <span style={{ fontSize: "11px", color: "var(--color-gray)" }}>
-                            Рекомендуется формат JPEG/PNG, размер до 5 МБ
-                          </span>
-                        </div>
-                      )}
+                {/* ВКЛАДКА: РУССКИЙ */}
+                {courseActiveTab === "ru" && (
+                  <>
+                    {/* Название */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                        Название курса (RU) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Например: Обучение Таро"
+                        value={courseModal.title}
+                        onChange={(e) => setCourseModal((prev) => ({ ...prev, title: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid var(--color-gray-border)",
+                        }}
+                      />
                     </div>
-                  </div>
-                </div>
+
+                    {/* Описание курса */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                        Описание курса (RU) *
+                      </label>
+                      <textarea
+                        required
+                        placeholder="Введите описание программы обучения, ключевые темы и результаты курса..."
+                        rows={3}
+                        value={courseModal.description}
+                        onChange={(e) => setCourseModal((prev) => ({ ...prev, description: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid var(--color-gray-border)",
+                          resize: "vertical",
+                          fontFamily: "inherit"
+                        }}
+                      />
+                    </div>
+
+                    {/* Ссылка на изображение */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                        Изображение для карточки магазина (URL)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Например: /public/tarot.png"
+                        value={courseModal.imageUrl}
+                        onChange={(e) => setCourseModal((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid var(--color-gray-border)",
+                          marginBottom: "10px",
+                        }}
+                      />
+
+                      {/* Загрузка файла в виде красивой плашки */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCourseImageUpload}
+                          style={{ display: "none" }}
+                          id="course-image-file-input"
+                        />
+
+                        <div
+                          className={styles.imageUploadArea}
+                          onClick={() => document.getElementById("course-image-file-input")?.click()}
+                          style={{ marginTop: "4px" }}
+                        >
+                          {courseImageUploading && (
+                            <div className={styles.progressBar} style={{ width: `${courseImageUploadProgress}%` }}></div>
+                          )}
+
+                          {courseModal.imageUrl ? (
+                            <div
+                              style={{
+                                position: "relative",
+                                width: "100%",
+                                height: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <img src={courseModal.imageUrl} alt="Превью" className={styles.uploadPreview} />
+                              <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "12px" }}>
+                                <span
+                                  style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                                  onClick={() => document.getElementById("course-image-file-input")?.click()}
+                                >
+                                  Заменить
+                                </span>
+                                <span style={{ color: "var(--color-gray-border)", fontSize: "12px" }}>|</span>
+                                <span
+                                  style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                                  onClick={() => setCourseModal((prev) => ({ ...prev, imageUrl: "" }))}
+                                >
+                                  Удалить
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={styles.uploadPlaceholder}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                viewBox="0 0 24 24"
+                              >
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                              </svg>
+                              <span>Загрузить изображение курса</span>
+                              <span style={{ fontSize: "11px", color: "var(--color-gray)" }}>
+                                Рекомендуется формат JPEG/PNG, размер до 5 МБ
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* ВКЛАДКА: НЕМЕЦКИЙ */}
+                {courseActiveTab === "de" && (
+                  <>
+                    {/* Название на немецком */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px", color: "#785c12" }}>
+                        Название курса (DE)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Например: Tarot-Ausbildung"
+                        value={courseModal.titleDe}
+                        onChange={(e) => setCourseModal((prev) => ({ ...prev, titleDe: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid #e2d2bb",
+                          backgroundColor: "#fffdf9",
+                        }}
+                      />
+                    </div>
+
+                    {/* Описание на немецком */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px", color: "#785c12" }}>
+                        Описание курса (DE)
+                      </label>
+                      <textarea
+                        placeholder="Описание программы обучения на немецком..."
+                        rows={3}
+                        value={courseModal.descriptionDe}
+                        onChange={(e) => setCourseModal((prev) => ({ ...prev, descriptionDe: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid #e2d2bb",
+                          resize: "vertical",
+                          fontFamily: "inherit",
+                          backgroundColor: "#fffdf9",
+                        }}
+                      />
+                    </div>
+
+                    {/* Ссылка на немецкое изображение */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px", color: "#785c12" }}>
+                        Изображение для карточки магазина (DE) (URL)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Например: /public/tarot_de.png"
+                        value={courseModal.imageUrlDe}
+                        onChange={(e) => setCourseModal((prev) => ({ ...prev, imageUrlDe: e.target.value }))}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          fontSize: "14px",
+                          borderRadius: "6px",
+                          border: "1px solid #e2d2bb",
+                          marginBottom: "10px",
+                          backgroundColor: "#fffdf9",
+                        }}
+                      />
+
+                      {/* Загрузка немецкого файла в виде красивой плашки */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCourseImageDeUpload}
+                          style={{ display: "none" }}
+                          id="course-image-de-file-input"
+                        />
+
+                        <div
+                          className={styles.imageUploadArea}
+                          onClick={() => document.getElementById("course-image-de-file-input")?.click()}
+                          style={{ marginTop: "4px", border: "1px dashed #e2d2bb", backgroundColor: "#fffdf9" }}
+                        >
+                          {courseImageDeUploading && (
+                            <div className={styles.progressBar} style={{ width: `${courseImageDeUploadProgress}%` }}></div>
+                          )}
+
+                          {courseModal.imageUrlDe ? (
+                            <div
+                              style={{
+                                position: "relative",
+                                width: "100%",
+                                height: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <img src={courseModal.imageUrlDe} alt="Превью" className={styles.uploadPreview} />
+                              <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "12px" }}>
+                                <span
+                                  style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                                  onClick={() => document.getElementById("course-image-de-file-input")?.click()}
+                                >
+                                  Заменить
+                                </span>
+                                <span style={{ color: "var(--color-gray-border)", fontSize: "12px" }}>|</span>
+                                <span
+                                  style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                                  onClick={() => setCourseModal((prev) => ({ ...prev, imageUrlDe: "" }))}
+                                >
+                                  Удалить
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={styles.uploadPlaceholder}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                fill="none"
+                                stroke="#785c12"
+                                strokeWidth="1.5"
+                                viewBox="0 0 24 24"
+                              >
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                              </svg>
+                              <span style={{ color: "#785c12" }}>Загрузить изображение курса (DE)</span>
+                              <span style={{ fontSize: "11px", color: "var(--color-gray)" }}>
+                                Рекомендуется формат JPEG/PNG, размер до 5 МБ
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
               </div>
 
@@ -2722,7 +3531,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
                 <button
                   type="button"
-                  onClick={() => setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", description: "", imageUrl: "" })}
+                  onClick={() => setCourseModal({ isOpen: false, mode: "create", courseId: "", title: "", titleDe: "", description: "", descriptionDe: "", imageUrl: "", imageUrlDe: "" })}
                   className="btn btn-secondary"
                   style={{ padding: "10px 20px" }}
                 >
@@ -2730,7 +3539,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 </button>
                 <button
                   type="submit"
-                  disabled={actionLoading || courseImageUploading}
+                  disabled={actionLoading || courseImageUploading || courseImageDeUploading}
                   className="btn btn-primary"
                   style={{ padding: "10px 20px", display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { CartProvider } from "src/context/CartContext";
+import { LanguageProvider } from "src/context/LanguageContext";
 
 interface IProvidersProps {
   children: React.ReactNode;
@@ -9,11 +10,15 @@ interface IProvidersProps {
 
 /**
  * Глобальный клиентский провайдер контекстов.
- * Используется для интеграции клиентских состояний (корзина, авторизация)
+ * Используется для интеграции клиентских состояний (корзина, язык, авторизация)
  * в серверную иерархию Next.js App Router без потери SEO метаданных.
  */
 export const Providers: React.FC<IProvidersProps> = ({ children }) => {
-  return <CartProvider>{children}</CartProvider>;
+  return (
+    <LanguageProvider>
+      <CartProvider>{children}</CartProvider>
+    </LanguageProvider>
+  );
 };
 
 export default Providers;

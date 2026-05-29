@@ -10,6 +10,13 @@ const globalForPrisma = globalThis as unknown as {
 
 const connectionString = process.env.khavych_POSTGRES_PRISMA_URL || process.env.khavych_DATABASE_URL || process.env.DATABASE_URL;
 
+if (connectionString) {
+  const maskedString = connectionString.replace(/:[^:@]+@/, ":****@");
+  console.log(`[Database Init] Инициализация Prisma Client со строкой подключения: ${maskedString}`);
+} else {
+  console.warn("[Database Init] ВНИМАНИЕ: Строка подключения к БД пуста!");
+}
+
 const pool = globalForPrisma.pool ?? new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 
@@ -20,7 +27,7 @@ const adapter = new PrismaPg(pool);
 export const db =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
     adapter,
   });
 

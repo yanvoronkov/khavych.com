@@ -26,32 +26,40 @@ model User {
 
 /// Обучающие курсы
 model Course {
-  id          String       @id @default(uuid())
-  title       String
-  description String
-  imageUrl    String?
-  isPublished Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  lessons     Lesson[]
-  products    Product[]
-  accesses    UserAccess[]
-  certificates Certificate[]
+  id            String       @id @default(uuid())
+  title         String
+  titleDe       String?
+  description   String
+  descriptionDe String?
+  imageUrl      String?
+  imageUrlDe    String?
+  isPublished   Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  lessons       Lesson[]
+  products      Product[]
+  accesses      UserAccess[]
+  certificates  Certificate[]
 }
 
 /// Уроки внутри курсов
 model Lesson {
-  id          String   @id @default(uuid())
-  courseId    String
-  title       String
-  description String
-  videoUrl    String?
+  id            String   @id @default(uuid())
+  courseId      String
+  title         String
+  titleDe       String?
+  description   String
+  descriptionDe String?
+  videoUrl      String?
+  videoUrlDe    String?
   videoCoverUrl String?
-  fileUrls    String[]
-  order       Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  videoCoverUrlDe String?
+  fileUrls      String[]
+  fileUrlsDe    String[]
+  order         Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
 }

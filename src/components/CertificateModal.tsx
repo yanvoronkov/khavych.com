@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./CertificateModal.module.css";
+import { useLanguage } from "../context/LanguageContext";
 
 interface CertificateModalProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export function CertificateModal({
   const [scale, setScale] = useState(1);
   const [backgroundUrl, setBackgroundUrl] = useState("");
   const [error, setError] = useState<string>("");
+
+  const { language, t } = useLanguage();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fontsLoadedRef = useRef(false);
@@ -97,13 +100,13 @@ export function CertificateModal({
     try {
       setIsGenerating(true);
       setError("");
-      setGenerationStep("Подготовка макета сертификата...");
+      setGenerationStep(t("cabinet", "certStep1"));
 
       // Импортируем библиотеки динамически только при клике, чтобы уменьшить размер базового бандла
       const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
 
-      setGenerationStep("Отрисовка бланка в высоком разрешении...");
+      setGenerationStep(t("cabinet", "certStep2"));
 
       // Берем скрытый полноразмерный элемент (который отрендерен без CSS-масштабирования)
       const element = document.getElementById("certificate-pdf-target");
@@ -123,7 +126,7 @@ export function CertificateModal({
         logging: false,
       });
 
-      setGenerationStep("Создание PDF-документа...");
+      setGenerationStep(t("cabinet", "certStep3"));
       // Используем JPEG с качеством 0.9 для достижения идеальной четкости и уменьшения размера файла до ~700-900 КБ
       const imgData = canvas.toDataURL("image/jpeg", 0.9);
 
@@ -137,7 +140,7 @@ export function CertificateModal({
 
       pdf.addImage(imgData, "JPEG", 0, 0, 2400, 1792);
 
-      setGenerationStep("Сохранение в вашем личном кабинете...");
+      setGenerationStep(t("cabinet", "certStep4"));
       const pdfBlob = pdf.output("blob");
 
       // Формируем FormData для загрузки в Vercel Blob и записи в бд
@@ -162,28 +165,34 @@ export function CertificateModal({
         throw new Error(data.message || "Не удалось сохранить сертификат на сервере");
       }
 
-      setGenerationStep("Скачивание файла...");
+      setGenerationStep(t("cabinet", "certStep5"));
 
       // Автоматическое скачивание файла на компьютер
-      pdf.save(`Сертификат Ольга Хавич - ${courseTitle}.pdf`);
+      const downloadFileName = language === "de"
+        ? `Zertifikat Olga Khavich - ${courseTitle}.pdf`
+        : `Сертификат Ольга Хавич - ${courseTitle}.pdf`;
+      pdf.save(downloadFileName);
 
       setIssuedPdfUrl(data.certificate.pdfUrl);
       setIsSuccess(true);
       onSuccess(data.certificate.pdfUrl);
     } catch (error: any) {
       console.error("Ошибка при генерации сертификата:", error);
-      setError(error.message || "Произошла ошибка при создании сертификата. Пожалуйста, попробуйте еще раз.");
+      setError(error.message || t("common", "error"));
     } finally {
       setIsGenerating(false);
       setGenerationStep("");
     }
   };
 
-  const formattedDate = new Date().toLocaleDateString("ru-RU", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  const formattedDate = new Date().toLocaleDateString(
+    language === "de" ? "de-DE" : "ru-RU",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }
+  );
 
   // Вспомогательный JSX для содержимого бланка сертификата
   const renderCertificateContent = () => (
@@ -216,27 +225,27 @@ export function CertificateModal({
             </svg>
           </div>
           <p className={styles.schoolName}>
-            Школа Духовного развития Ольги Хавич
+            {t("cabinet", "certSchoolName")}
           </p>
         </div>
 
         {/* Заголовок */}
         <div className={styles.certTitleBlock}>
-          <h1 className={styles.certTitle}>Сертификат</h1>
-          <p className={styles.certSubtitle}>настоящим подтверждается, что</p>
+          <h1 className={styles.certTitle}>{t("cabinet", "certDocTitle")}</h1>
+          <p className={styles.certSubtitle}>{t("cabinet", "certDocConfirm")}</p>
         </div>
 
         {/* Имя получателя */}
         <div className={styles.recipientBlock}>
           <h2 className={styles.recipientName}>
-            {userName.trim() || "Имя Фамилия"}
+            {userName.trim() || t("cabinet", "certDocDefaultName")}
           </h2>
         </div>
 
         {/* Курс */}
         <div className={styles.courseBlock}>
           <p className={styles.courseText}>
-            успешно прошел(ла) обучение и завершил(а) программу курса
+            {t("cabinet", "certDocCourseText")}{" "}
             <span className={styles.courseName}>«{courseTitle}»</span>
           </p>
         </div>
@@ -244,13 +253,13 @@ export function CertificateModal({
         {/* Футер бланка: Дата, Золотая Печать, Подпись */}
         <div className={styles.certFooter}>
           <div className={styles.footerLeft}>
-            <span className={styles.infoLabel}>Дата выдачи</span>
+            <span className={styles.infoLabel}>{t("cabinet", "certDocDate")}</span>
             <span className={styles.infoValue}>{formattedDate}</span>
           </div>
 
           <div className={styles.footerRight}>
-            <span className={styles.infoLabel}>Преподаватель</span>
-            <span className={styles.infoValue}>Ольга Хавич</span>
+            <span className={styles.infoLabel}>{t("cabinet", "certDocTeacher")}</span>
+            <span className={styles.infoValue}>{t("cabinet", "certDocTeacherName")}</span>
           </div>
         </div>
       </div>
@@ -271,10 +280,17 @@ export function CertificateModal({
             /* Экран успешной выдачи */
             <div className={styles.successScreen}>
               <div className={styles.successIcon}>✓</div>
-              <h3>Поздравляем! Ваш сертификат готов</h3>
+              <h3>{t("cabinet", "certSuccessTitle")}</h3>
               <p>
-                Именной сертификат о завершении курса <strong>«{courseTitle}»</strong> успешно сформирован.
-                Файл скачался на ваше устройство, а также сохранен в личном кабинете.
+                {language === "de" ? (
+                  <>
+                    Das personalisierte Zertifikat über den Kursabschluss <strong>«{courseTitle}»</strong> wurde erfolgreich generiert. Die Datei wurde auf Ihr Gerät heruntergeladen und auch in Ihrem Kundenbereich gespeichert.
+                  </>
+                ) : (
+                  <>
+                    Именной сертификат о завершении курса <strong>«{courseTitle}»</strong> успешно сформирован. Файл скачался на ваше устройство, а также сохранен в личном кабинете.
+                  </>
+                )}
               </p>
               <div style={{ display: "flex", gap: "12px" }}>
                 <a
@@ -284,10 +300,10 @@ export function CertificateModal({
                   className="btn btn-primary"
                   style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
-                  📥 Открыть / Скачать PDF
+                  {t("cabinet", "certSuccessOpen")}
                 </a>
                 <button className={styles.cancelBtn} onClick={onClose}>
-                  Закрыть окно
+                  {t("cabinet", "certSuccessClose")}
                 </button>
               </div>
             </div>
@@ -295,20 +311,19 @@ export function CertificateModal({
             /* Экран ввода имени и предпросмотра */
             <>
               <div className={styles.modalHeader}>
-                <h2>Получение именного сертификата</h2>
+                <h2>{t("cabinet", "certModalTitle")}</h2>
                 <p>
-                  Пожалуйста, введите ваше имя. Оно мгновенно отобразится на бланке предпросмотра ниже.
-                  Перед созданием PDF убедитесь, что имя написано без опечаток.
+                  {t("cabinet", "certModalDesc")}
                 </p>
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="student-name">Ваше имя и фамилия</label>
+                <label htmlFor="student-name">{t("cabinet", "certInputLabel")}</label>
                 <input
                   type="text"
                   id="student-name"
                   className={styles.inputName}
-                  placeholder="Например, Екатерина Смирнова"
+                  placeholder={t("cabinet", "certInputPlaceholder")}
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   maxLength={60}
@@ -317,7 +332,7 @@ export function CertificateModal({
               </div>
 
               <div className={styles.previewContainer} ref={containerRef}>
-                <span className={styles.previewLabel}>Живой предпросмотр сертификата</span>
+                <span className={styles.previewLabel}>{t("cabinet", "certPreviewLabel")}</span>
                 {/* Адаптивная обертка с масштабированием */}
                 <div className={styles.scaleWrapper} style={{ height: `${1792 * scale}px` }}>
                   <div
@@ -356,14 +371,14 @@ export function CertificateModal({
 
               <div className={styles.modalActions}>
                 <button className={styles.cancelBtn} onClick={onClose} disabled={isGenerating}>
-                  Отмена
+                  {t("cabinet", "certCancelBtn")}
                 </button>
                 <button
                   className={styles.submitBtn}
                   onClick={handleGenerate}
                   disabled={isGenerating || !userName.trim()}
                 >
-                  🏆 Подтвердить и выдать сертификат
+                  {t("cabinet", "certConfirmBtn")}
                 </button>
               </div>
             </>
@@ -374,7 +389,7 @@ export function CertificateModal({
         {isGenerating && (
           <div className={styles.loaderOverlay}>
             <div className={styles.spinner} />
-            <p>Выдача сертификата...</p>
+            <p>{t("cabinet", "certGeneratingText")}</p>
             <span>{generationStep}</span>
           </div>
         )}

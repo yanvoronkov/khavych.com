@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useCart } from "src/context/CartContext";
+import { useLanguage } from "src/context/LanguageContext";
 import { z } from "zod";
 import styles from "./CartDrawer.module.css";
 
@@ -11,22 +12,23 @@ declare global {
   }
 }
 
-// Схема валидации заказа с помощью Zod
-const checkoutSchema = z.object({
-  name: z.string().min(2, "Имя должно содержать не менее 2 символов"),
-  email: z.string().email("Введите корректный адрес электронной почты"),
-  phone: z.string().min(8, "Телефон должен быть не менее 8 цифр"),
-  address: z.string().optional(),
-});
-
-type CheckoutFormData = z.infer<typeof checkoutSchema>;
+// Интерфейс для данных формы оформления заказа
+interface CheckoutFormData {
+  name: string;
+  email: string;
+  phone: string;
+  address?: string;
+}
 
 /**
- * Выдвижная боковая панель корзины (CartDrawer).
- * Позволяет просматривать корзину, менять количество браслетов,
- * удалять товары и мгновенно оформлять заказ с отправкой Ольге в Telegram.
+ * Компонент CartDrawer — выдвижная боковая панель корзины.
+ * Позволяет управлять товарами в корзине, вводить контактные данные,
+ * выбирать метод оплаты (PayPal или ручной перевод) и совершать транзакции.
+ * 
+ * @returns JSX элемент боковой панели корзины.
  */
 export const CartDrawer: React.FC = () => {
+  const { language, t } = useLanguage();
   const {
     items,
     total,
@@ -333,6 +335,14 @@ export const CartDrawer: React.FC = () => {
     setIsSubmitting(true);
     setErrors({});
 
+    // Динамическая схема валидации Zod в зависимости от выбранного языка
+    const checkoutSchema = z.object({
+      name: z.string().min(2, language === "ru" ? "Имя должно содержать не менее 2 символов" : "Der Name muss mindestens 2 Zeichen lang sein"),
+      email: z.string().email(language === "ru" ? "Введите корректный адрес электронной почты" : "Geben Sie eine gültige E-Mail-Adresse ein"),
+      phone: z.string().min(8, language === "ru" ? "Телефон должен быть не менее 8 цифр" : "Die Telefonnummer muss mindestens 8 Ziffern enthalten"),
+      address: z.string().optional(),
+    });
+
     try {
       // 1. Валидация формы через Zod
       const validationData: CheckoutFormData = {
@@ -346,7 +356,9 @@ export const CartDrawer: React.FC = () => {
       if (hasBracelets && (!formData.address || formData.address.trim().length < 10)) {
         setErrors((prev) => ({
           ...prev,
-          address: "Для доставки браслета укажите полный адрес (город, улица, дом, индекс)",
+          address: language === "ru" 
+            ? "Для доставки браслета укажите полный адрес (город, улица, дом, индекс)" 
+            : "Geben Sie für den Versand des Armbands die vollständige Adresse an (Stadt, Straße, Hausnummer, Postleitzahl)",
         }));
         setIsSubmitting(false);
         return;
@@ -432,12 +444,12 @@ export const CartDrawer: React.FC = () => {
         {/* Хедер панели */}
         <div className={styles.header}>
           <h2 className={styles.title}>
-            {mode === "CART" && "Ваша корзина"}
-            {mode === "CHECKOUT" && "Оформление заказа"}
-            {mode === "PAYMENT" && "Оплата заказа"}
-            {mode === "SUCCESS" && "Заказ принят!"}
+            {mode === "CART" && t("cart", "title")}
+            {mode === "CHECKOUT" && (language === "ru" ? "Оформление заказа" : "Bestellung aufgeben")}
+            {mode === "PAYMENT" && (language === "ru" ? "Оплата заказа" : "Bestellung bezahlen")}
+            {mode === "SUCCESS" && (language === "ru" ? "Заказ принят!" : "Bestellung erhalten!")}
           </h2>
-          <button className={styles.closeBtn} onClick={handleCloseDrawer} aria-label="Закрыть">
+          <button className={styles.closeBtn} onClick={handleCloseDrawer} aria-label={language === "ru" ? "Закрыть" : "Schließen"}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -475,12 +487,14 @@ export const CartDrawer: React.FC = () => {
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <h3 className={styles.successTitle}>Успешно оформлено!</h3>
+              <h3 className={styles.successTitle}>{language === "ru" ? "Успешно оформлено!" : "Erfolgreich bestellt!"}</h3>
               <p className={styles.successDesc}>
-                Благодарим за заказ! Если вы оплатили онлайн через PayPal, доступ к обучению уже выслан вам на Email. Если вы выбрали ручной перевод, Ольга свяжется с вами для подтверждения!
+                {language === "ru" 
+                  ? "Благодарим за заказ! Если вы оплатили онлайн через PayPal, доступ к обучению уже выслан вам на Email. Если вы выбрали ручной перевод, Ольга свяжется с вами для подтверждения!" 
+                  : "Vielen Dank für Ihre Bestellung! Wenn Sie online mit PayPal bezahlt haben, wurde der Kurszugang bereits an Ihre E-Mail-Adresse gesendet. Bei manueller Überweisung wird sich Olga mit Ihnen in Verbindung setzen!"}
               </p>
               <button className="btn btn-primary" onClick={handleCloseDrawer}>
-                Отлично
+                {language === "ru" ? "Отлично" : "Ausgezeichnet"}
               </button>
             </div>
           ) : items.length === 0 ? (
@@ -501,9 +515,9 @@ export const CartDrawer: React.FC = () => {
                 <circle cx="20" cy="21" r="1" />
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
               </svg>
-              <p className={styles.emptyText}>В вашей корзине пока пусто</p>
+              <p className={styles.emptyText}>{t("cart", "empty")}</p>
               <button className="btn btn-secondary" onClick={handleCloseDrawer}>
-                Вернуться к покупкам
+                {t("cart", "continueShopping")}
               </button>
             </div>
           ) : mode === "CART" ? (
@@ -523,9 +537,9 @@ export const CartDrawer: React.FC = () => {
                     <div>
                       <h4 className={styles.itemName}>{item.product.name}</h4>
                       <span className={styles.itemMeta}>
-                        {item.product.category === "BRACELET" && "Браслет"}
-                        {item.product.category === "COURSE" && "Курс"}
-                        {item.product.category === "CONSULTATION" && "Консультация"}
+                        {item.product.category === "BRACELET" && (language === "ru" ? "Браслет" : "Kraftarmband")}
+                        {item.product.category === "COURSE" && (language === "ru" ? "Курс" : "Kurs")}
+                        {item.product.category === "CONSULTATION" && (language === "ru" ? "Консультация" : "Dienstleistung")}
                       </span>
                     </div>
 
@@ -540,7 +554,7 @@ export const CartDrawer: React.FC = () => {
                           <button
                             className={styles.qtyBtn}
                             onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                            aria-label="Уменьшить"
+                            aria-label={language === "ru" ? "Уменьшить" : "Verringern"}
                           >
                             -
                           </button>
@@ -548,20 +562,20 @@ export const CartDrawer: React.FC = () => {
                           <button
                             className={styles.qtyBtn}
                             onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            aria-label="Увеличить"
+                            aria-label={language === "ru" ? "Увеличить" : "Erhöhen"}
                           >
                             +
                           </button>
                         </div>
                       ) : (
-                        <span className={styles.itemMeta}>1 шт.</span>
+                        <span className={styles.itemMeta}>1 {language === "ru" ? "шт." : "Stk."}</span>
                       )}
 
                       {/* Кнопка удаления */}
                       <button
                         className={styles.deleteBtn}
                         onClick={() => removeFromCart(item.product.id)}
-                        aria-label="Удалить"
+                        aria-label={language === "ru" ? "Удалить" : "Löschen"}
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -589,9 +603,11 @@ export const CartDrawer: React.FC = () => {
             /* Экран выбора и совершения оплаты */
             <div className={styles.paymentContainer}>
               <div className={styles.paymentHeader}>
-                <h4 style={{ fontWeight: 700, fontSize: "14px", color: "#6b1d2f", margin: 0 }}>Заказ успешно создан!</h4>
+                <h4 style={{ fontWeight: 700, fontSize: "14px", color: "#6b1d2f", margin: 0 }}>
+                  {language === "ru" ? "Заказ успешно создан!" : "Bestellung erfolgreich erstellt!"}
+                </h4>
                 <p style={{ fontSize: "13px", color: "var(--color-gray)", marginTop: "4px", margin: "4px 0 0 0" }}>
-                  Сумма к оплате: <strong>{total.toLocaleString("de-DE")} €</strong>
+                  {language === "ru" ? "Сумма к оплате:" : "Gesamtsumme:"} <strong>{total.toLocaleString("de-DE")} €</strong>
                 </p>
               </div>
 
@@ -605,10 +621,12 @@ export const CartDrawer: React.FC = () => {
                 >
                   <div className={styles.paymentMethodRadio}>
                     <input type="radio" checked={paymentMethod === "PAYPAL"} readOnly />
-                    <strong>Онлайн-оплата PayPal</strong>
+                    <strong>{language === "ru" ? "Онлайн-оплата PayPal" : "PayPal Online-Zahlung"}</strong>
                   </div>
                   <p style={{ fontSize: "12px", color: "var(--color-gray)", marginTop: "6px", margin: "6px 0 0 0" }}>
-                    Мгновенный безопасный платеж. Доступ к онлайн-курсам открывается автоматически сразу после завершения оплаты!
+                    {language === "ru" 
+                      ? "Мгновенный безопасный платеж. Доступ к онлайн-курсам открывается автоматически сразу после завершения оплаты!" 
+                      : "Sofortige sichere Zahlung. Der Kurszugang wird direkt nach Abschluss della Zahlung freigeschaltet!"}
                   </p>
                 </div>
 
@@ -618,10 +636,12 @@ export const CartDrawer: React.FC = () => {
                 >
                   <div className={styles.paymentMethodRadio}>
                     <input type="radio" checked={paymentMethod === "MANUAL"} readOnly />
-                    <strong>Ручной перевод на карту</strong>
+                    <strong>{language === "ru" ? "Ручной перевод на карту" : "Manuelle Banküberweisung"}</strong>
                   </div>
                   <p style={{ fontSize: "12px", color: "var(--color-gray)", marginTop: "6px", margin: "6px 0 0 0" }}>
-                    Оплата прямым переводом. Ольга Хавич свяжется с вами по WhatsApp или почте и предоставит реквизиты перевода.
+                    {language === "ru" 
+                      ? "Оплата прямым переводом. Ольга Хавич свяжется с вами по WhatsApp или почте и предоставит реквизиты перевода." 
+                      : "Direkte Banküberweisung. Olga Khavich wird sich per WhatsApp oder E-Mail mit Ihnen in Verbindung setzen, um die Zahlungsdaten bereitzustellen."}
                   </p>
                 </div>
               </div>
@@ -631,7 +651,7 @@ export const CartDrawer: React.FC = () => {
                 <div style={{ marginTop: "20px", minHeight: "100px" }}>
                   {!paypalLoaded ? (
                     <div style={{ textAlign: "center", padding: "20px", color: "var(--color-primary)", fontWeight: 600 }}>
-                      Загрузка кнопок PayPal...
+                      {language === "ru" ? "Загрузка кнопок PayPal..." : "PayPal-Buttons werden geladen..."}
                     </div>
                   ) : (
                     <div id="paypal-button-container" style={{ width: "100%" }}></div>
@@ -642,7 +662,9 @@ export const CartDrawer: React.FC = () => {
               {paymentMethod === "MANUAL" && (
                 <div style={{ marginTop: "20px", padding: "16px", backgroundColor: "#fffcfc", border: "1px solid #f2e2e4", borderRadius: "10px" }}>
                   <p style={{ fontSize: "13px", lineHeight: "1.5", margin: 0 }}>
-                    Вы выбрали ручной перевод на карту. Ольга Хавич отправит вам реквизиты перевода в течение короткого времени. После оплаты она вручную подтвердит платеж, и вам откроется доступ к обучению!
+                    {language === "ru" 
+                      ? "Вы выбрали ручной перевод на карту. Ольга Хавич отправит вам реквизиты перевода в течение короткого времени. После оплаты она вручную подтвердит платеж, и вам откроется доступ к обучению!" 
+                      : "Sie haben die manuelle Banküberweisung gewählt. Olga Khavich wird Ihnen in Kürze die Bankverbindung zusenden. Nach der Zahlung wird sie den Zahlungseingang manuell bestätigen, und Ihr Kurszugang wird freigeschaltet!"}
                   </p>
                   <button 
                     type="button"
@@ -667,7 +689,7 @@ export const CartDrawer: React.FC = () => {
                       }
                     }}
                   >
-                    Я понял, ожидаю связи
+                    {language === "ru" ? "Я понял, ожидаю связи" : "Ich habe verstanden, ich warte auf die Nachricht"}
                   </button>
                 </div>
               )}
@@ -680,7 +702,7 @@ export const CartDrawer: React.FC = () => {
                   setPaymentMethod(null);
                 }}
               >
-                Вернуться назад
+                {language === "ru" ? "Вернуться назад" : "Zurück"}
               </span>
 
               {!isSubmitting && (
@@ -699,8 +721,8 @@ export const CartDrawer: React.FC = () => {
                   }}
                   onClick={() => {
                     setCustomConfirm({
-                      title: "⚠️ Отмена заказа",
-                      message: "Вы действительно хотите отменить оформление этого заказа?",
+                      title: language === "ru" ? "⚠️ Отмена заказа" : "⚠️ Bestellung stornieren",
+                      message: language === "ru" ? "Вы действительно хотите отменить оформление этого заказа?" : "Möchten Sie diese Bestellung wirklich stornieren?",
                       onConfirm: async () => {
                         setIsSubmitting(true);
                         try {
@@ -708,7 +730,7 @@ export const CartDrawer: React.FC = () => {
                             method: "POST"
                           });
                           if (res.ok) {
-                            showToast("Заказ успешно отменен.", "success");
+                            showToast(language === "ru" ? "Заказ успешно отменен." : "Bestellung erfolgreich storniert.", "success");
                             clearCart();
                             setMode("CART");
                             setCreatedOrderId("");
@@ -716,15 +738,15 @@ export const CartDrawer: React.FC = () => {
                           } else {
                             const data = await res.json();
                             setCustomAlert({
-                              title: "Ошибка",
-                              message: data.message || "Не удалось отменить заказ."
+                              title: language === "ru" ? "Ошибка" : "Fehler",
+                              message: data.message || (language === "ru" ? "Не удалось отменить заказ." : "Bestellung konnte nicht storniert werden.")
                             });
                           }
                         } catch (err) {
                           console.error("Ошибка при отмене заказа:", err);
                           setCustomAlert({
-                            title: "Ошибка",
-                            message: "Произошла ошибка при отмене заказа."
+                            title: language === "ru" ? "Ошибка" : "Fehler",
+                            message: language === "ru" ? "Произошла ошибка при отмене заказа." : "Ein Fehler ist bei der Stornierung aufgetreten."
                           });
                         } finally {
                           setIsSubmitting(false);
@@ -733,7 +755,7 @@ export const CartDrawer: React.FC = () => {
                     });
                   }}
                 >
-                  Отменить заказ
+                  {language === "ru" ? "Отменить заказ" : "Bestellung stornieren"}
                 </span>
               )}
             </div>
@@ -742,13 +764,13 @@ export const CartDrawer: React.FC = () => {
             <form className={styles.checkoutForm} onSubmit={handleSubmitOrder}>
               {/* Имя */}
               <div className={styles.formGroup}>
-                <label htmlFor="checkout-name">Ваше имя *</label>
+                <label htmlFor="checkout-name">{t("auth", "name")} *</label>
                 <input
                   type="text"
                   id="checkout-name"
                   name="name"
                   className={styles.input}
-                  placeholder="Иван Иванов"
+                  placeholder={language === "ru" ? "Иван Иванов" : "Max Mustermann"}
                   value={formData.name}
                   onChange={handleInputChange}
                   required
@@ -758,13 +780,13 @@ export const CartDrawer: React.FC = () => {
 
               {/* Email */}
               <div className={styles.formGroup}>
-                <label htmlFor="checkout-email">Электронная почта (Email) *</label>
+                <label htmlFor="checkout-email">Email *</label>
                 <input
                   type="email"
                   id="checkout-email"
                   name="email"
                   className={styles.input}
-                  placeholder="ivan@example.com"
+                  placeholder="email@example.com"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
@@ -774,13 +796,13 @@ export const CartDrawer: React.FC = () => {
 
               {/* Телефон */}
               <div className={styles.formGroup}>
-                <label htmlFor="checkout-phone">Номер телефона (WhatsApp / Telegram) *</label>
+                <label htmlFor="checkout-phone">{t("auth", "phone")} (WhatsApp / Telegram) *</label>
                 <input
                   type="tel"
                   id="checkout-phone"
                   name="phone"
                   className={styles.input}
-                  placeholder="+79991234567"
+                  placeholder="+4917630761368"
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
@@ -791,13 +813,13 @@ export const CartDrawer: React.FC = () => {
               {/* Адрес (показывается только при наличии браслетов) */}
               {hasBracelets && (
                 <div className={styles.formGroup}>
-                  <label htmlFor="checkout-address">Адрес доставки (с индексом) *</label>
+                  <label htmlFor="checkout-address">{language === "ru" ? "Адрес доставки (с индексом) *" : "Lieferadresse (mit Postleitzahl) *"}</label>
                   <input
                     type="text"
                     id="checkout-address"
                     name="address"
                     className={styles.input}
-                    placeholder="123456, г. Москва, ул. Ленина, д. 10, кв. 25"
+                    placeholder={language === "ru" ? "123456, г. Москва, ул. Ленина, д. 10, кв. 25" : "Hauptstraße 12, 10115 Berlin, Deutschland"}
                     value={formData.address || ""}
                     onChange={handleInputChange}
                     required
@@ -808,7 +830,7 @@ export const CartDrawer: React.FC = () => {
 
               {/* Ссылка возврата в корзину */}
               <span className={styles.backToCartBtn} onClick={handleBackToCart}>
-                Вернуться к списку товаров
+                {language === "ru" ? "Вернуться к списку товаров" : "Zurück zum Warenkorb"}
               </span>
             </form>
           )}
@@ -818,7 +840,7 @@ export const CartDrawer: React.FC = () => {
         {mode !== "SUCCESS" && mode !== "PAYMENT" && items.length > 0 && (
           <div className={styles.footer}>
             <div className={styles.summaryRow}>
-              <span>Итого:</span>
+              <span>{t("cart", "total")}:</span>
               <span className={styles.summaryTotal}>{total.toLocaleString("de-DE")} €</span>
             </div>
 
@@ -833,7 +855,7 @@ export const CartDrawer: React.FC = () => {
                   }}
                   style={{ flex: 1, padding: "10px" }}
                 >
-                  Очистить
+                  {language === "ru" ? "Очистить" : "Leeren"}
                 </button>
                 <button
                   type="button"
@@ -841,7 +863,7 @@ export const CartDrawer: React.FC = () => {
                   onClick={handleGoToCheckout}
                   style={{ flex: 2, padding: "10px" }}
                 >
-                  Оформить заказ
+                  {t("cart", "checkout")}
                 </button>
               </div>
             ) : (
@@ -850,7 +872,9 @@ export const CartDrawer: React.FC = () => {
                 onClick={handleSubmitOrder}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Отправка..." : "Подтвердить заказ"}
+                {isSubmitting 
+                  ? t("common", "loading") 
+                  : (language === "ru" ? "Подтвердить заказ" : "Bestellung bestätigen")}
               </button>
             )}
           </div>
@@ -882,7 +906,7 @@ export const CartDrawer: React.FC = () => {
                   className={`${styles.customModalBtn} ${styles.customModalBtnCancel}`}
                   onClick={() => setCustomConfirm(null)}
                 >
-                  Отмена
+                  {t("common", "cancel")}
                 </button>
                 <button 
                   type="button" 
@@ -892,7 +916,7 @@ export const CartDrawer: React.FC = () => {
                     setCustomConfirm(null);
                   }}
                 >
-                  Продолжить
+                  {language === "ru" ? "Продолжить" : "Fortfahren"}
                 </button>
               </div>
             </div>
@@ -915,7 +939,7 @@ export const CartDrawer: React.FC = () => {
                   className={`${styles.customModalBtn} ${styles.customModalBtnConfirm}`}
                   onClick={() => setCustomAlert(null)}
                 >
-                  Ок
+                  {language === "ru" ? "Ок" : "Ok"}
                 </button>
               </div>
             </div>

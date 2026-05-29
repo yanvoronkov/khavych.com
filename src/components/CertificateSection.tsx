@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CertificateModal } from "./CertificateModal";
+import { useLanguage } from "../context/LanguageContext";
 
 interface CertificateSectionProps {
   courseId: string;
@@ -18,6 +19,7 @@ export function CertificateSection({
 }: CertificateSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(initialPdfUrl);
+  const { t } = useLanguage();
 
   const handleSuccess = (url: string) => {
     setPdfUrl(url);
@@ -46,13 +48,13 @@ export function CertificateSection({
           gap: "6px",
         }}
       >
-        🏆 Завершение обучения
+        {t("cabinet", "certificateSectionTitle")}
       </h4>
 
       {pdfUrl ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <p style={{ fontSize: "12px", color: "#666", margin: 0, lineHeight: "1.5" }}>
-            Ваш именной сертификат об окончании курса успешно сформирован и сохранен.
+            {t("cabinet", "certificateIssuedText")}
           </p>
           <a
             href={pdfUrl}
@@ -75,7 +77,7 @@ export function CertificateSection({
               fontWeight: 600,
             }}
           >
-            📥 Скачать сертификат (PDF)
+            {t("cabinet", "downloadCertificateBtn")}
           </a>
           <button
             onClick={() => setIsModalOpen(true)}
@@ -94,13 +96,13 @@ export function CertificateSection({
             onMouseOver={(e) => (e.currentTarget.style.color = "#8a7355")}
             onMouseOut={(e) => (e.currentTarget.style.color = "#b58d3d")}
           >
-            ✏️ Изменить имя / Перевыпустить
+            {t("cabinet", "reissueCertificateBtn")}
           </button>
         </div>
       ) : (
         <div>
           <p style={{ fontSize: "12px", color: "#666", margin: "0 0 12px 0", lineHeight: "1.5" }}>
-            После окончания курса вы можете выпустить официальный именной сертификат школы Ольги Хавич.
+            {t("cabinet", "certificatePromoText")}
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
@@ -125,7 +127,7 @@ export function CertificateSection({
             onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.98)")}
             onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
           >
-            🎓 Выдать сертификат
+            {t("cabinet", "issueCertificateBtn")}
           </button>
         </div>
       )}

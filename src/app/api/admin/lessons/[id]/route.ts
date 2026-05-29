@@ -6,10 +6,15 @@ import { logger } from "src/lib/logger";
 
 const updateLessonSchema = z.object({
   title: z.string().min(1, "Название урока не должно быть пустым").optional(),
+  titleDe: z.string().optional().nullable(),
   description: z.string().optional(),
+  descriptionDe: z.string().optional().nullable(),
   videoUrl: z.string().nullable().optional(),
+  videoUrlDe: z.string().nullable().optional(),
   videoCoverUrl: z.string().nullable().optional(),
+  videoCoverUrlDe: z.string().nullable().optional(),
   fileUrls: z.array(z.string()).optional(),
+  fileUrlsDe: z.array(z.string()).optional(),
   order: z.number().int("Порядок должен быть целым числом").optional(),
 });
 
@@ -65,10 +70,15 @@ export async function PUT(request: Request, { params }: RouteParams) {
       where: { id },
       data: {
         title: validatedData.title,
+        titleDe: validatedData.titleDe !== undefined ? validatedData.titleDe : undefined,
         description: validatedData.description,
+        descriptionDe: validatedData.descriptionDe !== undefined ? validatedData.descriptionDe : undefined,
         videoUrl: validatedData.videoUrl !== undefined ? (validatedData.videoUrl || null) : undefined,
+        videoUrlDe: validatedData.videoUrlDe !== undefined ? (validatedData.videoUrlDe || null) : undefined,
         videoCoverUrl: validatedData.videoCoverUrl !== undefined ? (validatedData.videoCoverUrl || null) : undefined,
+        videoCoverUrlDe: validatedData.videoCoverUrlDe !== undefined ? (validatedData.videoCoverUrlDe || null) : undefined,
         fileUrls: validatedData.fileUrls,
+        fileUrlsDe: validatedData.fileUrlsDe,
         order: validatedData.order,
       },
     });

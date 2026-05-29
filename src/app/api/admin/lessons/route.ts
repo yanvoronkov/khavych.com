@@ -7,10 +7,15 @@ import { logger } from "src/lib/logger";
 const createLessonSchema = z.object({
   courseId: z.string().min(1, "ID курса не должен быть пустым"),
   title: z.string().min(1, "Название урока не должно быть пустым"),
+  titleDe: z.string().optional().nullable(),
   description: z.string(),
+  descriptionDe: z.string().optional().nullable(),
   videoUrl: z.string().nullable().optional(),
+  videoUrlDe: z.string().nullable().optional(),
   videoCoverUrl: z.string().nullable().optional(),
+  videoCoverUrlDe: z.string().nullable().optional(),
   fileUrls: z.array(z.string()).default([]),
+  fileUrlsDe: z.array(z.string()).default([]),
   order: z.number().int("Порядок должен быть целым числом").default(0),
 });
 
@@ -39,17 +44,35 @@ export async function POST(request: Request) {
     // 2. Валидация входных данных
     const body = await request.json();
     const validatedData = createLessonSchema.parse(body);
-    const { courseId, title, description, videoUrl, videoCoverUrl, fileUrls, order } = validatedData;
+    const {
+      courseId,
+      title,
+      titleDe,
+      description,
+      descriptionDe,
+      videoUrl,
+      videoUrlDe,
+      videoCoverUrl,
+      videoCoverUrlDe,
+      fileUrls,
+      fileUrlsDe,
+      order,
+    } = validatedData;
 
     // 3. Создаем урок в базе данных
     const newLesson = await db.lesson.create({
       data: {
         courseId,
         title,
+        titleDe: titleDe || null,
         description,
+        descriptionDe: descriptionDe || null,
         videoUrl: videoUrl || null,
+        videoUrlDe: videoUrlDe || null,
         videoCoverUrl: videoCoverUrl || null,
+        videoCoverUrlDe: videoCoverUrlDe || null,
         fileUrls,
+        fileUrlsDe,
         order,
       },
     });

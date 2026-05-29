@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "src/context/CartContext";
+import { useLanguage } from "src/context/LanguageContext";
 import styles from "./shop.module.css";
 
 // Тип для значения фильтра (включает "ALL" для сброса)
@@ -12,12 +13,20 @@ interface ShopClientProps {
   products: any[];
 }
 
+/**
+ * Клиентский компонент магазина товаров и услуг.
+ * Предоставляет интерфейс фильтрации продуктов по категориям и добавления их в корзину.
+ * 
+ * @param props Свойства компонента, содержащие список продуктов products.
+ * @returns JSX элемент каталога магазина.
+ */
 export default function ShopClient({ products }: ShopClientProps) {
   const { addToCart } = useCart();
+  const { language, t } = useLanguage();
   const searchParams = useSearchParams();
 
-  // Локаль по умолчанию (RU). Готова к расширению на EN/DE в будущем.
-  const locale = "ru";
+  // Локаль пользователя из мультиязычного контекста
+  const locale = language;
 
   // Состояние активного основного фильтра
   const [filter, setFilter] = useState<FilterValue>("ALL");
@@ -81,25 +90,25 @@ export default function ShopClient({ products }: ShopClientProps) {
             className={`${styles.filterBtn} ${filter === "ALL" ? styles.filterBtnActive : ""}`}
             onClick={() => handleMainFilterChange("ALL")}
           >
-            Все предложения
+            {t("shop", "all")}
           </button>
           <button
             className={`${styles.filterBtn} ${filter === "BRACELET" ? styles.filterBtnActive : ""}`}
             onClick={() => handleMainFilterChange("BRACELET")}
           >
-            Амулетные браслеты
+            {t("shop", "bracelets")}
           </button>
           <button
             className={`${styles.filterBtn} ${filter === "COURSE" ? styles.filterBtnActive : ""}`}
             onClick={() => handleMainFilterChange("COURSE")}
           >
-            Обучающие курсы
+            {t("shop", "courses")}
           </button>
           <button
             className={`${styles.filterBtn} ${filter === "CONSULTATION" ? styles.filterBtnActive : ""}`}
             onClick={() => handleMainFilterChange("CONSULTATION")}
           >
-            Услуги и Консультации
+            {t("shop", "consultations")}
           </button>
         </div>
 
@@ -110,31 +119,31 @@ export default function ShopClient({ products }: ShopClientProps) {
               className={`${styles.subFilterBtn} ${subFilter === "ALL" ? styles.subFilterBtnActive : ""}`}
               onClick={() => setSubFilter("ALL")}
             >
-              Все услуги
+              {language === "ru" ? "Все услуги" : "Alle Dienstleistungen"}
             </button>
             <button
               className={`${styles.subFilterBtn} ${subFilter === "NUMEROLOGY" ? styles.subFilterBtnActive : ""}`}
               onClick={() => setSubFilter("NUMEROLOGY")}
             >
-              Нумерология
+              {language === "ru" ? "Нумерология" : "Numerologie"}
             </button>
             <button
               className={`${styles.subFilterBtn} ${subFilter === "TAROT" ? styles.subFilterBtnActive : ""}`}
               onClick={() => setSubFilter("TAROT")}
             >
-              Карты Таро
+              {language === "ru" ? "Карты Таро" : "Tarot-Karten"}
             </button>
             <button
               className={`${styles.subFilterBtn} ${subFilter === "WAX" ? styles.subFilterBtnActive : ""}`}
               onClick={() => setSubFilter("WAX")}
             >
-              Восковые отливки
+              {language === "ru" ? "Восковые отливки" : "Wachsguss"}
             </button>
             <button
               className={`${styles.subFilterBtn} ${subFilter === "LADING" ? styles.subFilterBtnActive : ""}`}
               onClick={() => setSubFilter("LADING")}
             >
-              Ладование
+              {language === "ru" ? "Ладование" : "Ladowanie"}
             </button>
           </div>
         )}
@@ -144,7 +153,7 @@ export default function ShopClient({ products }: ShopClientProps) {
       <section className={styles.grid}>
         {filteredProducts.length === 0 ? (
           <div style={{ textAlign: "center", gridColumn: "1 / -1", padding: "40px 0", color: "var(--color-gray)" }}>
-            <p>Нет доступных предложений по выбранным фильтрам.</p>
+            <p>{language === "ru" ? "Нет доступных предложений по выбранным фильтрам." : "Keine Angebote für die ausgewählten Filter verfügbar."}</p>
           </div>
         ) : (
           filteredProducts.map((product) => {
@@ -155,30 +164,30 @@ export default function ShopClient({ products }: ShopClientProps) {
 
             // Определяем класс стиля для бейджа и эмодзи на основе категории
             let badgeClass = styles.badgeBracelet;
-            let categoryLabel = "Браслет";
+            let categoryLabel = language === "ru" ? "Браслет" : "Kraftarmband";
             let imageEmoji = "📿";
 
             if (product.category === "COURSE") {
               badgeClass = styles.badgeCourse;
-              categoryLabel = "Курс";
+              categoryLabel = language === "ru" ? "Курс" : "Kurs";
               imageEmoji = "📖";
             } else if (product.category === "CONSULTATION") {
               badgeClass = styles.badgeConsultation;
               
               if (product.subCategory === "NUMEROLOGY") {
-                categoryLabel = "Нумерология";
+                categoryLabel = language === "ru" ? "Нумерология" : "Numerologie";
                 imageEmoji = "🔢";
               } else if (product.subCategory === "TAROT") {
-                categoryLabel = "Таро";
+                categoryLabel = language === "ru" ? "Таро" : "Tarot";
                 imageEmoji = "🃏";
               } else if (product.subCategory === "WAX") {
-                categoryLabel = "Отливка";
+                categoryLabel = language === "ru" ? "Отливка" : "Wachsguss";
                 imageEmoji = "🕯️";
               } else if (product.subCategory === "LADING") {
-                categoryLabel = "Ладование";
+                categoryLabel = language === "ru" ? "Ладование" : "Ladowanie";
                 imageEmoji = "☀️";
               } else {
-                categoryLabel = "Услуга";
+                categoryLabel = language === "ru" ? "Услуга" : "Dienstleistung";
                 imageEmoji = "🔮";
               }
             }
@@ -247,7 +256,7 @@ export default function ShopClient({ products }: ShopClientProps) {
                   {/* Подвал карточки: цена и кнопка покупки */}
                   <div className={styles.cardFooter}>
                     <div className={styles.priceCol}>
-                      <span className={styles.priceLabel}>Стоимость</span>
+                      <span className={styles.priceLabel}>{language === "ru" ? "Стоимость" : "Preis"}</span>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
                         <span className={styles.price}>
                           {product.price.toLocaleString("de-DE")} €
@@ -271,7 +280,7 @@ export default function ShopClient({ products }: ShopClientProps) {
                         imageUrl: product.imageUrl || ""
                       } as any)}
                     >
-                      В корзину
+                      {t("shop", "addToCart")}
                     </button>
                   </div>
                 </div>

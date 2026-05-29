@@ -7,8 +7,11 @@ import { logger } from "src/lib/logger";
 // Схема валидации тела запроса
 const courseUpdateSchema = z.object({
   title: z.string().min(1, "Название курса не должно быть пустым"),
+  titleDe: z.string().optional().nullable(),
   description: z.string().min(1, "Описание курса не должно быть пустым"),
+  descriptionDe: z.string().optional().nullable(),
   imageUrl: z.string().optional().nullable(),
+  imageUrlDe: z.string().optional().nullable(),
 });
 
 /**
@@ -73,8 +76,11 @@ export async function PUT(
       where: { id },
       data: {
         title: validatedData.title.trim(),
+        titleDe: validatedData.titleDe?.trim() || null,
         description: validatedData.description.trim(),
+        descriptionDe: validatedData.descriptionDe?.trim() || null,
         imageUrl: validatedData.imageUrl?.trim() || null,
+        imageUrlDe: validatedData.imageUrlDe?.trim() || null,
       },
       include: {
         lessons: {
@@ -168,7 +174,7 @@ export async function DELETE(
       );
     }
 
-    // Удаляем курс из базы данных (уроки удалятся каскадно)
+    // [DELETE] курс из базы данных (уроки удалятся каскадно)
     await db.course.delete({
       where: { id },
     });

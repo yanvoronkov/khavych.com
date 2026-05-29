@@ -3,14 +3,15 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "src/components/Header";
+import { useLanguage } from "src/context/LanguageContext";
 import styles from "./home.module.css";
 
 // Типы для вопросов квиза
 interface QuizQuestion {
   id: number;
-  question: string;
+  question: { ru: string; de: string };
   options: {
-    text: string;
+    text: { ru: string; de: string };
     score: string; // Рекомендуемая категория/субкатегория
   }[];
 }
@@ -19,143 +20,207 @@ interface QuizQuestion {
 const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     id: 1,
-    question: "Какая сфера вашей жизни сейчас требует наибольшего внимания и трансформации?",
+    question: {
+      ru: "Какая сфера вашей жизни сейчас требует наибольшего внимания и трансформации?",
+      de: "Welcher Bereich Ihres Lebens erfordert derzeit die meiste Aufmerksamkeit?"
+    },
     options: [
-      { text: "Финансы и карьера (финансовый потолок, долги, выбор дела)", score: "NUMEROLOGY" },
-      { text: "Личные отношения и семья (поиск любви, ссоры, детские проблемы)", score: "TAROT" },
-      { text: "Внутреннее состояние (усталость, апатия, нехватка жизненных сил)", score: "WAX" },
-      { text: "Поиск предназначения, скрытых талантов и вектора развития", score: "NUMEROLOGY" }
+      { text: { ru: "Финансы и карьера (финансовый потолок, долги, выбор дела)", de: "Finanzen und Karriere (finanzielle Grenzen, Bestimmung)" }, score: "NUMEROLOGY" },
+      { text: { ru: "Личные отношения и семья (поиск любви, ссоры, детские проблемы)", de: "Beziehungen und Familie (Liebe finden, Harmonisierung)" }, score: "TAROT" },
+      { text: { ru: "Внутреннее состояние (усталость, апатия, нехватка жизненных сил)", de: "Innerer Zustand (Müdigkeit, Apathie, Blockaden)" }, score: "WAX" },
+      { text: { ru: "Поиск предназначения, скрытых талантов и вектора развития", de: "Suche nach Bestimmung und verborgenen Talenten" }, score: "NUMEROLOGY" }
     ]
   },
   {
     id: 2,
-    question: "Чувствуете ли вы нехватку энергии или ощущение, что ваши дороги к успеху \"закрыты\"?",
+    question: {
+      ru: "Чувствуете ли вы нехватку энергии или ощущение, что ваши дороги к успеху \"закрыты\"?",
+      de: "Spüren Sie Energiemangel oder Stillstand in Ihren Angelegenheiten?"
+    },
     options: [
-      { text: "Да, ощущаю постоянный упадок сил, апатию или застой в делах", score: "WAX" },
-      { text: "Иногда чувствую усталость, но в целом справляюсь", score: "LADING" },
-      { text: "Нет, с энергией все хорошо, нужен только точный расчет и совет", score: "NUMEROLOGY" }
+      { text: { ru: "Да, ощущаю постоянный упадок сил, апатию или застой в делах", de: "Ja, ich spüre ständigen Energiemangel oder Stillstand" }, score: "WAX" },
+      { text: { ru: "Иногда чувствую усталость, но в целом справляюсь", de: "Manchmal fühle ich mich müde, aber ich komme zurecht" }, score: "LADING" },
+      { text: { ru: "Нет, с энергией все хорошо, нужен только точный расчет и совет", de: "Nein, mit der Energie ist alles bestens, ich brauche nur Rat" }, score: "NUMEROLOGY" }
     ]
   },
   {
     id: 3,
-    question: "Какому методу работы вы интуитивно доверяете больше всего?",
+    question: {
+      ru: "Какому методу работы вы интуитивно доверяете больше всего?",
+      de: "Welcher Arbeitsmethode vertrauen Sie intuitiv am meisten?"
+    },
     options: [
-      { text: "Точным расчетам по дате рождения (цифры, матрицы судеб)", score: "NUMEROLOGY" },
-      { text: "Интуитивным подсказкам, символам и раскладам (карты Таро)", score: "TAROT" },
-      { text: "Энергетическому очищению воском и огнем (устранение блоков)", score: "WAX" },
-      { text: "Мягкому наполнению силой и открытию путей (Ладование)", score: "LADING" }
+      { text: { ru: "Точным расчетам по дате рождения (цифры, матрицы судеб)", de: "Genaue Berechnungen nach Geburtsdatum (Matrix des Schicksals)" }, score: "NUMEROLOGY" },
+      { text: { ru: "Интуитивным подсказкам, символам и раскладам (карты Таро)", de: "Intuitive Hinweise und Symbole (Tarot-Karten)" }, score: "TAROT" },
+      { text: { ru: "Энергетическому очищению воском и огнем (устранение блоков)", de: "Energetische Reinigung mit Wachs und Feuer (Wachsguss)" }, score: "WAX" },
+      { text: { ru: "Мягкому наполнению силой и открытию путей (Ладование)", de: "Sanfte Energieübertragung und Wegeöffnung (Ladowanie)" }, score: "LADING" }
     ]
   }
 ];
 
 // Рекомендации по результатам квиза
-const QUIZ_RESULTS: Record<string, { title: string; desc: string; link: string; btnText: string }> = {
+const QUIZ_RESULTS: Record<string, { title: { ru: string; de: string }; desc: { ru: string; de: string }; link: string; btnText: { ru: string; de: string } }> = {
   NUMEROLOGY: {
-    title: "Нумерологический анализ личности и предназначения",
-    desc: "Ваши ответы показывают, что сейчас для вас важнее всего получить четкую ментальную карту жизни. Ольга рассчитает вашу индивидуальную Матрицу Судьбы, выявит скрытые таланты, финансовые каналы и укажет точный вектор реализации.",
+    title: {
+      ru: "Нумерологический анализ личности и предназначения",
+      de: "Numerologische Persönlichkeits- und Potenzialanalyse"
+    },
+    desc: {
+      ru: "Ваши ответы показывают, что сейчас для вас важнее всего получить четкую ментальную карту жизни. Ольга рассчитает вашу индивидуальную Матрицу Судьбы, выявит скрытые таланты, финансовые каналы и укажет точный вектор реализации.",
+      de: "Ihre Antworten zeigen, dass es für Sie jetzt am wichtigsten ist, eine klare Lebenskarte zu erhalten. Olga berechnet Ihre individuelle Schicksalsmatrix, identifiziert verborgene Talente, Finanzkanäle und zeigt den genauen Vektor der Selbstverwirklichung."
+    },
     link: "/shop?category=CONSULTATION&subCategory=NUMEROLOGY",
-    btnText: "Выбрать нумерологический расчет"
+    btnText: {
+      ru: "Выбрать нумерологический расчет",
+      de: "Numerologische Analyse wählen"
+    }
   },
   TAROT: {
-    title: "Диагностический расклад на картах Таро",
-    desc: "Вам необходим точный и честный срез текущих событий. Расклад Таро покажет скрытые мотивы окружающих, истинные причины застоя в отношениях или бизнесе, а также подсветит наиболее удачные развилки выбора.",
+    title: {
+      ru: "Диагностический расклад на картах Таро",
+      de: "Diagnostische Tarot-Sitzung"
+    },
+    desc: {
+      ru: "Вам необходим точный и честный срез текущих событий. Расклад Таро покажет скрытые мотивы окружающих, истинные причины застоя в отношениях или бизнесе, а также подсветит наиболее удачные развилки выбора.",
+      de: "Sie benötigen eine präzise und ehrliche Bestandsaufnahme der aktuellen Ereignisse. Die Tarot-Sitzung zeigt verborgene Motive anderer, die wahren Ursachen für Stillstand in Beziehungen oder im Geschäft und hebt die besten Entscheidungswege hervor."
+    },
     link: "/shop?category=CONSULTATION&subCategory=TAROT",
-    btnText: "Выбрать расклад Таро"
+    btnText: {
+      ru: "Выбрать расклад Таро",
+      de: "Tarot-Sitzung wählen"
+    }
   },
   WAX: {
-    title: "Глубокая восковая отливка (очищение чакр)",
-    desc: "Похоже, вы накопили значительный груз энергетической усталости или чужеродного негатива. Мягкие восковые отливки Ольги Хавич помогут бережно снять деструктивные программы, очистить чакры и восстановить здоровое биополе.",
+    title: {
+      ru: "Глубокая восковая отливка (очищение чакр)",
+      de: "Tiefe Wachsreinigung (Chakrenreinigung)"
+    },
+    desc: {
+      ru: "Похоже, вы накопили значительный груз энергетической усталости или чужеродного негатива. Мягкие восковые отливки Ольги Хавич помогут бережно снять деструктивные программы, очистить чакры и восстановить здоровое биополе.",
+      de: "Es scheint, als hätten Sie eine erhebliche Last an energetischer Müdigkeit oder negativem Einfluss angesammelt. Olgas sanfte Wachsgüsse helfen dabei, destruktive Programme behutsam zu entfernen, die Chakren zu reinigen und ein gesundes Biofeld wiederherzustellen."
+    },
     link: "/shop?category=CONSULTATION&subCategory=WAX",
-    btnText: "Пройти очищение воском"
+    btnText: {
+      ru: "Пройти очищение воском",
+      de: "Wachsreinigung wählen"
+    }
   },
   LADING: {
-    title: "Энергетическое Ладование (открытие дорог)",
-    desc: "Вы готовы к наполнению и активным действиям, но вам нужен мягкий импульс сил. Ладование Ольги Хавич настроит ваше поле на финансовую стабильность, здоровье и привлечение ресурсных событий в жизнь.",
+    title: {
+      ru: "Энергетическое Ладование (открытие дорог)",
+      de: "Energetisches Ladowanie (Wegeöffnung)"
+    },
+    desc: {
+      ru: "Вы готовы к наполнению и активным действиям, но вам нужен мягкий импульс сил. Ладование Ольги Хавич настроит ваше поле на финансовую стабильность, здоровье и привлечение ресурсных событий в жизнь.",
+      de: "Sie sind bereit für Füllung und aktives Handeln, benötigen aber einen sanften Kraftimpuls. Olgas Ladowanie stimmt Ihr Feld auf finanzielle Stabilität, Gesundheit und das Anziehen positiver Lebensereignisse ein."
+    },
     link: "/shop?category=CONSULTATION&subCategory=LADING",
-    btnText: "Заказать ладование"
+    btnText: {
+      ru: "Заказать ладование",
+      de: "Ladowanie wählen"
+    }
   }
 };
 
 interface Diploma {
   id: number;
-  title: string;
-  subtitle: string;
+  title: { ru: string; de: string };
+  subtitle: { ru: string; de: string };
   image: string;
   width: number;
   height: number;
 }
 
 const DIPLOMAS: Diploma[] = [
-  { id: 1, title: "Диплом Нумеролога", subtitle: "Профессиональный числовой анализ матрицы судьбы и предназначения", image: "/sertificate1.webp", width: 2560, height: 1597 },
-  { id: 2, title: "Магистр Тарологии", subtitle: "Прогнозирование на Старших и Младших Арканах, анализ ситуации", image: "/sertificate2.webp", width: 2560, height: 1597 },
-  { id: 3, title: "Энергопрактик & Ладование", subtitle: "Глубокое очищение энергоканалов, восковые отливки биополя", image: "/sertificate3.webp", width: 2560, height: 1597 },
-  { id: 4, title: "Чакроанализ", subtitle: "Диагностика чакровой системы человека по дате рождения", image: "/sertificate4.webp", width: 2560, height: 1597 },
-  { id: 5, title: "Коррекция Судьбы", subtitle: "Методология числовых кодов и перенаправление жизненных путей", image: "/sertificate5.webp", width: 2560, height: 1597 },
-  { id: 6, title: "Рунические Практики", subtitle: "Сакральные знаки, защитные ставы и диагностика энергетики", image: "/sertificate6.webp", width: 1056, height: 816 },
-  { id: 7, title: "Амулетная Нумерология", subtitle: "Создание индивидуальных минеральных браслетов по формуле рождения", image: "/sertificate7.webp", width: 2560, height: 1597 },
-  { id: 8, title: "Психологическое консультирование", subtitle: "Методы гештальт-терапии и когнитивной коррекции в эзотерике", image: "/sertificate8.webp", width: 2560, height: 1597 },
-  { id: 9, title: "Практическая Нумерология", subtitle: "Магистр числовых прогнозов, расчет финансового и любовного каналов", image: "/sertificate9.webp", width: 1280, height: 1280 },
-  { id: 10, title: "Энергетическая Чистка", subtitle: "Мастер бесконтактного ладования, снятие деструктивных блоков", image: "/sertificate10.webp", width: 2560, height: 1597 },
-  { id: 11, title: "Кармическая Коррекция", subtitle: "Определение и развязывание кармических узлов прошлых воплощений", image: "/sertificate11.webp", width: 2560, height: 1597 },
-  { id: 12, title: "Осознанное Менторство", subtitle: "Помощь в раскрытии внутреннего потенциала и духовного баланса", image: "/sertificate12.webp", width: 2048, height: 2048 },
-  { id: 13, title: "Матрица Изобилия", subtitle: "Индивидуальный расчет финансовых ключей и карьерных векторов", image: "/sertificate13.webp", width: 2001, height: 1416 },
-  { id: 14, title: "Энерготерапия 5 Измерения", subtitle: "Интегральные практики глубокого исцеления души и сознания", image: "/sertificate14.webp", width: 2048, height: 2048 }
+  { id: 1, title: { ru: "Диплом Нумеролога", de: "Diplom für Numerologie" }, subtitle: { ru: "Профессиональный числовой анализ матрицы судьбы и предназначения", de: "Professionelle numerologische Analyse der Schicksalsmatrix" }, image: "/sertificate1.webp", width: 2560, height: 1597 },
+  { id: 2, title: { ru: "Магистр Тарологии", de: "Magister der Tarot-Wissenschaft" }, subtitle: { ru: "Прогнозирование на Старших и Младших Арканах, анализ ситуации", de: "Prognostik auf Großen und Kleinen Arkana, Situationsanalyse" }, image: "/sertificate2.webp", width: 2560, height: 1597 },
+  { id: 3, title: { ru: "Энергопрактик & Ладование", de: "Energiepraktik & Ladowanie" }, subtitle: { ru: "Глубокое очищение энергоканалов, восковые отливки биополя", de: "Tiefe Reinigung der Energiekanäle, Wachsguss des Biofelds" }, image: "/sertificate3.webp", width: 2560, height: 1597 },
+  { id: 4, title: { ru: "Чакроанализ", de: "Chakren-Analyse" }, subtitle: { ru: "Диагностика чакровой системы человека по дате рождения", de: "Diagnostik des Chakrensystems eines Menschen nach Geburtsdatum" }, image: "/sertificate4.webp", width: 2560, height: 1597 },
+  { id: 5, title: { ru: "Коррекция Судьбы", de: "Schicksalskorrektur" }, subtitle: { ru: "Методология числовых кодов и перенаправление жизненных путей", de: "Methodik von Zahlencodes und Neuausrichtung von Lebenswegen" }, image: "/sertificate5.webp", width: 2560, height: 1597 },
+  { id: 6, title: { ru: "Рунические Практики", de: "Runen-Praktiken" }, subtitle: { ru: "Сакральные знаки, защитные ставы и диагностика энергетики", de: "Sakrale Zeichen, Schutzformeln und Energiediagnostik" }, image: "/sertificate6.webp", width: 1056, height: 816 },
+  { id: 7, title: { ru: "Амулетная Нумерология", de: "Amulett-Numerologie" }, subtitle: { ru: "Создание индивидуальных минеральных браслетов по формуле рождения", de: "Erstellung individueller Mineralarmbänder nach der Geburtsformel" }, image: "/sertificate7.webp", width: 2560, height: 1597 },
+  { id: 8, title: { ru: "Психологическое консультирование", de: "Psychologische Beratung" }, subtitle: { ru: "Методы гештальт-терапии и когнитивной коррекции в эзотерике", de: "Methoden der Gestalttherapie und kognitiven Korrektur in der Esoterik" }, image: "/sertificate8.webp", width: 2560, height: 1597 },
+  { id: 9, title: { ru: "Практическая Нумерология", de: "Praktische Numerologie" }, subtitle: { ru: "Магистр числовых прогнозов, расчет финансового и любовного каналов", de: "Magister für Zahlenprognosen, Berechnung von Finanz- und Liebeskanälen" }, image: "/sertificate9.webp", width: 1280, height: 1280 },
+  { id: 10, title: { ru: "Энергетическая Чистка", de: "Energetische Reinigung" }, subtitle: { ru: "Мастер бесконтактного ладования, снятие деструктивных блоков", de: "Meister des berührungslosen Ladowanie, Entfernung destruktiver Blockaden" }, image: "/sertificate10.webp", width: 2560, height: 1597 },
+  { id: 11, title: { ru: "Кармическая Коррекция", de: "Karmische Korrektur" }, subtitle: { ru: "Определение и развязывание кармических узлов прошлых воплощений", de: "Bestimmung und Auflösung karmischer Knoten aus früheren Inkarnationen" }, image: "/sertificate11.webp", width: 2560, height: 1597 },
+  { id: 12, title: { ru: "Осознанное Менторство", de: "Achtsames Mentoring" }, subtitle: { ru: "Помощь в раскрытии внутреннего потенциала и духовного баланса", de: "Hilfe bei der Entfaltung des inneren Potenzials und der spirituellen Balance" }, image: "/sertificate12.webp", width: 2048, height: 2048 },
+  { id: 13, title: { ru: "Матрица Изобилия", de: "Matrix der Fülle" }, subtitle: { ru: "Индивидуальный расчет финансовых ключей и карьерных векторов", de: "Individuelle Berechnung von Finanzschlüsseln und Karrierevektoren" }, image: "/sertificate13.webp", width: 2001, height: 1416 },
+  { id: 14, title: { ru: "Энерготерапия 5 Измерения", de: "Energietherapie der 5. Dimension" }, subtitle: { ru: "Интегральные практики глубокого исцеления души и сознания", de: "Integrale Praktiken zur tiefen Heilung von Seele und Bewusstsein" }, image: "/sertificate14.webp", width: 2048, height: 2048 }
 ];
 
 interface Testimonial {
   id: number;
-  text: string;
+  text: { ru: string; de: string };
   author: string;
   avatar: string;
-  role: string;
+  role: { ru: string; de: string };
 }
 
 const TESTIMONIALS: Testimonial[] = [
   {
     id: 1,
-    text: "Хочу выразить огромную благодарность Ольге замечательному человеку и настоящему профессионалу своего дела. Обращение к ней стало для меня очень важной поддержкой в непростой период жизни. Она не только помогла разобраться в ситуации, но и дала уверенность, спокойствие и внутреннюю гармонию.\n\nСпасибо за помощь, внимание и доброе отношение. Редко встречаются такие светлые и отзывчивые люди. От всей души рекомендую!",
+    text: {
+      ru: "Хочу выразить огромную благодарность Ольге замечательному человеку и настоящему профессионалу своего дела. Обращение к ней стало для меня очень важной поддержкой в непростой период жизни. Она не только помогла разобраться в ситуации, но и дала уверенность, спокойствие и внутреннюю гармонию.\n\nСпасибо за помощь, внимание и доброе отношение. Редко встречаются такие светлые и отзывчивые люди. От всей души рекомендую!",
+      de: "Ich möchte Olga meinen tiefsten Dank aussprechen – einer wunderbaren Persönlichkeit und einer wahren Expertin auf ihrem Gebiet. Ihre Beratung war für mich eine sehr wichtige Unterstützung in einer schwierigen Lebensphase. Sie hat mir nicht nur geholfen, die Situation zu verstehen, sondern mir auch Zuversicht, Ruhe und innere Harmonie geschenkt.\n\nVielen Dank für die Hilfe, die Aufmerksamkeit und die Herzlichkeit. Solche feinfühligen Menschen trifft man selten. Ich empfehle sie von ganzem Herzen!"
+    },
     author: "Елена",
     avatar: "ЕЛ",
-    role: "Клиент"
+    role: { ru: "Клиент", de: "Klientin" }
   },
   {
     id: 2,
-    text: "Добрый вечер! Ольга, хотела бы выразить Вам огромное спасибо за информацию, анализ и подсказки. Получила огромное количество подробной информации по всем направлениям жизни.\nСамое главное получила для себя ответы на вопросы на которые давно искала ответы. Очень профессиональный подход.\nОльга, вы опытный специалист, дающий мудрые и точные советы и инструменты. Мой запрос был раскрыт, стало понятно направление для дальнейшего движения, даны рекомендации на что обратить внимание, что стоит делать, а от чего стоит отказаться, это было в точку.\nОльга, благодарю вас и желаю удачи!",
+    text: {
+      ru: "Добрый вечер! Ольга, хотела бы выразить Вам огромное спасибо за информацию, анализ и подсказки. Получила огромное количество подробной информации по всем направлениям жизни.\nСамое главное получила для себя ответы на вопросы на которые давно искала ответы. Очень профессиональный подход.\nОльга, вы опытный специалист, дающий мудрые и точные советы и инструменты. Мой запрос был раскрыт, стало понятно направление для дальнейшего движения, даны рекомендации на что обратить внимание, что стоит делать, а от чего стоит отказаться, это было в точку.\nОльга, благодарю вас и желаю удачи!",
+      de: "Guten Abend! Olga, ich möchte Ihnen vielmals für die Informationen, die Analyse und die Ratschläge danken. Ich habe eine enorme Menge an detaillierten Informationen für alle Lebensbereiche erhalten.\nVor allem habe ich Antworten auf Fragen gefunden, nach denen ich schon lange gesucht habe. Ein sehr professioneller Ansatz.\nOlga, Sie sind eine erfahrene Spezialistin, die weise und präzise Ratschläge und Werkzeuge anbietet. Mein Anliegen wurde vollständig gelöst, die Richtung für die Zukunft ist klar geworden, und es wurden wertvolle Empfehlungen gegeben.\nVielen Dank, Olga, und viel Erfolg!"
+    },
     author: "Ирина",
     avatar: "ИР",
-    role: "Клиент"
+    role: { ru: "Клиент", de: "Klientin" }
   },
   {
     id: 3,
-    text: "Уважаемая Ольга, спасибо за ваш вклад в открытие мне дорог для хорошей работы и безопасности. С Вашей помощью я смогла безопасно доехать домой, хотя в дороге была ужасная авария. Решить многие вопросы по документам, за короткое время приобрести много знакомых, найти три работы, главное кругом успевать теперь. А так же отдельное спасибо за старославянский родовой обряд на помощь и поддержку рода.\nВсе работает, рекомендую Вас как специалиста в этой области своим друзьям и знакомым. Желаю Вам только идти вперед ❤️❤️❤️❤️",
+    text: {
+      ru: "Уважаемая Ольга, спасибо за ваш вклад в открытие мне дорог для хорошей работы и безопасности. С Вашей помощью я смогла безопасно доехать домой, хотя в дороге была ужасная авария. Решить многие вопросы по документам, за короткое время приобрести много знакомых, найти три работы, главное кругом успевать теперь. А так же отдельное спасибо за старославянский родовой обряд на помощь и поддержку рода.\nВсе работает, рекомендую Вас как специалиста в этой области своим друзьям и знакомым. Желаю Вам только идти вперед ❤️❤️❤️❤️",
+      de: "Liebe Olga, vielen Dank für Ihren Beitrag zur Öffnung meiner Wege für eine gute Arbeit und Sicherheit. Mit Ihrer Hilfe konnte ich sicher nach Hause reisen, obwohl es auf dem Weg einen schrecklichen Unfall gab. Ich konnte viele Dokumentenfragen klären, in kurzer Zeit viele Kontakte knüpfen und drei Jobs finden. Ein besonderer Dank gilt auch dem altslawischen Ahnenritual zur Unterstützung der Ahnenkräfte.\nAlles funktioniert bestens, ich empfehle Sie gerne weiter! Ich wünsche Ihnen nur das Beste ❤️❤️❤️❤️"
+    },
     author: "Татьяна",
     avatar: "ТТ",
-    role: "Клиент"
+    role: { ru: "Клиент", de: "Klientin" }
   },
   {
     id: 4,
-    text: "Оля спасибо большое тебе за курс, очень приятно с тобой работать 😍 мне очень нравится твоя трактовка карт и то как ты объясняешь, информации невероятно много, буду разбираться ✨😍",
+    text: {
+      ru: "Оля спасибо большое тебе за курс, очень приятно с тобой работать 😍 мне очень нравится твоя трактовка карт и то как ты объясняешь, информации невероятно много, буду разбираться ✨😍",
+      de: "Olya, vielen Dank für den Kurs, es ist eine Freude, mit dir zu arbeiten! Ich liebe deine Interpretation der Karten und deine Erklärungen. Die Menge an Informationen ist fantastisch, ich werde mich intensiv damit beschäftigen! ✨😍"
+    },
     author: "Юлия",
     avatar: "ЮЛ",
-    role: "Ученица курса"
+    role: { ru: "Ученица курса", de: "Schülerin des Kurses" }
   },
   {
     id: 5,
-    text: "Приветики. 😊 Свеча какая прямая и пламя так прямо горит 🥰. А цветочки это лаванда, щебрец, ромашка или я ошибаюсь? Как красиво 😍. Спасибочки солнце 😘 Кстати я все эти дни так себя прекрасно чувствую, так легко, высыпаюсь, в течении дня полна энергии. Суб., воскресенье работала с 6 утра и целый день после до вечера чем то занималась и даже не устала. А ещё не поверишь я не чувствую боли в спине, это прям огонь. Я так сильно тебе благодарна и не только тебе, а тому кто привёл меня на встречу с тобой. 🥰😘",
+    text: {
+      ru: "Приветики. 😊 Свеча какая прямая и пламя так прямо горит 🥰. А цветочки это лаванда, щебрец, ромашка или я ошибаюсь? Как красиво 😍. Спасибочки солнце 😘 Кстати я все эти дни так себя прекрасно чувствую, так легко, высыпаюсь, в течении дня полна энергии. Суб., воскресенье работала с 6 утра и целый день после до вечера чем то занималась и даже не устала. А ещё не поверишь я не чувствую боли в спине, это прям огонь. Я так сильно тебе благодарна и не только тебе, а тому кто привёл меня на встречу с тобой. 🥰😘",
+      de: "Hallo! 😊 Die Kerze brennt so ruhig und die Flamme ist so gerade. Die Blumen sind Lavendel, Thymian und Kamille, oder? Wunderschön! Vielen Dank, mein Sonnenschein. Ich fühle mich seit Tagen so großartig, leicht und voller Energie. Ich habe das ganze Wochenende ab 6 Uhr morgens gearbeitet und hatte danach immer noch Energie. Und stell dir vor, meine Rückenschmerzen sind weg! Ich bin dir so dankbar!"
+    },
     author: "Анна",
     avatar: "АН",
-    role: "Клиент"
+    role: { ru: "Клиент", de: "Klientin" }
   },
   {
     id: 6,
-    text: "Доброе утро. Оля я вчера проснулась в 5:40, проводила малого в школу и думала лягу спать. Но на моё удивление у меня было много энергии, спать не хотелось от слова совсем. Сегодня я чувствую себя так же. Полна энергии и нет чувства сонливости и усталости. ☺️☺️☺️\nЭх... пойду гладить кучу белья 🤣🤣🤣\nСпасибочки 😘",
+    text: {
+      ru: "Доброе утро. Оля я вчера проснулась в 5:40, проводила малого в школу и думала лягу спать. Но на моё удивление у меня было много энергии, спать не хотелось от слова совсем. Сегодня я чувствую себя так же. Полна энергии и нет чувства сонливости и усталости. ☺️☺️☺️\nЭх... пойду гладить кучу белья 🤣🤣🤣\nСпасибочки 😘",
+      de: "Guten Morgen! Olya, ich bin gestern um 5:40 Uhr aufgewacht, habe das Kind zur Schule gebracht und dachte, ich lege mich wieder hin. Aber zu meiner Überraschung hatte ich so viel Energie, dass ich überhaupt nicht müde war. Heute fühle ich mich genauso. Voller Energie und ohne Müdigkeit. ☺️☺️☺️\nJetzt werde ich bügeln gehen 🤣🤣🤣\nVielen Dank! 😘"
+    },
     author: "Светлана",
     avatar: "СВ",
-    role: "Клиент"
+    role: { ru: "Клиент", de: "Klientin" }
   }
 ];
 
 export default function Home() {
+  const { language, t } = useLanguage();
   // Состояния для каруселей
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
   const [visibleSlides, setVisibleSlides] = useState<number>(3);
@@ -310,8 +375,8 @@ export default function Home() {
             {/* Блок заголовка */}
             <div className={styles.heroTitleArea}>
               <h1 className={styles.heroTitle} id="main-title">
-                Ольга Хавич, духовный целитель, таролог,<br />
-                <span>нумеролог</span>
+                {t("hero", "subtitle")}<br />
+                <span>{t("hero", "title")}</span>
               </h1>
             </div>
 
@@ -320,8 +385,8 @@ export default function Home() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/olga.webp"
-                alt="Ольга Хавич, духовный целитель, таролог, нумеролог"
-                title="Ольга Хавич, духовный целитель, таролог, нумеролог"
+                alt="Olga Khavich"
+                title="Olga Khavich"
                 width={667}
                 height={1000}
                 className={styles.heroOlgaImage}
@@ -334,15 +399,15 @@ export default function Home() {
             {/* Блок подзаголовка и кнопок (для десктопов он внутри Hero Grid) */}
             <div className={`${styles.heroBottomArea} ${styles.desktopOnly}`}>
               <p className={styles.heroSubtitle}>
-                Помогаю клиентам справляться со многими жизненными проблемами в отношениях, финансах, бизнесе и других сферах.
+                {t("hero", "desc")}
               </p>
 
               <div className={styles.heroActions}>
                 <a href="#quiz-block" className="btn btn-primary" id="hero-btn-quiz">
-                  Подобрать метод решения
+                  {t("hero", "cta")}
                 </a>
                 <Link href="/shop" className="btn btn-secondary" id="hero-btn-shop">
-                  В магазин силы
+                  {t("header", "shop")}
                 </Link>
               </div>
             </div>
@@ -355,14 +420,14 @@ export default function Home() {
       <div className={`${styles.heroBottomAreaMobile} ${styles.mobileOnly}`}>
         <div className="container">
           <p className={styles.heroSubtitleMobile}>
-            Помогаю клиентам справляться со многими жизненными проблемами в отношениях, финансах, бизнесе и других сферах.
+            {t("hero", "desc")}
           </p>
           <div className={styles.heroActionsMobile}>
             <a href="#quiz-block" className="btn btn-primary" id="hero-btn-quiz-mobile">
-              Подобрать метод решения
+              {t("hero", "cta")}
             </a>
             <Link href="/shop" className="btn btn-secondary" id="hero-btn-shop-mobile">
-              В магазин силы
+              {t("header", "shop")}
             </Link>
           </div>
         </div>
@@ -370,10 +435,9 @@ export default function Home() {
       <section className={styles.problems} id="problems">
         <div className="container">
           <div className={styles.centerHeader}>
-            <h2>С какими запросами ко мне приходят?</h2>
+            <h2>{t("problems", "title")}</h2>
             <p>
-              В жизни каждого наступает момент застоя или кризиса. Моя задача — найти глубинную
-              причину блокировки и дать вам точные ключи для её устранения.
+              {t("problems", "subtitle")}
             </p>
           </div>
 
@@ -386,8 +450,8 @@ export default function Home() {
                 </svg>
               </div>
               <div className={styles.problemCardContent}>
-                <h3>Финансы и карьера</h3>
-                <p>Уперлись в финансовый потолок? Бизнес буксует? Не понимаете, в какое русло направить силы для привлечения материального изобилия?</p>
+                <h3>{t("problems", "finance")}</h3>
+                <p>{t("problems", "financeDesc")}</p>
               </div>
             </div>
 
@@ -398,8 +462,8 @@ export default function Home() {
                 </svg>
               </div>
               <div className={styles.problemCardContent}>
-                <h3>Личные отношения</h3>
-                <p>Наступаете на одни и те же грабли с партнерами? Ощущаете одиночество и непонимание? Переживаете болезненный разрыв или семейный кризис?</p>
+                <h3>{t("problems", "relations")}</h3>
+                <p>{t("problems", "relationsDesc")}</p>
               </div>
             </div>
 
@@ -410,8 +474,8 @@ export default function Home() {
                 </svg>
               </div>
               <div className={styles.problemCardContent}>
-                <h3>Энергия и здоровье</h3>
-                <p>Чувствуете хроническую усталость, опустошение или апатию? Ощущаете, что все дороги закрыты и удача буквально отвернулась от вас?</p>
+                <h3>{t("problems", "energy")}</h3>
+                <p>{t("problems", "energyDesc")}</p>
               </div>
             </div>
 
@@ -423,14 +487,14 @@ export default function Home() {
                 </svg>
               </div>
               <div className={styles.problemCardContent}>
-                <h3>Предназначение и дети</h3>
-                <p>Не знаете, кто вы на самом деле и в чем ваша кармическая задача? Хотите понять таланты и особенности характера вашего ребенка?</p>
+                <h3>{t("problems", "destiny")}</h3>
+                <p>{t("problems", "destinyDesc")}</p>
               </div>
             </div>
           </div>
 
           <div className={styles.problemsTransition}>
-            «Каждая из этих проблем имеет четкую причину, скрытую в вашей дате рождения и энергоструктуре. Мы найдем её и трансформируем в ваш ресурс.»
+            {t("problems", "quote")}
           </div>
         </div>
       </section>
@@ -439,10 +503,9 @@ export default function Home() {
       <section className={styles.keys} id="keys">
         <div className="container">
           <div className={styles.centerHeader}>
-            <h2 style={{ color: "#fff" }}>Система Четырех Ключей</h2>
+            <h2 style={{ color: "#fff" }}>{t("keysBlock", "title")}</h2>
             <p style={{ color: "rgba(255,255,255,0.7)" }}>
-              Моя методика построена на интегральном подходе: от точной диагностики развилок вашей реальности
-              и глубокого очищения воском до наполнения природной силой и детального расчета матрицы судьбы.
+              {t("keysBlock", "subtitle")}
             </p>
           </div>
 
@@ -451,10 +514,9 @@ export default function Home() {
               <div className={styles.keyHeader}>
                 <div className={styles.keyStepNumber}>01</div>
               </div>
-              <h3 className={styles.keyStepTitle}>Диагностика (Таро)</h3>
+              <h3 className={styles.keyStepTitle}>{t("keysBlock", "k1_title")}</h3>
               <p className={styles.keyStepDesc}>
-                Сканируем текущие развилки вашей реальности. Видим скрытые мотивы людей,
-                причины кризисов и помогаем сделать верный выбор прямо сейчас.
+                {t("keysBlock", "k1_desc")}
               </p>
             </div>
 
@@ -462,10 +524,9 @@ export default function Home() {
               <div className={styles.keyHeader}>
                 <div className={styles.keyStepNumber}>02</div>
               </div>
-              <h3 className={styles.keyStepTitle}>Очищение (Отливки)</h3>
+              <h3 className={styles.keyStepTitle}>{t("keysBlock", "k2_title")}</h3>
               <p className={styles.keyStepDesc}>
-                Бережно убираем энергетические блокировки, сглазы, деструктивные программы
-                и привязки из прошлых травмирующих отношений.
+                {t("keysBlock", "k2_desc")}
               </p>
             </div>
 
@@ -473,10 +534,9 @@ export default function Home() {
               <div className={styles.keyHeader}>
                 <div className={styles.keyStepNumber}>03</div>
               </div>
-              <h3 className={styles.keyStepTitle}>Наполнение (Ладование)</h3>
+              <h3 className={styles.keyStepTitle}>{t("keysBlock", "k3_title")}</h3>
               <p className={styles.keyStepDesc}>
-                Заполняем очищенные каналы природной силой. Настраиваем ваше биополе
-                на финансовую стабильность, здоровье и привлечение любви.
+                {t("keysBlock", "k3_desc")}
               </p>
             </div>
 
@@ -484,10 +544,9 @@ export default function Home() {
               <div className={styles.keyHeader}>
                 <div className={styles.keyStepNumber}>04</div>
               </div>
-              <h3 className={styles.keyStepTitle}>Расчет (Нумерология)</h3>
+              <h3 className={styles.keyStepTitle}>{t("keysBlock", "k4_title")}</h3>
               <p className={styles.keyStepDesc}>
-                Составляем точную ментальную карту вашей жизни по дате рождения. Находим сильные стороны,
-                предназначение и кармические задачи.
+                {t("keysBlock", "k4_desc")}
               </p>
             </div>
           </div>
@@ -498,10 +557,9 @@ export default function Home() {
       <section className={styles.services} id="services">
         <div className="container">
           <div className={styles.centerHeader}>
-            <h2>Направления Помощи и Практик</h2>
+            <h2>{t("servicesBlock", "title")}</h2>
             <p>
-              Выберите подходящее направление для вашей личной трансформации. Вы можете заказать индивидуальную консультацию
-              или полноценный энергетический обряд.
+              {t("servicesBlock", "subtitle")}
             </p>
           </div>
 
@@ -509,61 +567,56 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-tarot.webp" alt="Карты Таро" title="Карты Таро" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
+                <img src="/images/service-tarot.webp" alt="Tarot" title="Tarot" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
-              <h3>Карты Таро</h3>
+              <h3>{t("servicesBlock", "s1_title")}</h3>
               <p>
-                Точный анализ запутанных жизненных ситуаций и прогнозирование вероятностей. Расклады на
-                партнерство, карьеру, причины финансовых кризисов и поиск правильного пути.
+                {t("servicesBlock", "s1_desc")}
               </p>
               <Link href="/shop?category=CONSULTATION&subCategory=TAROT" className="btn btn-secondary" style={{ marginTop: "auto" }} id="service-tarot-btn">
-                Сделать расклад (от 40 €)
+                {t("servicesBlock", "s1_btn")}
               </Link>
             </article>
 
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-wax.webp" alt="Восковые отливки" title="Восковые отливки" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
+                <img src="/images/service-wax.webp" alt="Wachsguss" title="Wachsguss" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
-              <h3>Восковые отливки</h3>
+              <h3>{t("servicesBlock", "s2_title")}</h3>
               <p>
-                Диагностика и глубокое очищение энергетических центров (чакр). Снятие негатива,
-                деструктивных программ и разрушение привязок из прошлых токсичных отношений.
+                {t("servicesBlock", "s2_desc")}
               </p>
               <Link href="/shop?category=CONSULTATION&subCategory=WAX" className="btn btn-secondary" style={{ marginTop: "auto" }} id="service-wax-btn">
-                Очистить поле (от 70 €)
+                {t("servicesBlock", "s2_btn")}
               </Link>
             </article>
 
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-lading.webp" alt="Ладование биополя" title="Ладование биополя" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
+                <img src="/images/service-lading.webp" alt="Ladowanie" title="Ladowanie" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
-              <h3>Ладование биополя</h3>
+              <h3>{t("servicesBlock", "s3_title")}</h3>
               <p>
-                Практики наполнения чистой силой после очищений. Восстановление здоровья,
-                настройка на финансовую стабильность, красоту и энергетическое «открытие дорог».
+                {t("servicesBlock", "s3_desc")}
               </p>
               <Link href="/shop?category=CONSULTATION&subCategory=LADING" className="btn btn-secondary" style={{ marginTop: "auto" }} id="service-lading-btn">
-                Наполниться силой (от 70 €)
+                {t("servicesBlock", "s3_btn")}
               </Link>
-
             </article>
 
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-numerology.webp" alt="Нумерологический прогноз" title="Нумерологический прогноз" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
+                <img src="/images/service-numerology.webp" alt="Numerologie" title="Numerologie" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
-              <h3>Нумерологический прогноз</h3>
+              <h3>{t("servicesBlock", "s4_title")}</h3>
               <p>
-                Глубокий анализ вашей личности и судьбы по дате рождения. Расчет предназначения,
-                финансовых каналов, совместимости в любви и прогнозирование ключевых периодов жизни.
+                {t("servicesBlock", "s4_desc")}
               </p>
               <Link href="/shop?category=CONSULTATION&subCategory=NUMEROLOGY" className="btn btn-secondary" style={{ marginTop: "auto" }} id="service-matrix-btn">
-                Выбрать расчет (от 70 €)
+                {t("servicesBlock", "s4_btn")}
               </Link>
             </article>
           </div>
@@ -574,59 +627,56 @@ export default function Home() {
       <section className={styles.productsPower} id="products-power">
         <div className="container">
           <div className={styles.centerHeader}>
-            <h2>Инструменты Силы и Сакральные Знания</h2>
+            <h2>{t("productsPowerBlock", "title")}</h2>
             <p>
-              Поддерживайте свое ресурсное состояние с помощью индивидуальных амулетов или начните
-              самостоятельное обучение нумерологии и таро.
+              {t("productsPowerBlock", "subtitle")}
             </p>
           </div>
 
           <div className={styles.productsPowerGrid}>
             {/* Блок Амулетов */}
             <div className={`${styles.powerCard} ${styles.powerCardNormal}`}>
-              <div className={styles.powerBadge}>Артефакты силы</div>
-              <h3 className={styles.powerTitle}>Индивидуальные амулетные браслеты</h3>
+              <div className={styles.powerBadge}>{t("productsPowerBlock", "p1_badge")}</div>
+              <h3 className={styles.powerTitle}>{t("productsPowerBlock", "p1_title")}</h3>
               <p className={styles.powerDesc}>
-                Браслеты из натуральных минералов премиального качества. Каждый камень подбирается Ольгой вручную строго
-                под вашу дату рождения и конкретный запрос (финансы, защита биополя, любовь и гармония). Все браслеты проходят обряд воскового ладования.
+                {t("productsPowerBlock", "p1_desc")}
               </p>
               <div className={styles.powerList}>
                 <div className={styles.powerListItem}>
-                  <span className={styles.powerListItemDot}>✦</span> 100% натуральные камни
+                  <span className={styles.powerListItemDot}>✦</span> {t("productsPowerBlock", "p1_f1")}
                 </div>
                 <div className={styles.powerListItem}>
-                  <span className={styles.powerListItemDot}>✦</span> Индивидуальный расчет камней по вашей матрице
+                  <span className={styles.powerListItemDot}>✦</span> {t("productsPowerBlock", "p1_f2")}
                 </div>
                 <div className={styles.powerListItem}>
-                  <span className={styles.powerListItemDot}>✦</span> Обряд активации и зарядка силой мастера
+                  <span className={styles.powerListItemDot}>✦</span> {t("productsPowerBlock", "p1_f3")}
                 </div>
               </div>
               <Link href="/shop?category=PRODUCT" className="btn btn-secondary" style={{ marginTop: "auto" }}>
-                Подобрать браслет (от 39 €)
+                {t("productsPowerBlock", "p1_btn")}
               </Link>
             </div>
 
             {/* Блок Курсов */}
             <div className={`${styles.powerCard} ${styles.powerCardPremium}`}>
-              <div className={styles.powerBadge}>Авторское обучение</div>
-              <h3 className={styles.powerTitle}>Онлайн-курсы по нумерологии и таро</h3>
+              <div className={styles.powerBadge}>{t("productsPowerBlock", "p2_badge")}</div>
+              <h3 className={styles.powerTitle}>{t("productsPowerBlock", "p2_title")}</h3>
               <p className={styles.powerDesc}>
-                Станьте хозяином своей судьбы или освойте новую престижную помогающую профессию. Понятные видеоуроки без воды,
-                детальные PDF-методички и удобный личный кабинет ученика с бессрочным или временным доступом.
+                {t("productsPowerBlock", "p2_desc")}
               </p>
               <div className={styles.powerList}>
                 <div className={styles.powerListItem}>
-                  <span className={styles.powerListItemDot}>✦</span> Видеоплеер Kinescope высокого качества без рекламы
+                  <span className={styles.powerListItemDot}>✦</span> {t("productsPowerBlock", "p2_f1")}
                 </div>
                 <div className={styles.powerListItem}>
-                  <span className={styles.powerListItemDot}>✦</span> Готовые методические пособия для расчетов
+                  <span className={styles.powerListItemDot}>✦</span> {t("productsPowerBlock", "p2_f2")}
                 </div>
                 <div className={styles.powerListItem}>
-                  <span className={styles.powerListItemDot}>✦</span> Личный кабинет для контроля сроков доступов
+                  <span className={styles.powerListItemDot}>✦</span> {t("productsPowerBlock", "p2_f3")}
                 </div>
               </div>
               <Link href="/shop?category=COURSE" className="btn btn-primary" style={{ marginTop: "auto" }}>
-                Начать обучение (от 149 €)
+                {t("productsPowerBlock", "p2_btn")}
               </Link>
             </div>
           </div>
@@ -637,10 +687,9 @@ export default function Home() {
       <section className={styles.quiz} id="quiz-block">
         <div className="container">
           <div className={styles.centerHeader}>
-            <h2>С чего начать ваше преображение?</h2>
+            <h2>{t("quiz", "title")}</h2>
             <p>
-              Пройдите короткий интуитивный тест из 3 вопросов, чтобы определить, какой инструмент
-              Ольги Хавич принесет вам максимальную пользу прямо сейчас.
+              {t("quiz", "subtitle")}
             </p>
           </div>
 
@@ -649,7 +698,11 @@ export default function Home() {
               <>
                 <div className={styles.quizHeader}>
                   <div className={styles.quizProgressWrapper}>
-                    <span>Вопрос {currentQuestionIndex + 1} из {QUIZ_QUESTIONS.length}</span>
+                    <span>
+                      {language === "ru"
+                        ? `Вопрос ${currentQuestionIndex + 1} из ${QUIZ_QUESTIONS.length}`
+                        : `Frage ${currentQuestionIndex + 1} von ${QUIZ_QUESTIONS.length}`}
+                    </span>
                     <span>{Math.round(((currentQuestionIndex + 1) / QUIZ_QUESTIONS.length) * 100)}%</span>
                   </div>
                   <div className={styles.quizProgressBar}>
@@ -662,7 +715,7 @@ export default function Home() {
 
                 <div className={styles.quizContent}>
                   <div className={styles.quizQuestion}>
-                    <h3>{QUIZ_QUESTIONS[currentQuestionIndex].question}</h3>
+                    <h3>{QUIZ_QUESTIONS[currentQuestionIndex].question[language]}</h3>
                     <div className={styles.quizOptions}>
                       {QUIZ_QUESTIONS[currentQuestionIndex].options.map((opt, i) => (
                         <button
@@ -670,7 +723,7 @@ export default function Home() {
                           className={styles.quizOption}
                           onClick={() => handleQuizAnswer(opt.score)}
                         >
-                          <span>{opt.text}</span>
+                          <span>{opt.text[language]}</span>
                           <span className={styles.quizOptionCheck}>✓</span>
                         </button>
                       ))}
@@ -682,20 +735,24 @@ export default function Home() {
               <div className={styles.quizContent}>
                 <div className={styles.quizResult}>
                   <div className={styles.quizResultIcon}>🔑</div>
-                  <h3 className={styles.quizResultTitle}>Ваша персональная рекомендация:</h3>
+                  <h3 className={styles.quizResultTitle}>{t("quiz", "resultTitle")}</h3>
                   <div className={styles.quizResultAction}>
-                    <h4>{QUIZ_RESULTS[finalRecommendation].title}</h4>
-                    <p>Рекомендуемый шаг для восстановления баланса и раскрытия потенциала</p>
+                    <h4>{QUIZ_RESULTS[finalRecommendation].title[language]}</h4>
+                    <p>
+                      {language === "ru"
+                        ? "Рекомендуемый шаг для восстановления баланса и раскрытия потенциала"
+                        : "Empfohlener Schritt zur Wiederherstellung der Balance und Potenzialentfaltung"}
+                    </p>
                   </div>
                   <p className={styles.quizResultDesc}>
-                    {QUIZ_RESULTS[finalRecommendation].desc}
+                    {QUIZ_RESULTS[finalRecommendation].desc[language]}
                   </p>
                   <div style={{ display: "flex", gap: "16px", justifyContent: "center" }}>
                     <Link href={QUIZ_RESULTS[finalRecommendation].link} className="btn btn-primary">
-                      {QUIZ_RESULTS[finalRecommendation].btnText}
+                      {QUIZ_RESULTS[finalRecommendation].btnText[language]}
                     </Link>
                     <button className="btn btn-secondary" onClick={resetQuiz}>
-                      Пройти заново
+                      {t("quiz", "btnRestart")}
                     </button>
                   </div>
                 </div>
@@ -714,8 +771,8 @@ export default function Home() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/olga2.webp"
-                  alt="Ольга Хавич, нумеролог и ваш проводник в мир осознанности"
-                  title="Ольга Хавич, нумеролог и ваш проводник в мир осознанности"
+                  alt={language === "ru" ? "Ольга Хавич, нумеролог и ваш проводник в мир осознанности" : "Olga Khavich, Numerologin und Ihre Begleiterin"}
+                  title={language === "ru" ? "Ольга Хавич, нумеролог и ваш проводник в мир осознанности" : "Olga Khavich, Numerologin und Ihre Begleiterin"}
                   width={1000}
                   height={1045}
                   className={styles.aboutOlgaImage}
@@ -727,19 +784,18 @@ export default function Home() {
 
             <div className={styles.aboutContent}>
               <h2>
-                Ваш проводник в мир осознанности — <span>Ольга Хавич</span>
+                {t("about", "subtitle")} — <span>{t("about", "title")}</span>
               </h2>
 
               <div className={styles.aboutText}>
                 <p style={{ fontWeight: "600", fontSize: "17px", color: "var(--color-primary)", borderLeft: "3px solid var(--color-primary)", paddingLeft: "15px", fontStyle: "italic" }}>
-                  «Моя цель — не просто дать вам предсказание будущего, а вручить точную числовую карту судьбы и энергетические инструменты, чтобы вы построили свое счастливое будущее сами.»
+                  {t("about", "quote")}
                 </p>
                 <p>
-                  Уже более 10 лет я помогаю людям по всей Европе и СНГ выходить из глубоких кризисов,
-                  находить свое предназначение, выстраивать гармоничные отношения в семье и пробивать финансовые потолки.
+                  {t("about", "text1")}
                 </p>
                 <p>
-                  В своей практике я соединяю сухую математическую точность расчетов числовых матриц с глубоким чувствованием тонкого плана через восковое ладование и расклады карт Таро, в содействии с моими  Духовными Наставниками.
+                  {t("about", "text2")}
                 </p>
               </div>
 
@@ -748,32 +804,32 @@ export default function Home() {
                 <div className={styles.featureItem}>
                   <div className={styles.featureItemIcon}>✓</div>
                   <div className={styles.featureItemText}>
-                    <h3>10+ лет опыта</h3>
-                    <p>Проверенные временем и тысячами клиентов практики нумерологии и тарологии.</p>
+                    <h3>{t("about", "feat1_title")}</h3>
+                    <p>{t("about", "feat1_desc")}</p>
                   </div>
                 </div>
 
                 <div className={styles.featureItem}>
                   <div className={styles.featureItemIcon}>✓</div>
                   <div className={styles.featureItemText}>
-                    <h3>Индивидуальный расчет</h3>
-                    <p>Каждый амулет создается Ольгой под дату рождения конкретного человека.</p>
+                    <h3>{t("about", "feat2_title")}</h3>
+                    <p>{t("about", "feat2_desc")}</p>
                   </div>
                 </div>
 
                 <div className={styles.featureItem}>
                   <div className={styles.featureItemIcon}>✓</div>
                   <div className={styles.featureItemText}>
-                    <h3>Энергетическая зарядка</h3>
-                    <p>Все изделия проходят обряд мягкого воскового ладования силой мастера.</p>
+                    <h3>{t("about", "feat3_title")}</h3>
+                    <p>{t("about", "feat3_desc")}</p>
                   </div>
                 </div>
 
                 <div className={styles.featureItem}>
                   <div className={styles.featureItemIcon}>✓</div>
                   <div className={styles.featureItemText}>
-                    <h3>Удобный ЛК ученика</h3>
-                    <p>Собственная современная IT-платформа для качественного обучения.</p>
+                    <h3>{t("about", "feat4_title")}</h3>
+                    <p>{t("about", "feat4_desc")}</p>
                   </div>
                 </div>
               </div>
@@ -786,10 +842,9 @@ export default function Home() {
       <section className={styles.certificates} id="skills">
         <div className="container">
           <div className={styles.centerHeader}>
-            <h2>Дипломы и Сертификаты</h2>
+            <h2>{t("skills", "title")}</h2>
             <p>
-              Подтвержденная квалификация и академический подход к эзотерическим дисциплинам.
-              Ольга обучалась у ведущих мастеров России и зарубежья.
+              {t("skills", "subtitle")}
             </p>
           </div>
 
@@ -799,7 +854,7 @@ export default function Home() {
               onClick={prevSlide}
               disabled={currentSlideIndex === 0}
               className={`${styles.sliderArrow} ${styles.sliderArrowLeft} ${currentSlideIndex === 0 ? styles.sliderArrowDisabled : ""}`}
-              aria-label="Предыдущий сертификат"
+              aria-label={language === "ru" ? "Предыдущий сертификат" : "Vorheriges Zertifikat"}
             >
               ‹
             </button>
@@ -826,8 +881,8 @@ export default function Home() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={dip.image}
-                          alt={dip.title}
-                          title={dip.title}
+                          alt={dip.title[language]}
+                          title={dip.title[language]}
                           width={dip.width}
                           height={dip.height}
                           className={styles.diplomaImg}
@@ -837,7 +892,7 @@ export default function Home() {
                         <div className={styles.diplomaOverlay}>
                           <span style={{ fontSize: "24px" }}>🔍</span>
                           <span style={{ fontSize: "11px", color: "#fff", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
-                            Увеличить
+                            {language === "ru" ? "Увеличить" : "Vergrößern"}
                           </span>
                         </div>
                       </div>
@@ -852,7 +907,7 @@ export default function Home() {
               onClick={nextSlide}
               disabled={currentSlideIndex >= DIPLOMAS.length - visibleSlides}
               className={`${styles.sliderArrow} ${styles.sliderArrowRight} ${currentSlideIndex >= DIPLOMAS.length - visibleSlides ? styles.sliderArrowDisabled : ""}`}
-              aria-label="Следующий сертификат"
+              aria-label={language === "ru" ? "Следующий сертификат" : "Nächstes Zertifikat"}
             >
               ›
             </button>
@@ -865,7 +920,7 @@ export default function Home() {
                 key={idx}
                 onClick={() => setCurrentSlideIndex(idx)}
                 className={`${styles.sliderDot} ${currentSlideIndex === idx ? styles.sliderDotActive : ""}`}
-                aria-label={`Перейти к слайду ${idx + 1}`}
+                aria-label={language === "ru" ? `Перейти к слайду ${idx + 1}` : `Zu Folie ${idx + 1} wechseln`}
               />
             ))}
           </div>
@@ -876,10 +931,9 @@ export default function Home() {
       <section className={styles.testimonials} id="testimonials">
         <div className="container">
           <div className={styles.centerHeader}>
-            <h2>Истории Реальных Трансформаций</h2>
+            <h2>{t("testimonials", "title")}</h2>
             <p>
-              Как изменилась жизнь людей после глубоких консультаций Ольги Хавич,
-              восковых очищений или индивидуального подбора амулета.
+              {t("testimonials", "subtitle")}
             </p>
           </div>
 
@@ -889,7 +943,7 @@ export default function Home() {
               onClick={prevTestimonial}
               disabled={currentTestimonialIndex === 0}
               className={`${styles.testimonialsSliderArrow} ${styles.testimonialsSliderArrowLeft} ${currentTestimonialIndex === 0 ? styles.testimonialsSliderArrowDisabled : ""}`}
-              aria-label="Предыдущий отзыв"
+              aria-label={language === "ru" ? "Предыдущий отзыв" : "Vorherige Bewertung"}
             >
               ‹
             </button>
@@ -909,19 +963,19 @@ export default function Home() {
                     style={{ width: `${100 / visibleTestimonials}%` }}
                   >
                     <article className={styles.testimonialCard}>
-                      <div className={styles.quoteIcon}>
+                       <div className={styles.quoteIcon}>
                         <svg width="45" height="45" fill="currentColor" viewBox="0 0 24 24" opacity="0.1">
                           <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.154c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                         </svg>
                       </div>
                       <p className={styles.testimonialText}>
-                        «{test.text}»
+                        «{test.text[language]}»
                       </p>
                       <div className={styles.clientMeta}>
                         <div className={styles.avatar}>{test.avatar}</div>
                         <div className={styles.clientInfo}>
                           <h3>{test.author}</h3>
-                          <p>{test.role}</p>
+                          <p>{test.role[language]}</p>
                         </div>
                       </div>
                     </article>
@@ -935,7 +989,7 @@ export default function Home() {
               onClick={nextTestimonial}
               disabled={currentTestimonialIndex >= TESTIMONIALS.length - visibleTestimonials}
               className={`${styles.testimonialsSliderArrow} ${styles.testimonialsSliderArrowRight} ${currentTestimonialIndex >= TESTIMONIALS.length - visibleTestimonials ? styles.testimonialsSliderArrowDisabled : ""}`}
-              aria-label="Следующий отзыв"
+              aria-label={language === "ru" ? "Следующий отзыв" : "Nächste Bewertung"}
             >
               ›
             </button>
@@ -948,7 +1002,7 @@ export default function Home() {
                 key={idx}
                 onClick={() => setCurrentTestimonialIndex(idx)}
                 className={`${styles.testimonialsSliderDot} ${currentTestimonialIndex === idx ? styles.testimonialsSliderDotActive : ""}`}
-                aria-label={`Перейти к отзыву ${idx + 1}`}
+                aria-label={language === "ru" ? `Перейти к отзыву ${idx + 1}` : `Zu Bewertung ${idx + 1} wechseln`}
               />
             ))}
           </div>
@@ -959,66 +1013,57 @@ export default function Home() {
       <section className={styles.faq} id="faq-section">
         <div className="container">
           <div className={styles.centerHeader}>
-            <h2>Часто Задаваемые Вопросы</h2>
+            <h2>{t("faq", "title")}</h2>
             <p>
-              Ответы на ключевые вопросы о методах работы Ольги Хавич, доставке амулетов
-              и процессе обучения.
+              {t("faq", "subtitle")}
             </p>
           </div>
 
           <div className={styles.faqGrid}>
             <div className={`${styles.faqItem} ${openFaqIndex === 0 ? styles.faqItemOpen : ""}`}>
               <button className={styles.faqQuestion} onClick={() => toggleFaq(0)}>
-                <span>Как проходят онлайн-консультации и сколько они длятся?</span>
+                <span>{t("faq", "q1")}</span>
                 <span className={styles.faqIcon}>+</span>
               </button>
               <div className={styles.faqAnswer}>
                 <p>
-                  Индивидуальные консультации по нумерологии или Таро проходят в онлайн-формате (через Zoom, WhatsApp или Telegram)
-                  и длятся от 30 минут до часа, но не больше. Возможен аудиоформат. Ольга детально разбирает ваш запрос, дает пошаговые рекомендации и отвечает на ваши вопросы.
-                  Запись консультации и все методические материалы для расчетов остаются у вас навсегда.
+                  {t("faq", "a1")}
                 </p>
               </div>
             </div>
 
             <div className={`${styles.faqItem} ${openFaqIndex === 1 ? styles.faqItemOpen : ""}`}>
               <button className={styles.faqQuestion} onClick={() => toggleFaq(1)}>
-                <span>Нужно ли мое личное присутствие при восковых отливках или ладовании?</span>
+                <span>{t("faq", "q2")}</span>
                 <span className={styles.faqIcon}>+</span>
               </button>
               <div className={styles.faqAnswer}>
                 <p>
-                  Нет, ваше физическое присутствие на обряде не требуется. Ольга работает бесконтактно, используя вашу фотографию,
-                  полное имя и точную дату рождения. Это проверенная веками методика дистанционной энерготерапии. По завершении обряда
-                  вы получаете подробнейший аудиоотчет от Ольги с расшифровкой отливок и рекомендациями.
+                  {t("faq", "a2")}
                 </p>
               </div>
             </div>
 
             <div className={`${styles.faqItem} ${openFaqIndex === 2 ? styles.faqItemOpen : ""}`}>
               <button className={styles.faqQuestion} onClick={() => toggleFaq(2)}>
-                <span>Как рассчитывается и создается индивидуальный амулетный браслет?</span>
+                <span>{t("faq", "q3")}</span>
                 <span className={styles.faqIcon}>+</span>
               </button>
               <div className={styles.faqAnswer}>
                 <p>
-                  Сначала Ольга рассчитывает вашу числовую матрицу по дате рождения и определяет камни-покровители, соответствующие вашему запросу.
-                  Затем подбираются натуральные минералы премиум-класса (аметист, лазурит, тигровый глаз, гранат и др.). В завершение
-                  Ольга проводит обряд воскового ладования изделия, чтобы активировать его защитные и ресурсные свойства лично под вас.
+                  {t("faq", "a3")}
                 </p>
               </div>
             </div>
 
             <div className={`${styles.faqItem} ${openFaqIndex === 3 ? styles.faqItemOpen : ""}`}>
               <button className={styles.faqQuestion} onClick={() => toggleFaq(3)}>
-                <span>Как быстро я получу доступ к курсам после подтверждения заказа?</span>
+                <span>{t("faq", "q4")}</span>
                 <span className={styles.faqIcon}>+</span>
               </button>
               <div className={styles.faqAnswer}>
                 <p>
-                  Доступ предоставляется моментально. Сразу после оплаты и подтверждения заказа вы сможете авторизоваться в личном кабинете
-                  ученика на сайте. Там автоматически появится ваш видеокурс с уроками (через быстрый плеер Kinescope) и PDF-методичками.
-                  Ольга настраивает гибкий срок действия доступа в соответствии с тарифом.
+                  {t("faq", "a4")}
                 </p>
               </div>
             </div>
@@ -1031,10 +1076,9 @@ export default function Home() {
       <footer className={styles.footer}>
         <div className="container" style={{ marginBottom: "60px", textAlign: "center" }}>
           <div className={styles.centerHeader} style={{ marginBottom: "30px" }}>
-            <h2 style={{ color: "#fff" }}>Не знаете, с чего начать?</h2>
+            <h2 style={{ color: "#fff" }}>{t("footer", "title")}</h2>
             <p style={{ color: "rgba(255,255,255,0.9)" }}>
-              Напишите Ольге Хавич напрямую в мессенджерах. Кратко опишите вашу жизненную ситуацию,
-              и она подскажет, какой инструмент (расчет, очищение или амулет) поможет вам быстрее всего.
+              {t("footer", "desc")}
             </p>
           </div>
           <div style={{ display: "flex", gap: "20px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -1045,7 +1089,7 @@ export default function Home() {
               className="btn btn-primary"
               style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 28px" }}
             >
-              <span>Связаться в WhatsApp</span>
+              <span>{t("footer", "wa")}</span>
             </a>
             <a
               href="https://t.me/Bluesky_blue_blue"
@@ -1054,7 +1098,7 @@ export default function Home() {
               className="btn btn-secondary"
               style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 28px", borderColor: "rgba(255,255,255,0.2)" }}
             >
-              <span>Связаться в Telegram</span>
+              <span>{t("footer", "tg")}</span>
             </a>
           </div>
         </div>
@@ -1064,14 +1108,13 @@ export default function Home() {
           <div className={styles.footerLogo}>
             <h3>OLGA KHAVYCH</h3>
             <p>
-              Интегральный анализ личности, энергопрактики воскового очищения и ладования для раскрытия
-              вашего природного потенциала и гармонии в жизни.
+              {t("footer", "logoDesc")}
             </p>
           </div>
 
           {/* Колонка 2: Контакты */}
           <div className={styles.footerContacts}>
-            <h4>Контакты для связи</h4>
+            <h4>{t("footer", "contactsTitle")}</h4>
             <div className={styles.contactItem}>
               <span className={styles.contactIcon}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1087,7 +1130,7 @@ export default function Home() {
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                 </svg>
               </span>
-              <span>+49 176 30761368 (Германия)</span>
+              <span>+49 176 30761368 ({t("footer", "germany")})</span>
             </div>
             <a href="https://instagram.com/numerologin.khavych" target="_blank" rel="noopener noreferrer" className={styles.contactItem} style={{ textDecoration: "none", color: "inherit" }}>
               <span className={styles.contactIcon}>
@@ -1110,10 +1153,10 @@ export default function Home() {
 
         {/* Копирайты */}
         <div className={`container ${styles.footerBottom}`}>
-          <p>© 2026 Ольга Хавич. Все права защищены.</p>
+          <p>{t("footer", "copyright")}</p>
           <p>
             <Link href="/login" style={{ color: "rgba(255,255,255,0.75)", textDecoration: "underline" }}>
-              Вход для учеников и администратора
+              {t("footer", "cabinetLink")}
             </Link>
           </p>
         </div>
@@ -1138,8 +1181,8 @@ export default function Home() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={activeDiploma.image}
-              alt={activeDiploma.title}
-              title={activeDiploma.title}
+              alt={activeDiploma.title[language]}
+              title={activeDiploma.title[language]}
               width={activeDiploma.width}
               height={activeDiploma.height}
               className={styles.lightboxImage}
