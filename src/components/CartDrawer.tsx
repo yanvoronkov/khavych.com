@@ -149,6 +149,28 @@ export const CartDrawer: React.FC = () => {
     }
   }, []);
 
+  // Автозаполнение данных авторизованного пользователя при монтировании корзины
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        if (res.ok && data.authenticated && data.user) {
+          setFormData((prev) => ({
+            ...prev,
+            name: prev.name || data.user.name || "",
+            email: prev.email || data.user.email || "",
+            phone: prev.phone || data.user.phone || "",
+          }));
+        }
+      } catch (err) {
+        console.error("Не удалось автозаполнить данные пользователя при монтировании:", err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   // Функция для динамической загрузки скрипта PayPal
   const loadPaypalSdk = async () => {
     if (window.paypal) {
@@ -257,11 +279,31 @@ export const CartDrawer: React.FC = () => {
 
   /**
    * Переключение на режим оформления заказа.
-   * Очищает старые ошибки.
+   * Очищает старые ошибки и автозаполняет данные профиля.
    */
   const handleGoToCheckout = () => {
     setErrors({});
     setMode("CHECKOUT");
+
+    // Подтягиваем актуальные данные вошедшего пользователя, если они ещё не заполнены
+    const fetchUserData = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        if (res.ok && data.authenticated && data.user) {
+          setFormData((prev) => ({
+            ...prev,
+            name: prev.name || data.user.name || "",
+            email: prev.email || data.user.email || "",
+            phone: prev.phone || data.user.phone || "",
+          }));
+        }
+      } catch (err) {
+        console.error("Не удалось автозаполнить данные пользователя при оформлении:", err);
+      }
+    };
+
+    fetchUserData();
   };
 
   /**

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { logger } from "src/lib/logger";
+import { db } from "src/lib/db";
 
 /**
  * Обработчик GET запроса для проверки текущей сессии пользователя.
@@ -27,6 +28,12 @@ export async function GET() {
         name: string;
       };
 
+      // Загружаем телефон из базы данных, чтобы автозаполнять в форме
+      const userDb = await db.user.findUnique({
+        where: { id: decoded.userId },
+        select: { phone: true },
+      });
+
       return NextResponse.json({
         authenticated: true,
         user: {
@@ -34,6 +41,7 @@ export async function GET() {
           email: decoded.email,
           name: decoded.name,
           role: decoded.role,
+          phone: userDb?.phone || "",
         },
       });
     } catch (jwtError) {

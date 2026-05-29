@@ -111,7 +111,7 @@ export async function POST(request: Request) {
       const testMsg = `🧪 <b>ТЕСТ УВЕДОМЛЕНИЙ • KHAVYCH.COM</b>\n\n` +
                       `✅ Поздравляем! Ваш Telegram бот успешно настроен и подключен к панели управления Ольги Хавич.\n\n` +
                       `⚙️ <b>Статус:</b> Готов к приему реальных заказов.\n` +
-                      `⏰ <b>Время проверки:</b> <code>${new Date().toLocaleTimeString("de-DE")}</code>`;
+                      `⏰ <b>Время проверки:</b> <code>${new Date().toLocaleString("ru-RU", { timeZone: "Europe/Kiev" })}</code>`;
 
       const results = await Promise.all(
         chatIds.map(async (id) => {
