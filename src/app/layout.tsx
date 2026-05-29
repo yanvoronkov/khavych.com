@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Inter } from "next/font/google";
 import { Providers } from "src/components/Providers";
 import { CartDrawer } from "src/components/CartDrawer";
+import { ScrollToTop } from "src/components/ScrollToTop";
 import "./globals.css";
 
 // Подключаем премиальный шрифт Montserrat для заголовков с поддержкой кириллицы
@@ -66,6 +67,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <CartDrawer />
+          <ScrollToTop />
         </Providers>
       </body>
     </html>

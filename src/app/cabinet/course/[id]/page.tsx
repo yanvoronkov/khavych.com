@@ -191,6 +191,10 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
     }
   }
 
+  const activeIndex = lessons.findIndex((l) => l.id === activeLesson.id);
+  const prevLesson = activeIndex > 0 ? lessons[activeIndex - 1] : null;
+  const nextLesson = activeIndex < lessons.length - 1 ? lessons[activeIndex + 1] : null;
+
   return (
     <div className={styles.cabinetPage} style={{ paddingBottom: "60px" }}>
       {/* Подключаем глобальный Header */}
@@ -343,6 +347,47 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
                   <p className={styles.noFiles}>К этому уроку нет дополнительных материалов</p>
                 )}
               </div>
+            </div>
+
+            {/* Блок навигации между уроками */}
+            <div className={styles.lessonNavigation}>
+              {prevLesson ? (
+                <Link
+                  href={`/cabinet/course/${courseId}?lessonId=${prevLesson.id}`}
+                  className={styles.navBtn}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                  <span>Предыдущий урок</span>
+                </Link>
+              ) : (
+                <button className={`${styles.navBtn} ${styles.navBtnDisabled}`} disabled>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                  <span>Предыдущий урок</span>
+                </button>
+              )}
+
+              {nextLesson ? (
+                <Link
+                  href={`/cabinet/course/${courseId}?lessonId=${nextLesson.id}`}
+                  className={`${styles.navBtn} ${styles.navBtnNext}`}
+                >
+                  <span>Следующий урок</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </Link>
+              ) : (
+                <button className={`${styles.navBtn} ${styles.navBtnNext} ${styles.navBtnDisabled}`} disabled>
+                  <span>Следующий урок</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              )}
             </div>
           </main>
         </div>
