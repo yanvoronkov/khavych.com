@@ -823,9 +823,27 @@ export const CartDrawer: React.FC = () => {
             </div>
 
             {mode === "CART" ? (
-              <button className="btn btn-primary" onClick={handleGoToCheckout}>
-                Оформить заказ
-              </button>
+              <div style={{ display: "flex", gap: "10px", width: "100%" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    clearCart();
+                    handleCloseDrawer();
+                  }}
+                  style={{ flex: 1, padding: "10px" }}
+                >
+                  Очистить
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleGoToCheckout}
+                  style={{ flex: 2, padding: "10px" }}
+                >
+                  Оформить заказ
+                </button>
+              </div>
             ) : (
               <button
                 className="btn btn-primary btn-accent"
