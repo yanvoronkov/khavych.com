@@ -252,7 +252,7 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
           {/* Основной контент активного урока */}
           <main className={styles.lessonContent}>
             {/* Заголовок урока */}
-            <div className={styles.lessonHeader}>
+            <div className={styles.lessonHeader} id="lesson-title">
               <h1 className={styles.lessonTitle}>{activeLesson.title}</h1>
             </div>
 
@@ -353,7 +353,7 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
             <div className={styles.lessonNavigation}>
               {prevLesson ? (
                 <Link
-                  href={`/cabinet/course/${courseId}?lessonId=${prevLesson.id}`}
+                  href={`/cabinet/course/${courseId}?lessonId=${prevLesson.id}#lesson-title`}
                   className={styles.navBtn}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -372,7 +372,7 @@ export default async function CoursePage({ params, searchParams }: ICoursePagePr
 
               {nextLesson ? (
                 <Link
-                  href={`/cabinet/course/${courseId}?lessonId=${nextLesson.id}`}
+                  href={`/cabinet/course/${courseId}?lessonId=${nextLesson.id}#lesson-title`}
                   className={`${styles.navBtn} ${styles.navBtnNext}`}
                 >
                   <span>Следующий урок</span>
