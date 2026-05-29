@@ -101,32 +101,46 @@ export async function POST(request: Request) {
         );
       }
 
-      console.log(`🤖 Отправка тестового сообщения через бот к чату ${chatId}`);
+      console.log(`🤖 Отправка тестового сообщения через бот к чатам: ${chatId}`);
+
+      const chatIds = chatId.split(/[\s,;]+/).filter(Boolean);
+      if (chatIds.length === 0) {
+        throw new Error("Не указано ни одного корректного Chat ID");
+      }
 
       const testMsg = `🧪 <b>ТЕСТ УВЕДОМЛЕНИЙ • KHAVYCH.COM</b>\n\n` +
                       `✅ Поздравляем! Ваш Telegram бот успешно настроен и подключен к панели управления Ольги Хавич.\n\n` +
                       `⚙️ <b>Статус:</b> Готов к приему реальных заказов.\n` +
                       `⏰ <b>Время проверки:</b> <code>${new Date().toLocaleTimeString("de-DE")}</code>`;
 
-      const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: testMsg,
-          parse_mode: "HTML",
-        }),
-      });
+      const results = await Promise.all(
+        chatIds.map(async (id) => {
+          try {
+            const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: id,
+                text: testMsg,
+                parse_mode: "HTML",
+              }),
+            });
+            const resData = await response.json();
+            return response.ok && resData.ok;
+          } catch {
+            return false;
+          }
+        })
+      );
 
-      const resData = await response.json();
-
-      if (!response.ok || !resData.ok) {
-        throw new Error(resData.description || "Telegram API вернул ошибку");
+      const successCount = results.filter(Boolean).length;
+      if (successCount === 0) {
+        throw new Error("Не удалось отправить сообщение ни на один Chat ID. Проверьте правильность токена и ID.");
       }
 
       return NextResponse.json({
         success: true,
-        message: "Тестовое сообщение успешно отправлено в ваш Telegram!",
+        message: `Тестовое сообщение успешно отправлено на ${successCount} из ${chatIds.length} Chat ID!`,
       });
     }
 

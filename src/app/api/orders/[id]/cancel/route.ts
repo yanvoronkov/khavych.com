@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
 import { sendOrderCancelledEmail } from "src/lib/email";
+import { sendTelegramNotification as sendTelegramNotificationUtil } from "src/lib/telegram";
 
 export const dynamic = "force-dynamic";
 
@@ -90,44 +91,13 @@ export async function POST(
  * Вспомогательная функция отправки Telegram-уведомления об отмене заказа клиентом
  */
 async function sendTelegramClientCancelNotification(order: any) {
-  let token = process.env.TELEGRAM_BOT_TOKEN;
-  let chatId = process.env.TELEGRAM_CHAT_ID;
+  const text = `❌ <b>ЗАКАЗ ОТМЕНЕН КЛИЕНТОМ В КОРЗИНЕ</b>\n\n` +
+               `🆔 <b>ID Заказа:</b> <code>${order.id}</code>\n` +
+               `👤 <b>Клиент:</b> <b>${order.customerName}</b>\n` +
+               `📧 <b>Email:</b> <code>${order.customerEmail}</code>\n` +
+               `💰 <b>Сумма заказа:</b> <b>${Number(order.totalAmount).toLocaleString("de-DE")} €</b>\n\n` +
+               `📊 <b>Статус:</b> <b><u>Отменен покупателем самостоятельно</u></b>\n\n` +
+               `💬 <i>Заказ был отменен клиентом на шаге оплаты в корзине сайта.</i>`;
 
-  try {
-    const [dbToken, dbChatId] = await Promise.all([
-      db.setting.findUnique({ where: { key: "telegramBotToken" } }),
-      db.setting.findUnique({ where: { key: "telegramChatId" } }),
-    ]);
-
-    if (dbToken && dbToken.value.trim()) token = dbToken.value.trim();
-    if (dbChatId && dbChatId.value.trim()) chatId = dbChatId.value.trim();
-  } catch (err) {
-    logger.warn({ err }, "Не удалось прочитать настройки Telegram для уведомления об отмене");
-  }
-
-  if (!token || !chatId || token === "your-telegram-bot-token" || chatId === "your-telegram-chat-id") {
-    return;
-  }
-
-  const text = `❌ <b>ЗАКАЗ ОТМЕНЕН КЛИЕНТОМ В КОРЗИНЕ</b>\n
-🆔 <b>ID Заказа:</b> <code>${order.id}</code>
-👤 <b>Клиент:</b> <b>${order.customerName}</b>
-📧 <b>Email:</b> <code>${order.customerEmail}</code>
-💰 <b>Сумма заказа:</b> <b>${Number(order.totalAmount).toLocaleString("de-DE")} €</b>\n
-📊 <b>Статус:</b> <b><u>Отменен покупателем самостоятельно</u></b>\n
-💬 <i>Заказ был отменен клиентом на шаге оплаты в корзине сайта.</i>`;
-
-  try {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text,
-        parse_mode: "HTML",
-      }),
-    });
-  } catch (err) {
-    logger.error({ err, orderId: order.id }, "Исключение при отправке Telegram уведомления об отмене клиентом");
-  }
+  await sendTelegramNotificationUtil(text);
 }

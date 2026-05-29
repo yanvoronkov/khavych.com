@@ -10,6 +10,7 @@ const userUpdateSchema = z.object({
   name: z.string().min(2, "Имя должно быть не менее 2 символов"),
   phone: z.string().min(6, "Телефон должен быть не менее 6 символов"),
   additionalInfo: z.string().optional().nullable(),
+  role: z.enum(["USER", "ADMIN"]).optional(),
 });
 
 /**
@@ -89,6 +90,18 @@ export async function PUT(
       }
     }
 
+    // Запрещено менять свою собственную роль на USER в целях безопасности
+    if (existingUser.id === session.userId && validatedData.role === "USER") {
+      return NextResponse.json(
+        {
+          error: true,
+          code: "FORBIDDEN",
+          message: "Вы не можете лишить себя прав администратора",
+        },
+        { status: 400 }
+      );
+    }
+
     // Обновляем данные пользователя
     const updatedUser = await db.user.update({
       where: { id },
@@ -97,6 +110,7 @@ export async function PUT(
         name: validatedData.name.trim(),
         phone: validatedData.phone.trim(),
         additionalInfo: validatedData.additionalInfo?.trim() || null,
+        role: validatedData.role,
       },
       include: {
         accesses: true,

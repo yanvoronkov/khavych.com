@@ -5,6 +5,7 @@ import { getServerSession } from "src/lib/auth";
 import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
 import { sendOrderPaidEmail, sendOrderCancelledEmail } from "src/lib/email";
+import { sendTelegramNotification } from "src/lib/telegram";
 
 export const dynamic = "force-dynamic";
 
@@ -242,25 +243,6 @@ export async function PUT(
  * Вспомогательная функция отправки статусного уведомления в Telegram Ольге
  */
 async function sendTelegramStatusNotification(order: any, status: "PAID" | "CANCELLED") {
-  let token = process.env.TELEGRAM_BOT_TOKEN;
-  let chatId = process.env.TELEGRAM_CHAT_ID;
-
-  try {
-    const [dbToken, dbChatId] = await Promise.all([
-      db.setting.findUnique({ where: { key: "telegramBotToken" } }),
-      db.setting.findUnique({ where: { key: "telegramChatId" } }),
-    ]);
-
-    if (dbToken && dbToken.value.trim()) token = dbToken.value.trim();
-    if (dbChatId && dbChatId.value.trim()) chatId = dbChatId.value.trim();
-  } catch (err) {
-    logger.warn({ err }, "Не удалось прочитать настройки Telegram из БД для статусного уведомления");
-  }
-
-  if (!token || !chatId || token === "your-telegram-bot-token" || chatId === "your-telegram-chat-id") {
-    return;
-  }
-
   const statusLabel = status === "PAID" ? "✅ ОПЛАЧЕН (РУЧНОЕ ПОДТВЕРЖДЕНИЕ)" : "❌ ОТМЕНЕН";
   const emoji = status === "PAID" ? "💰" : "🚫";
 
@@ -273,15 +255,7 @@ async function sendTelegramStatusNotification(order: any, status: "PAID" | "CANC
 ${status === "PAID" ? "🎓 <i>Доступы к курсам автоматически открыты, приветственное письмо со ссылкой на Личный кабинет отправлено клиенту!</i>" : "<i>Заказ был отменен администратором сайта.</i>"}`;
 
   try {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text,
-        parse_mode: "HTML",
-      }),
-    });
+    await sendTelegramNotification(text);
   } catch (err) {
     logger.error({ err, orderId: order.id }, "Исключение при отправке статусного уведомления в Telegram");
   }

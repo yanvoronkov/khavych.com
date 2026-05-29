@@ -5,6 +5,7 @@ import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
 import { capturePaypalOrder } from "src/lib/paypal";
 import { sendOrderPaidEmail } from "src/lib/email";
+import { sendTelegramNotification } from "src/lib/telegram";
 
 export const dynamic = "force-dynamic";
 
@@ -212,25 +213,6 @@ export async function POST(request: Request) {
  * Вспомогательная функция отправки Telegram-уведомления об оплате PayPal
  */
 async function sendTelegramPaypalNotification(order: any) {
-  let token = process.env.TELEGRAM_BOT_TOKEN;
-  let chatId = process.env.TELEGRAM_CHAT_ID;
-
-  try {
-    const [dbToken, dbChatId] = await Promise.all([
-      db.setting.findUnique({ where: { key: "telegramBotToken" } }),
-      db.setting.findUnique({ where: { key: "telegramChatId" } }),
-    ]);
-
-    if (dbToken && dbToken.value.trim()) token = dbToken.value.trim();
-    if (dbChatId && dbChatId.value.trim()) chatId = dbChatId.value.trim();
-  } catch (err) {
-    logger.warn({ err }, "Не удалось прочитать настройки Telegram для PayPal уведомления");
-  }
-
-  if (!token || !chatId || token === "your-telegram-bot-token" || chatId === "your-telegram-chat-id") {
-    return;
-  }
-
   const text = `💰 <b>УСПЕШНАЯ ОНЛАЙН-ОПЛАТА PAYPAL</b>\n
 🆔 <b>ID Заказа:</b> <code>${order.id}</code>
 👤 <b>Клиент:</b> <b>${order.customerName}</b>
@@ -239,15 +221,7 @@ async function sendTelegramPaypalNotification(order: any) {
 🎓 <i>Платеж обработан автоматически! Пользователю создан аккаунт (если это новый гость) и отправлено письмо с доступами в Личный кабинет. Проверьте новые доступы в админке!</i>`;
 
   try {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text,
-        parse_mode: "HTML",
-      }),
-    });
+    await sendTelegramNotification(text);
   } catch (err) {
     logger.error({ err, orderId: order.id }, "Ошибка при отправке Telegram сообщения об оплате PayPal");
   }

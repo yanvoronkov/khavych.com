@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
 import { sendOrderCreatedEmail } from "src/lib/email";
+import { sendTelegramNotification as sendTelegramNotificationUtil } from "src/lib/telegram";
 
 // Схема валидации входящего запроса на создание заказа с помощью Zod
 const orderCreateSchema = z.object({
@@ -112,35 +113,6 @@ async function sendTelegramNotification(
   data: z.infer<typeof orderCreateSchema>,
   orderId: string
 ) {
-  let token = process.env.TELEGRAM_BOT_TOKEN;
-  let chatId = process.env.TELEGRAM_CHAT_ID;
-
-  try {
-    // 1. Пытаемся получить настройки динамически из базы данных
-    const [dbToken, dbChatId] = await Promise.all([
-      db.setting.findUnique({ where: { key: "telegramBotToken" } }),
-      db.setting.findUnique({ where: { key: "telegramChatId" } }),
-    ]);
-
-    if (dbToken && dbToken.value.trim()) {
-      token = dbToken.value.trim();
-    }
-    if (dbChatId && dbChatId.value.trim()) {
-      chatId = dbChatId.value.trim();
-    }
-  } catch (dbErr) {
-    logger.warn({ dbErr }, "Не удалось прочитать настройки Telegram из базы данных, используем .env");
-  }
-
-  // Если ключи не настроены (например, при локальной разработке), просто логируем это
-  if (!token || !chatId || token === "your-telegram-bot-token" || chatId === "your-telegram-chat-id") {
-    logger.warn(
-      { orderId },
-      "Уведомление в Telegram не отправлено: не настроены TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID в .env / БД"
-    );
-    return;
-  }
-
   // Формируем красивое HTML сообщение для Telegram
   const itemsText = data.items
     .map(
@@ -155,36 +127,15 @@ async function sendTelegramNotification(
     ? `\n📍 <b>Адрес доставки:</b> <code>${data.customerAddress}</code>`
     : "";
 
-  const text = `🔔 <b>НОВЫЙ ЗАКАЗ НА САЙТЕ KHAVYCH.COM</b>\n
-🆔 <b>ID Заказа:</b> <code>${orderId}</code>
-👤 <b>Клиент:</b> <b>${data.customerName}</b>
-📞 <b>Телефон:</b> <code>${data.customerPhone}</code>
-📧 <b>Email:</b> <code>${data.customerEmail}</code>${addressText}\n
-📦 <b>Содержимое заказа:</b>
-${itemsText}\n
-💰 <b>Итого к оплате:</b> <b><u>${data.totalAmount.toLocaleString("de-DE")} €</u></b>\n
-💬 <i>Ольга, свяжитесь с клиентом в WhatsApp или по почте для подтверждения заказа и выставления счета!</i>`;
+  const text = `🔔 <b>НОВЫЙ ЗАКАЗ НА САЙТЕ KHAVYCH.COM</b>\n\n` +
+               `🆔 <b>ID Заказа:</b> <code>${orderId}</code>\n` +
+               `👤 <b>Клиент:</b> <b>${data.customerName}</b>\n` +
+               `📞 <b>Телефон:</b> <code>${data.customerPhone}</code>\n` +
+               `📧 <b>Email:</b> <code>${data.customerEmail}</code>${addressText}\n\n` +
+               `📦 <b>Содержимое заказа:</b>\n` +
+               `${itemsText}\n\n` +
+               `💰 <b>Итого к оплате:</b> <b><u>${data.totalAmount.toLocaleString("de-DE")} €</u></b>\n\n` +
+               `💬 <i>Ольга, свяжитесь с клиентом в WhatsApp или по почте для подтверждения заказа и выставления счета!</i>`;
 
-  try {
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text,
-        parse_mode: "HTML",
-      }),
-    });
-
-    if (!response.ok) {
-      const responseData = await response.json();
-      logger.error({ responseData }, "Ошибка от API Telegram при отправке лога");
-    } else {
-      logger.info({ orderId }, "Уведомление о заказе успешно отправлено в Telegram");
-    }
-  } catch (err) {
-    logger.error({ err, orderId }, "Исключение при отправке уведомления в Telegram");
-  }
+  await sendTelegramNotificationUtil(text);
 }

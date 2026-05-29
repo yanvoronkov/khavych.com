@@ -3,6 +3,7 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 import { db } from "src/lib/db";
 import { logger } from "src/lib/logger";
+import { sendTelegramNotification } from "src/lib/telegram";
 
 // Схема валидации данных для регистрации через Zod
 const registerSchema = z.object({
@@ -71,6 +72,18 @@ export async function POST(request: Request) {
     });
 
     logger.info({ userId: user.id, role: user.role }, "Новый пользователь успешно зарегистрирован");
+
+    // Фоновая отправка уведомления в Telegram (не блокирует ответ клиенту)
+    const tgMsg = `📝 <b>НОВАЯ РЕГИСТРАЦИЯ • KHAVYCH.COM</b>\n\n` +
+                  `👤 <b>Имя:</b> <code>${user.name}</code>\n` +
+                  `📧 <b>Email:</b> <code>${user.email}</code>\n` +
+                  `📞 <b>Телефон:</b> <code>${user.phone}</code>\n` +
+                  `🔑 <b>Роль:</b> <code>${user.role}</code>\n` +
+                  `⏰ <b>Дата:</b> <code>${new Date().toLocaleString("ru-RU", { timeZone: "Europe/Kiev" })}</code>`;
+
+    sendTelegramNotification(tgMsg).catch((err) => {
+      logger.error({ err }, "Ошибка при фоновой отправке уведомления в Telegram");
+    });
 
     return NextResponse.json({
       success: true,

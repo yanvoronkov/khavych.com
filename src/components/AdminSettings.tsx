@@ -344,16 +344,19 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel} htmlFor="telegramChatId">
-              ID чата или группы Telegram (Chat ID) *
+              ID чатов или групп Telegram (Chat IDs) *
             </label>
             <input
               type="text"
               id="telegramChatId"
               className={styles.formInput}
-              placeholder="Например: 987654321 или -100123456789"
+              placeholder="Например: 987654321, -100123456789"
               value={settings.telegramChatId}
               onChange={(e) => setSettings((prev) => ({ ...prev, telegramChatId: e.target.value }))}
             />
+            <p style={{ fontSize: "11px", color: "var(--color-gray)", marginTop: "4px", margin: 0 }}>
+              Можно указать несколько Chat ID через запятую или пробел, чтобы бот отправлял дублирующие уведомления нескольким администраторам и в группу.
+            </p>
           </div>
 
           <div className={styles.actionsRow}>

@@ -129,6 +129,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     name: string;
     email: string;
     phone: string;
+    role: "USER" | "ADMIN";
     additionalInfo: string;
   }>({
     isOpen: false,
@@ -137,6 +138,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
     name: "",
     email: "",
     phone: "",
+    role: "USER",
     additionalInfo: "",
   });
 
@@ -928,6 +930,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       name: "",
       email: "",
       phone: "",
+      role: "USER",
       additionalInfo: "",
     });
   };
@@ -940,6 +943,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
       name: user.name,
       email: user.email,
       phone: user.phone,
+      role: user.role || "USER",
       additionalInfo: user.additionalInfo || "",
     });
   };
@@ -997,6 +1001,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
             name: userModal.name,
             email: userModal.email,
             phone: userModal.phone,
+            role: userModal.role,
             additionalInfo: userModal.additionalInfo || null,
           }),
         });
@@ -1012,7 +1017,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
         showNotification("Данные ученика обновлены", "success");
       }
 
-      setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", additionalInfo: "" });
+      setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", role: "USER", additionalInfo: "" });
     } catch (err: unknown) {
       showNotification(err instanceof Error ? err.message : "Произошла ошибка", "error");
     } finally {
@@ -2782,7 +2787,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                 {userModal.mode === "create" ? "➕ Добавление ученика" : "✏️ Редактирование личных данных"}
               </h3>
               <button
-                onClick={() => setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", additionalInfo: "" })}
+                onClick={() => setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", role: "USER", additionalInfo: "" })}
                 style={{
                   border: "none",
                   background: "none",
@@ -2868,6 +2873,33 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
                   </div>
                 )}
 
+                {/* Роль в системе */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
+                    Роль в системе *
+                  </label>
+                  <select
+                    value={userModal.role}
+                    onChange={(e) => setUserModal((prev) => ({ ...prev, role: e.target.value as "USER" | "ADMIN" }))}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      fontSize: "14px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--color-gray-border)",
+                      backgroundColor: "#fff",
+                      cursor: "pointer",
+                      outline: "none"
+                    }}
+                  >
+                    <option value="USER">Ученик (USER)</option>
+                    <option value="ADMIN">Администратор (ADMIN)</option>
+                  </select>
+                  <p style={{ fontSize: "11px", color: "var(--color-gray)", marginTop: "4px", margin: 0 }}>
+                    Предоставление роли администратора дает полный доступ к админ-панели и управлению сайтом.
+                  </p>
+                </div>
+
                 {/* Дополнительная информация */}
                 <div>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "6px" }}>
@@ -2896,7 +2928,7 @@ export const AdminClient: React.FC<IAdminClientProps> = ({ initialUsers, courses
               <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
                 <button
                   type="button"
-                  onClick={() => setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", additionalInfo: "" })}
+                  onClick={() => setUserModal({ isOpen: false, mode: "create", userId: "", name: "", email: "", phone: "", role: "USER", additionalInfo: "" })}
                   className="btn btn-secondary"
                   style={{ padding: "10px 20px" }}
                 >
