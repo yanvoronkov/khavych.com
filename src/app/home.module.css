@@ -227,7 +227,7 @@
   margin-top: 2px;
 }
 
-.featureItemText h4 {
+.featureItemText h3 {
   font-size: 14px;
   font-weight: 700;
   color: var(--color-dark);
@@ -426,11 +426,12 @@
 .sliderPagination {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 16px;
   margin-top: 30px;
 }
 
 .sliderDot {
+  position: relative;
   width: 8px;
   height: 8px;
   border-radius: var(--radius-full);
@@ -439,6 +440,16 @@
   cursor: pointer;
   transition: all var(--transition-normal);
   padding: 0;
+}
+
+.sliderDot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
 }
 
 .sliderDot:hover {
@@ -609,11 +620,12 @@
 .testimonialsSliderPagination {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 16px;
   margin-top: 30px;
 }
 
 .testimonialsSliderDot {
+  position: relative;
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -622,6 +634,16 @@
   cursor: pointer;
   padding: 0;
   transition: all var(--transition-normal);
+}
+
+.testimonialsSliderDot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
 }
 
 .testimonialsSliderDotActive {
@@ -683,7 +705,7 @@
   box-shadow: 0 4px 10px rgba(197, 23, 34, 0.2);
 }
 
-.clientInfo h4 {
+.clientInfo h3 {
   font-size: 13px;
   font-weight: 700;
   color: var(--color-dark);
@@ -870,7 +892,7 @@
   transform: scale(1.1) rotate(5deg);
 }
 
-.problemCardContent h4 {
+.problemCardContent h3 {
   font-family: var(--font-title);
   font-size: 18px;
   font-weight: 700;

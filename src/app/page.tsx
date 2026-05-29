@@ -258,7 +258,8 @@ export default function Home() {
       {/* Шапка сайта с корзиной */}
       <Header />
 
-      {/* 1. HERO СЕКЦИЯ (Attention - Главный экран) */}
+      <main>
+        {/* 1. HERO СЕКЦИЯ (Attention - Главный экран) */}
       <section className={styles.hero} id="hero">
         <div className={`container ${styles.heroContainer}`}>
           <div className={styles.heroGrid}>
@@ -339,7 +340,7 @@ export default function Home() {
                 </svg>
               </div>
               <div className={styles.problemCardContent}>
-                <h4>Финансы и карьера</h4>
+                <h3>Финансы и карьера</h3>
                 <p>Уперлись в финансовый потолок? Бизнес буксует? Не понимаете, в какое русло направить силы для привлечения материального изобилия?</p>
               </div>
             </div>
@@ -351,7 +352,7 @@ export default function Home() {
                 </svg>
               </div>
               <div className={styles.problemCardContent}>
-                <h4>Личные отношения</h4>
+                <h3>Личные отношения</h3>
                 <p>Наступаете на одни и те же грабли с партнерами? Ощущаете одиночество и непонимание? Переживаете болезненный разрыв или семейный кризис?</p>
               </div>
             </div>
@@ -363,7 +364,7 @@ export default function Home() {
                 </svg>
               </div>
               <div className={styles.problemCardContent}>
-                <h4>Энергия и здоровье</h4>
+                <h3>Энергия и здоровье</h3>
                 <p>Чувствуете хроническую усталость, опустошение или апатию? Ощущаете, что все дороги закрыты и удача буквально отвернулась от вас?</p>
               </div>
             </div>
@@ -376,7 +377,7 @@ export default function Home() {
                 </svg>
               </div>
               <div className={styles.problemCardContent}>
-                <h4>Предназначение и дети</h4>
+                <h3>Предназначение и дети</h3>
                 <p>Не знаете, кто вы на самом деле и в чем ваша кармическая задача? Хотите понять таланты и особенности характера вашего ребенка?</p>
               </div>
             </div>
@@ -698,7 +699,7 @@ export default function Home() {
                 <div className={styles.featureItem}>
                   <div className={styles.featureItemIcon}>✓</div>
                   <div className={styles.featureItemText}>
-                    <h4>10+ лет опыта</h4>
+                    <h3>10+ лет опыта</h3>
                     <p>Проверенные временем и тысячами клиентов практики нумерологии и тарологии.</p>
                   </div>
                 </div>
@@ -706,7 +707,7 @@ export default function Home() {
                 <div className={styles.featureItem}>
                   <div className={styles.featureItemIcon}>✓</div>
                   <div className={styles.featureItemText}>
-                    <h4>Индивидуальный расчет</h4>
+                    <h3>Индивидуальный расчет</h3>
                     <p>Каждый амулет создается Ольгой под дату рождения конкретного человека.</p>
                   </div>
                 </div>
@@ -714,7 +715,7 @@ export default function Home() {
                 <div className={styles.featureItem}>
                   <div className={styles.featureItemIcon}>✓</div>
                   <div className={styles.featureItemText}>
-                    <h4>Энергетическая зарядка</h4>
+                    <h3>Энергетическая зарядка</h3>
                     <p>Все изделия проходят обряд мягкого воскового ладования силой мастера.</p>
                   </div>
                 </div>
@@ -722,7 +723,7 @@ export default function Home() {
                 <div className={styles.featureItem}>
                   <div className={styles.featureItemIcon}>✓</div>
                   <div className={styles.featureItemText}>
-                    <h4>Удобный ЛК ученика</h4>
+                    <h3>Удобный ЛК ученика</h3>
                     <p>Собственная современная IT-платформа для качественного обучения.</p>
                   </div>
                 </div>
@@ -867,7 +868,7 @@ export default function Home() {
                       <div className={styles.clientMeta}>
                         <div className={styles.avatar}>{test.avatar}</div>
                         <div className={styles.clientInfo}>
-                          <h4>{test.author}</h4>
+                          <h3>{test.author}</h3>
                           <p>{test.role}</p>
                         </div>
                       </div>
@@ -972,13 +973,14 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* 10. ФИНАЛЬНЫЙ CTA (Action - Запись / Консультация) */}
       <footer className={styles.footer}>
         <div className="container" style={{ marginBottom: "60px", textAlign: "center" }}>
           <div className={styles.centerHeader} style={{ marginBottom: "30px" }}>
             <h2 style={{ color: "#fff" }}>Не знаете, с чего начать?</h2>
-            <p style={{ color: "rgba(255,255,255,0.7)" }}>
+            <p style={{ color: "rgba(255,255,255,0.9)" }}>
               Напишите Ольге Хавич напрямую в мессенджерах. Кратко опишите вашу жизненную ситуацию,
               и она подскажет, какой инструмент (расчет, очищение или амулет) поможет вам быстрее всего.
             </p>
@@ -1058,7 +1060,7 @@ export default function Home() {
         <div className={`container ${styles.footerBottom}`}>
           <p>© 2026 Ольга Хавич. Все права защищены.</p>
           <p>
-            <Link href="/login" style={{ color: "rgba(255,255,255,0.4)", textDecoration: "underline" }}>
+            <Link href="/login" style={{ color: "rgba(255,255,255,0.75)", textDecoration: "underline" }}>
               Вход для учеников и администратора
             </Link>
           </p>
