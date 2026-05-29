@@ -41,10 +41,10 @@ export const metadata: Metadata = {
     url: "https://khavych.com",
     images: [
       {
-        url: "/olga.webp",
-        width: 667,
-        height: 1000,
-        alt: "Ольга Хавич, духовный целитель, таролог, нумеролог",
+        url: "/og_image.jpg",
+        width: 600,
+        height: 315,
+        alt: "Ольга Хавич | Нумерология, Таро и Энергопрактики",
       },
     ],
   },
