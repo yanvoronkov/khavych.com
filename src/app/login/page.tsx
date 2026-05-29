@@ -1,7 +1,14 @@
 import React from "react";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getServerSession } from "src/lib/auth";
 import LoginClient from "./LoginClient";
+
+export const metadata: Metadata = {
+  title: "Вход в Личный кабинет | Ольга Хавич",
+  description:
+    "Авторизация в закрытой образовательной платформе нумеролога и таролога Ольги Хавич. Получите доступ к вашим оплаченным курсам и материалам уроков.",
+};
 
 // Принудительно отключаем кэширование страницы, так как она считывает сессионные куки
 export const dynamic = "force-dynamic";

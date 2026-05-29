@@ -1,8 +1,23 @@
 import React, { Suspense } from "react";
+import type { Metadata } from "next";
 import { Header } from "src/components/Header";
 import { db } from "src/lib/db";
 import ShopClient from "./ShopClient";
 import styles from "./shop.module.css";
+
+// Уникальные метаданные для SEO-оптимизации страницы магазина
+export const metadata: Metadata = {
+  title: "Магазин Ольги Хавич | Авторские браслеты и курсы по нумерологии",
+  description:
+    "Купить уникальные амулетные браслеты из натуральных камней под дату рождения, заказать чакроанализ, нумерологические консультации и онлайн-курсы Ольги Хавич.",
+  openGraph: {
+    title: "Магазин Ольги Хавич | Авторские браслеты и курсы по нумерологии",
+    description:
+      "Натуральные камни, профессиональный нумерологический анализ и авторские курсы с личным кабинетом ученика.",
+    type: "website",
+    locale: "ru_RU",
+  },
+};
 
 // Делаем страницу динамической, так как она зависит от содержимого базы данных
 export const dynamic = "force-dynamic";
@@ -40,6 +55,26 @@ export default async function ShopPage() {
 
   return (
     <div className={styles.shopPage}>
+      {/* Микроразметка Schema.org для магазина в результатах поиска */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Store",
+            "name": "Магазин Ольги Хавич",
+            "description": "Авторские браслеты-амулеты из натуральных камней под дату рождения, нумерологические консультации и обучающие курсы.",
+            "url": `${process.env.NEXT_PUBLIC_APP_URL || "https://khavich.com"}/shop`,
+            "priceRange": "€€",
+            "image": `${process.env.NEXT_PUBLIC_APP_URL || "https://khavich.com"}/favicon.png`,
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "DE"
+            }
+          }),
+        }}
+      />
+
       {/* Шапка сайта */}
       <Header />
 
