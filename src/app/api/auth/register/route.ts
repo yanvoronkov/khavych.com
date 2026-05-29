@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     logger.info({ userId: user.id, role: user.role }, "Новый пользователь успешно зарегистрирован");
 
-    // Фоновая отправка уведомления в Telegram (не блокирует ответ клиенту)
+    // Отправка уведомления в Telegram (с ожиданием, чтобы гарантировать доставку в serverless-среде)
     const tgMsg = `📝 <b>НОВАЯ РЕГИСТРАЦИЯ • KHAVYCH.COM</b>\n\n` +
                   `👤 <b>Имя:</b> <code>${user.name}</code>\n` +
                   `📧 <b>Email:</b> <code>${user.email}</code>\n` +
@@ -81,9 +81,11 @@ export async function POST(request: Request) {
                   `🔑 <b>Роль:</b> <code>${user.role}</code>\n` +
                   `⏰ <b>Дата:</b> <code>${new Date().toLocaleString("ru-RU", { timeZone: "Europe/Kiev" })}</code>`;
 
-    sendTelegramNotification(tgMsg).catch((err) => {
-      logger.error({ err }, "Ошибка при фоновой отправке уведомления в Telegram");
-    });
+    try {
+      await sendTelegramNotification(tgMsg);
+    } catch (err) {
+      logger.error({ err }, "Ошибка при отправке уведомления о регистрации в Telegram");
+    }
 
     return NextResponse.json({
       success: true,
