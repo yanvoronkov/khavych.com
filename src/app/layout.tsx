@@ -6,6 +6,9 @@ import { ScrollToTop } from "src/components/ScrollToTop";
 import { db } from "src/lib/db";
 import "./globals.css";
 
+// Обеспечиваем динамический рендеринг макета для актуального считывания настроек из базы данных при каждом запросе
+export const dynamic = "force-dynamic";
+
 // Подключаем премиальный шрифт Montserrat для заголовков с поддержкой кириллицы
 const montserrat = Montserrat({
   subsets: ["latin", "cyrillic"],
