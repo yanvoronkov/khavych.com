@@ -81,23 +81,25 @@ interface Diploma {
   title: string;
   subtitle: string;
   image: string;
+  width: number;
+  height: number;
 }
 
 const DIPLOMAS: Diploma[] = [
-  { id: 1, title: "Диплом Нумеролога", subtitle: "Профессиональный числовой анализ матрицы судьбы и предназначения", image: "/sertificate1.webp" },
-  { id: 2, title: "Магистр Тарологии", subtitle: "Прогнозирование на Старших и Младших Арканах, анализ ситуации", image: "/sertificate2.webp" },
-  { id: 3, title: "Энергопрактик & Ладование", subtitle: "Глубокое очищение энергоканалов, восковые отливки биополя", image: "/sertificate3.webp" },
-  { id: 4, title: "Чакроанализ", subtitle: "Диагностика чакровой системы человека по дате рождения", image: "/sertificate4.webp" },
-  { id: 5, title: "Коррекция Судьбы", subtitle: "Методология числовых кодов и перенаправление жизненных путей", image: "/sertificate5.webp" },
-  { id: 6, title: "Рунические Практики", subtitle: "Сакральные знаки, защитные ставы и диагностика энергетики", image: "/sertificate6.webp" },
-  { id: 7, title: "Амулетная Нумерология", subtitle: "Создание индивидуальных минеральных браслетов по формуле рождения", image: "/sertificate7.webp" },
-  { id: 8, title: "Психологическое консультирование", subtitle: "Методы гештальт-терапии и когнитивной коррекции в эзотерике", image: "/sertificate8.webp" },
-  { id: 9, title: "Практическая Нумерология", subtitle: "Магистр числовых прогнозов, расчет финансового и любовного каналов", image: "/sertificate9.webp" },
-  { id: 10, title: "Энергетическая Чистка", subtitle: "Мастер бесконтактного ладования, снятие деструктивных блоков", image: "/sertificate10.webp" },
-  { id: 11, title: "Кармическая Коррекция", subtitle: "Определение и развязывание кармических узлов прошлых воплощений", image: "/sertificate11.webp" },
-  { id: 12, title: "Осознанное Менторство", subtitle: "Помощь в раскрытии внутреннего потенциала и духовного баланса", image: "/sertificate12.webp" },
-  { id: 13, title: "Матрица Изобилия", subtitle: "Индивидуальный расчет финансовых ключей и карьерных векторов", image: "/sertificate13.webp" },
-  { id: 14, title: "Энерготерапия 5 Измерения", subtitle: "Интегральные практики глубокого исцеления души и сознания", image: "/sertificate14.webp" }
+  { id: 1, title: "Диплом Нумеролога", subtitle: "Профессиональный числовой анализ матрицы судьбы и предназначения", image: "/sertificate1.webp", width: 2560, height: 1597 },
+  { id: 2, title: "Магистр Тарологии", subtitle: "Прогнозирование на Старших и Младших Арканах, анализ ситуации", image: "/sertificate2.webp", width: 2560, height: 1597 },
+  { id: 3, title: "Энергопрактик & Ладование", subtitle: "Глубокое очищение энергоканалов, восковые отливки биополя", image: "/sertificate3.webp", width: 2560, height: 1597 },
+  { id: 4, title: "Чакроанализ", subtitle: "Диагностика чакровой системы человека по дате рождения", image: "/sertificate4.webp", width: 2560, height: 1597 },
+  { id: 5, title: "Коррекция Судьбы", subtitle: "Методология числовых кодов и перенаправление жизненных путей", image: "/sertificate5.webp", width: 2560, height: 1597 },
+  { id: 6, title: "Рунические Практики", subtitle: "Сакральные знаки, защитные ставы и диагностика энергетики", image: "/sertificate6.webp", width: 1056, height: 816 },
+  { id: 7, title: "Амулетная Нумерология", subtitle: "Создание индивидуальных минеральных браслетов по формуле рождения", image: "/sertificate7.webp", width: 2560, height: 1597 },
+  { id: 8, title: "Психологическое консультирование", subtitle: "Методы гештальт-терапии и когнитивной коррекции в эзотерике", image: "/sertificate8.webp", width: 2560, height: 1597 },
+  { id: 9, title: "Практическая Нумерология", subtitle: "Магистр числовых прогнозов, расчет финансового и любовного каналов", image: "/sertificate9.webp", width: 1280, height: 1280 },
+  { id: 10, title: "Энергетическая Чистка", subtitle: "Мастер бесконтактного ладования, снятие деструктивных блоков", image: "/sertificate10.webp", width: 2560, height: 1597 },
+  { id: 11, title: "Кармическая Коррекция", subtitle: "Определение и развязывание кармических узлов прошлых воплощений", image: "/sertificate11.webp", width: 2560, height: 1597 },
+  { id: 12, title: "Осознанное Менторство", subtitle: "Помощь в раскрытии внутреннего потенциала и духовного баланса", image: "/sertificate12.webp", width: 2048, height: 2048 },
+  { id: 13, title: "Матрица Изобилия", subtitle: "Индивидуальный расчет финансовых ключей и карьерных векторов", image: "/sertificate13.webp", width: 2001, height: 1416 },
+  { id: 14, title: "Энерготерапия 5 Измерения", subtitle: "Интегральные практики глубокого исцеления души и сознания", image: "/sertificate14.webp", width: 2048, height: 2048 }
 ];
 
 interface Testimonial {
@@ -255,6 +257,47 @@ export default function Home() {
 
   return (
     <div className={styles.homeWrapper}>
+      {/* Микроразметка Schema.org (JSON-LD) для главной страницы */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Person",
+                "@id": "https://khavych.com/#person",
+                "name": "Ольга Хавич",
+                "jobTitle": "Духовный целитель, таролог, нумеролог",
+                "url": "https://khavych.com",
+                "image": "https://khavych.com/olga.webp",
+                "description": "Духовный целитель, таролог, нумеролог. Помогаю находить ответы на жизненные вопросы в сфере финансов, отношений и предназначения.",
+                "sameAs": [
+                  "https://instagram.com/numerologin.khavych",
+                  "https://tiktok.com/@magja_moja"
+                ]
+              },
+              {
+                "@type": "LocalBusiness",
+                "@id": "https://khavych.com/#organization",
+                "name": "Ольга Хавич | Нумерология, Таро и Энергопрактики",
+                "url": "https://khavych.com",
+                "logo": "https://khavych.com/olga.webp",
+                "image": "https://khavych.com/olga.webp",
+                "description": "Интегральный анализ личности, энергопрактики воскового очищения и ладования для раскрытия вашего природного потенциала и гармонии в жизни.",
+                "telephone": "+4917630761368",
+                "email": "info@khavych.com",
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressCountry": "DE"
+                },
+                "priceRange": "€40 - €200"
+              }
+            ]
+          }),
+        }}
+      />
+
       {/* Шапка сайта с корзиной */}
       <Header />
 
@@ -278,6 +321,9 @@ export default function Home() {
               <img
                 src="/olga.webp"
                 alt="Ольга Хавич, духовный целитель, таролог, нумеролог"
+                title="Ольга Хавич, духовный целитель, таролог, нумеролог"
+                width={667}
+                height={1000}
                 className={styles.heroOlgaImage}
                 loading="eager"
                 fetchPriority="high"
@@ -463,7 +509,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-tarot.webp" alt="Карты Таро" className={styles.serviceImage} loading="lazy" decoding="async" />
+                <img src="/images/service-tarot.webp" alt="Карты Таро" title="Карты Таро" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
               <h3>Карты Таро</h3>
               <p>
@@ -478,7 +524,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-wax.webp" alt="Восковые отливки" className={styles.serviceImage} loading="lazy" decoding="async" />
+                <img src="/images/service-wax.webp" alt="Восковые отливки" title="Восковые отливки" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
               <h3>Восковые отливки</h3>
               <p>
@@ -493,7 +539,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-lading.webp" alt="Ладование биополя" className={styles.serviceImage} loading="lazy" decoding="async" />
+                <img src="/images/service-lading.webp" alt="Ладование биополя" title="Ладование биополя" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
               <h3>Ладование биополя</h3>
               <p>
@@ -509,7 +555,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-numerology.webp" alt="Нумерологический прогноз" className={styles.serviceImage} loading="lazy" decoding="async" />
+                <img src="/images/service-numerology.webp" alt="Нумерологический прогноз" title="Нумерологический прогноз" width={500} height={500} className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
               <h3>Нумерологический прогноз</h3>
               <p>
@@ -669,6 +715,9 @@ export default function Home() {
                 <img
                   src="/olga2.webp"
                   alt="Ольга Хавич, нумеролог и ваш проводник в мир осознанности"
+                  title="Ольга Хавич, нумеролог и ваш проводник в мир осознанности"
+                  width={1000}
+                  height={1045}
                   className={styles.aboutOlgaImage}
                   loading="lazy"
                   decoding="async"
@@ -778,6 +827,9 @@ export default function Home() {
                         <img
                           src={dip.image}
                           alt={dip.title}
+                          title={dip.title}
+                          width={dip.width}
+                          height={dip.height}
                           className={styles.diplomaImg}
                           loading="lazy"
                           decoding="async"
@@ -1087,6 +1139,9 @@ export default function Home() {
             <img
               src={activeDiploma.image}
               alt={activeDiploma.title}
+              title={activeDiploma.title}
+              width={activeDiploma.width}
+              height={activeDiploma.height}
               className={styles.lightboxImage}
               decoding="async"
             />
