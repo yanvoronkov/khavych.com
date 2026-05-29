@@ -206,6 +206,8 @@ export default async function CabinetPage(props: {
                           src={course.imageUrl}
                           alt={course.title}
                           className={styles.courseImage}
+                          loading="lazy"
+                          decoding="async"
                         />
                       ) : (
                         <div className={styles.noImage}>Изображение курса</div>

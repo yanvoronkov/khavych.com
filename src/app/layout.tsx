@@ -63,6 +63,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" className={`${montserrat.variable} ${inter.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://wa.me" />
+        <link rel="preconnect" href="https://t.me" />
+      </head>
       <body className="antialiased">
         <Providers>
           {children}

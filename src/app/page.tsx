@@ -278,6 +278,9 @@ export default function Home() {
                 src="/olga.webp"
                 alt="Ольга Хавич, духовный целитель, таролог, нумеролог"
                 className={styles.heroOlgaImage}
+                loading="eager"
+                fetchPriority="high"
+                decoding="sync"
               />
             </div>
 
@@ -459,7 +462,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-tarot.webp" alt="Карты Таро" className={styles.serviceImage} />
+                <img src="/images/service-tarot.webp" alt="Карты Таро" className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
               <h3>Карты Таро</h3>
               <p>
@@ -474,7 +477,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-wax.webp" alt="Восковые отливки" className={styles.serviceImage} />
+                <img src="/images/service-wax.webp" alt="Восковые отливки" className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
               <h3>Восковые отливки</h3>
               <p>
@@ -489,7 +492,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-lading.webp" alt="Ладование биополя" className={styles.serviceImage} />
+                <img src="/images/service-lading.webp" alt="Ладование биополя" className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
               <h3>Ладование биополя</h3>
               <p>
@@ -505,7 +508,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-numerology.webp" alt="Нумерологический прогноз" className={styles.serviceImage} />
+                <img src="/images/service-numerology.webp" alt="Нумерологический прогноз" className={styles.serviceImage} loading="lazy" decoding="async" />
               </div>
               <h3>Нумерологический прогноз</h3>
               <p>
@@ -666,6 +669,8 @@ export default function Home() {
                   src="/olga2.webp"
                   alt="Ольга Хавич, нумеролог и ваш проводник в мир осознанности"
                   className={styles.aboutOlgaImage}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -773,6 +778,8 @@ export default function Home() {
                           src={dip.image}
                           alt={dip.title}
                           className={styles.diplomaImg}
+                          loading="lazy"
+                          decoding="async"
                         />
                         <div className={styles.diplomaOverlay}>
                           <span style={{ fontSize: "24px" }}>🔍</span>
@@ -1079,6 +1086,7 @@ export default function Home() {
               src={activeDiploma.image}
               alt={activeDiploma.title}
               className={styles.lightboxImage}
+              decoding="async"
             />
           </div>
         </div>
