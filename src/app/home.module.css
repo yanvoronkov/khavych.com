@@ -4,7 +4,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  background: url('/hero-bg.jpg') no-repeat;
+  background: url('/hero-bg.webp') no-repeat;
   background-size: cover;
   background-position: center;
   color: var(--color-dark);

@@ -448,7 +448,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
               ) : (
                 <>
                   <img
-                    src={settings.certificateBgUrl || "/images/cert-bg.jpg"}
+                    src={settings.certificateBgUrl || "/images/cert-bg.webp"}
                     alt="Certificate Background Preview"
                     style={{
                       width: "100%",
@@ -457,7 +457,7 @@ export const AdminSettings: React.FC<IAdminSettingsProps> = ({ showNotification 
                       opacity: 0.85,
                     }}
                     onError={(e) => {
-                      e.currentTarget.src = "/images/cert-bg.jpg";
+                      e.currentTarget.src = "/images/cert-bg.webp";
                     }}
                   />
                   <div

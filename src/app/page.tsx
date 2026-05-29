@@ -84,20 +84,20 @@ interface Diploma {
 }
 
 const DIPLOMAS: Diploma[] = [
-  { id: 1, title: "Диплом Нумеролога", subtitle: "Профессиональный числовой анализ матрицы судьбы и предназначения", image: "/sertificate1.jpg" },
-  { id: 2, title: "Магистр Тарологии", subtitle: "Прогнозирование на Старших и Младших Арканах, анализ ситуации", image: "/sertificate2.jpg" },
-  { id: 3, title: "Энергопрактик & Ладование", subtitle: "Глубокое очищение энергоканалов, восковые отливки биополя", image: "/sertificate3.jpg" },
-  { id: 4, title: "Чакроанализ", subtitle: "Диагностика чакровой системы человека по дате рождения", image: "/sertificate4.jpg" },
-  { id: 5, title: "Коррекция Судьбы", subtitle: "Методология числовых кодов и перенаправление жизненных путей", image: "/sertificate5.jpg" },
-  { id: 6, title: "Рунические Практики", subtitle: "Сакральные знаки, защитные ставы и диагностика энергетики", image: "/sertificate6.jpg" },
-  { id: 7, title: "Амулетная Нумерология", subtitle: "Создание индивидуальных минеральных браслетов по формуле рождения", image: "/sertificate7.jpg" },
-  { id: 8, title: "Психологическое консультирование", subtitle: "Методы гештальт-терапии и когнитивной коррекции в эзотерике", image: "/sertificate8.jpg" },
-  { id: 9, title: "Практическая Нумерология", subtitle: "Магистр числовых прогнозов, расчет финансового и любовного каналов", image: "/sertificate9.jpg" },
-  { id: 10, title: "Энергетическая Чистка", subtitle: "Мастер бесконтактного ладования, снятие деструктивных блоков", image: "/sertificate10.jpg" },
-  { id: 11, title: "Кармическая Коррекция", subtitle: "Определение и развязывание кармических узлов прошлых воплощений", image: "/sertificate11.jpg" },
-  { id: 12, title: "Осознанное Менторство", subtitle: "Помощь в раскрытии внутреннего потенциала и духовного баланса", image: "/sertificate12.jpeg" },
-  { id: 13, title: "Матрица Изобилия", subtitle: "Индивидуальный расчет финансовых ключей и карьерных векторов", image: "/sertificate13.jpg" },
-  { id: 14, title: "Энерготерапия 5 Измерения", subtitle: "Интегральные практики глубокого исцеления души и сознания", image: "/sertificate14.jpeg" }
+  { id: 1, title: "Диплом Нумеролога", subtitle: "Профессиональный числовой анализ матрицы судьбы и предназначения", image: "/sertificate1.webp" },
+  { id: 2, title: "Магистр Тарологии", subtitle: "Прогнозирование на Старших и Младших Арканах, анализ ситуации", image: "/sertificate2.webp" },
+  { id: 3, title: "Энергопрактик & Ладование", subtitle: "Глубокое очищение энергоканалов, восковые отливки биополя", image: "/sertificate3.webp" },
+  { id: 4, title: "Чакроанализ", subtitle: "Диагностика чакровой системы человека по дате рождения", image: "/sertificate4.webp" },
+  { id: 5, title: "Коррекция Судьбы", subtitle: "Методология числовых кодов и перенаправление жизненных путей", image: "/sertificate5.webp" },
+  { id: 6, title: "Рунические Практики", subtitle: "Сакральные знаки, защитные ставы и диагностика энергетики", image: "/sertificate6.webp" },
+  { id: 7, title: "Амулетная Нумерология", subtitle: "Создание индивидуальных минеральных браслетов по формуле рождения", image: "/sertificate7.webp" },
+  { id: 8, title: "Психологическое консультирование", subtitle: "Методы гештальт-терапии и когнитивной коррекции в эзотерике", image: "/sertificate8.webp" },
+  { id: 9, title: "Практическая Нумерология", subtitle: "Магистр числовых прогнозов, расчет финансового и любовного каналов", image: "/sertificate9.webp" },
+  { id: 10, title: "Энергетическая Чистка", subtitle: "Мастер бесконтактного ладования, снятие деструктивных блоков", image: "/sertificate10.webp" },
+  { id: 11, title: "Кармическая Коррекция", subtitle: "Определение и развязывание кармических узлов прошлых воплощений", image: "/sertificate11.webp" },
+  { id: 12, title: "Осознанное Менторство", subtitle: "Помощь в раскрытии внутреннего потенциала и духовного баланса", image: "/sertificate12.webp" },
+  { id: 13, title: "Матрица Изобилия", subtitle: "Индивидуальный расчет финансовых ключей и карьерных векторов", image: "/sertificate13.webp" },
+  { id: 14, title: "Энерготерапия 5 Измерения", subtitle: "Интегральные практики глубокого исцеления души и сознания", image: "/sertificate14.webp" }
 ];
 
 interface Testimonial {
@@ -275,7 +275,7 @@ export default function Home() {
             <div className={styles.heroImageArea}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/olga.png"
+                src="/olga.webp"
                 alt="Ольга Хавич, духовный целитель, таролог, нумеролог"
                 className={styles.heroOlgaImage}
               />
@@ -459,7 +459,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-tarot.jpg" alt="Карты Таро" className={styles.serviceImage} />
+                <img src="/images/service-tarot.webp" alt="Карты Таро" className={styles.serviceImage} />
               </div>
               <h3>Карты Таро</h3>
               <p>
@@ -474,7 +474,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-wax.jpg" alt="Восковые отливки" className={styles.serviceImage} />
+                <img src="/images/service-wax.webp" alt="Восковые отливки" className={styles.serviceImage} />
               </div>
               <h3>Восковые отливки</h3>
               <p>
@@ -489,7 +489,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-lading.jpg" alt="Ладование биополя" className={styles.serviceImage} />
+                <img src="/images/service-lading.webp" alt="Ладование биополя" className={styles.serviceImage} />
               </div>
               <h3>Ладование биополя</h3>
               <p>
@@ -505,7 +505,7 @@ export default function Home() {
             <article className={styles.serviceCard}>
               <div className={styles.serviceImageWrapper}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/service-numerology.jpg" alt="Нумерологический прогноз" className={styles.serviceImage} />
+                <img src="/images/service-numerology.webp" alt="Нумерологический прогноз" className={styles.serviceImage} />
               </div>
               <h3>Нумерологический прогноз</h3>
               <p>
@@ -663,7 +663,7 @@ export default function Home() {
               <div className={styles.aboutFrame}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/olga2.jpg"
+                  src="/olga2.webp"
                   alt="Ольга Хавич, нумеролог и ваш проводник в мир осознанности"
                   className={styles.aboutOlgaImage}
                 />
