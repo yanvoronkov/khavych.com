@@ -34,6 +34,9 @@ export default function ShopClient({ products }: ShopClientProps) {
   // Состояние активного подфильтра услуг
   const [subFilter, setSubFilter] = useState<string | "ALL">("ALL");
 
+  // Состояние текстового поиска товаров
+  const [searchQuery, setSearchQuery] = useState("");
+
   // Инициализация фильтров из query-параметров при первой загрузке
   useEffect(() => {
     const categoryParam = searchParams.get("category");
@@ -54,7 +57,14 @@ export default function ShopClient({ products }: ShopClientProps) {
     setSubFilter("ALL");
   };
 
-  // Фильтруем продукты
+  // Безопасный парсинг переведенных полей на основе JSON структуры
+  const getTranslation = (fieldObj: any, lang: string = "ru") => {
+    if (!fieldObj) return "";
+    const parsed = typeof fieldObj === "string" ? JSON.parse(fieldObj) : fieldObj;
+    return parsed[lang] || parsed["ru"] || "";
+  };
+
+  // Фильтруем продукты по категории и поисковому запросу
   const filteredProducts = products.filter((product) => {
     // 1. Фильтр по основной категории
     if (filter !== "ALL" && product.category !== filter) {
@@ -64,15 +74,40 @@ export default function ShopClient({ products }: ShopClientProps) {
     if (filter === "CONSULTATION" && subFilter !== "ALL" && product.subCategory !== subFilter) {
       return false;
     }
+    
+    // 3. Поиск по заголовку, описанию и цене
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase();
+      const name = getTranslation(product.name, locale).toLowerCase();
+      const description = getTranslation(product.description, locale).toLowerCase();
+      const priceStr = product.price.toString();
+      
+      const matchesName = name.includes(query);
+      const matchesDesc = description.includes(query);
+      const matchesPrice = priceStr.includes(query);
+      
+      if (!matchesName && !matchesDesc && !matchesPrice) {
+        return false;
+      }
+    }
+    
     return true;
   });
 
-  // Безопасный парсинг переведенных полей на основе JSON структуры
-  const getTranslation = (fieldObj: any, lang: string = "ru") => {
-    if (!fieldObj) return "";
-    const parsed = typeof fieldObj === "string" ? JSON.parse(fieldObj) : fieldObj;
-    return parsed[lang] || parsed["ru"] || "";
+  // Порядок сортировки категорий во вкладке "Все предложения":
+  // Сначала Браслеты (BRACELET), затем Курсы (COURSE), затем Консультации (CONSULTATION)
+  const categoryOrder: Record<string, number> = {
+    BRACELET: 1,
+    COURSE: 2,
+    CONSULTATION: 3,
   };
+
+  // Сортируем продукты (применяется всегда для удобства, особенно во вкладке "Все предложения")
+  const displayProducts = [...filteredProducts].sort((a, b) => {
+    const orderA = categoryOrder[a.category] || 99;
+    const orderB = categoryOrder[b.category] || 99;
+    return orderA - orderB;
+  });
 
   // Получение переведенного массива фич
   const getFeatures = (featuresObj: any, lang: string = "ru") => {
@@ -149,14 +184,45 @@ export default function ShopClient({ products }: ShopClientProps) {
         )}
       </section>
 
+      {/* Поисковая строка */}
+      <div className={styles.searchWrapper}>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder={
+            language === "ru"
+              ? "Поиск по названию, описанию или цене..."
+              : "Suche nach Name, Beschreibung oder Preis..."
+          }
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <div className={styles.searchIcon}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            viewBox="0 0 24 24"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </div>
+      </div>
+
       {/* Сетка товаров */}
       <section className={styles.grid}>
-        {filteredProducts.length === 0 ? (
+        {displayProducts.length === 0 ? (
           <div style={{ textAlign: "center", gridColumn: "1 / -1", padding: "40px 0", color: "var(--color-gray)" }}>
             <p>{language === "ru" ? "Нет доступных предложений по выбранным фильтрам." : "Keine Angebote für die ausgewählten Filter verfügbar."}</p>
           </div>
         ) : (
-          filteredProducts.map((product) => {
+          displayProducts.map((product) => {
             // Определение локализованных данных
             const name = getTranslation(product.name, locale);
             const description = getTranslation(product.description, locale);
