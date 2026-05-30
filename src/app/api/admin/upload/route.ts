@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "src/lib/auth";
 import { put, del } from "@vercel/blob";
 import { logger } from "src/lib/logger";
+import sharp from "sharp";
 
 // Отключаем кэширование и принудительно делаем роут динамическим
 export const dynamic = "force-dynamic";
@@ -97,11 +98,39 @@ export async function POST(request: Request) {
     // Заменяем все небезопасные символы в имени на подчеркивания
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const folder = (uploadType === "document" || uploadType === "lesson-cover") ? "lessons" : "products";
-    const filename = `${folder}/${Date.now()}-${safeName}`;
     
-    const blob = await put(filename, buffer, {
+    let processedBuffer: any = buffer;
+    let filename = `${folder}/${Date.now()}-${safeName}`;
+    let contentType = file.type;
+
+    // Если загружается картинка и это не документ
+    if (uploadType !== "document" && file.type.startsWith("image/")) {
+      try {
+        processedBuffer = await sharp(buffer)
+          .webp({ quality: 82, lossless: false })
+          .toBuffer();
+        
+        // Меняем расширение на .webp
+        const baseName = safeName.substring(0, safeName.lastIndexOf(".")) || safeName;
+        filename = `${folder}/${Date.now()}-${baseName}.webp`;
+        contentType = "image/webp";
+        
+        logger.info(
+          { 
+            originalSize: file.size, 
+            optimizedSize: processedBuffer.length,
+            compressionRatio: ((1 - processedBuffer.length / file.size) * 100).toFixed(1) + "%" 
+          }, 
+          "Изображение успешно оптимизировано в WebP с помощью sharp"
+        );
+      } catch (sharpError) {
+        logger.error({ sharpError }, "Не удалось оптимизировать изображение с помощью sharp, загружаем оригинал");
+      }
+    }
+
+    const blob = await put(filename, processedBuffer, {
       access: "public",
-      contentType: file.type,
+      contentType: contentType,
     });
 
     logger.info({ url: blob.url, uploadType }, "Файл успешно загружен в Vercel Blob");
