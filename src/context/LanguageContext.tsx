@@ -583,8 +583,13 @@ const LanguageContext = createContext<ILanguageContext | undefined>(undefined);
  * @param props Дочерние элементы провайдера.
  * @returns JSX провайдера контекста.
  */
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>("ru");
+interface ILanguageProviderProps {
+  children: React.ReactNode;
+  defaultLanguage?: Language;
+}
+
+export const LanguageProvider: React.FC<ILanguageProviderProps> = ({ children, defaultLanguage = "ru" }) => {
+  const [language, setLanguageState] = useState<Language>(defaultLanguage);
   const router = useRouter();
 
   // Инициализация языка пользователя
@@ -592,19 +597,23 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const savedLang = localStorage.getItem("khavich_language") as Language | null;
       if (savedLang === "ru" || savedLang === "de") {
-        setLanguageState(savedLang);
+        if (savedLang !== defaultLanguage) {
+          setLanguageState(savedLang);
+        }
         document.cookie = `khavich_language=${savedLang};path=/;max-age=31536000;SameSite=Lax`;
       } else {
         // Проверяем язык браузера по умолчанию
         const browserLang = navigator.language.substring(0, 2).toLowerCase();
         const defaultLang = browserLang === "de" ? "de" : "ru";
-        setLanguageState(defaultLang);
+        if (defaultLang !== defaultLanguage) {
+          setLanguageState(defaultLang);
+        }
         document.cookie = `khavich_language=${defaultLang};path=/;max-age=31536000;SameSite=Lax`;
       }
     } catch (e) {
       // Игнорируем ошибки доступа в приватных режимах
     }
-  }, []);
+  }, [defaultLanguage]);
 
   /**
    * Функция установки и сохранения выбранного языка на клиенте и в куках.

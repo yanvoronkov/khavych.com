@@ -5,6 +5,7 @@ import { Providers } from "src/components/Providers";
 import { CartDrawer } from "src/components/CartDrawer";
 import { ScrollToTop } from "src/components/ScrollToTop";
 import { db } from "src/lib/db";
+import { cookies } from "next/headers";
 import "./globals.css";
 
 // Обеспечиваем динамический рендеринг макета для актуального считывания настроек из базы данных при каждом запросе
@@ -80,6 +81,10 @@ export default async function RootLayout({
     // Безопасный перехват ошибок (например, при сборке проекта)
   }
 
+  // Получаем язык из кук на сервере для предотвращения Hydration Mismatch
+  const cookieStore = await cookies();
+  const language = cookieStore.get("khavich_language")?.value === "de" ? "de" : "ru";
+
   return (
     <html lang="ru" className={`${montserrat.variable} ${inter.variable}`}>
       <head>
@@ -116,7 +121,7 @@ export default async function RootLayout({
         )}
       </head>
       <body className="antialiased">
-        <Providers>
+        <Providers defaultLanguage={language}>
           {children}
           <CartDrawer />
           <ScrollToTop />

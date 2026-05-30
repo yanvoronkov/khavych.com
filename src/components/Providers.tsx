@@ -4,8 +4,11 @@ import React from "react";
 import { CartProvider } from "src/context/CartContext";
 import { LanguageProvider } from "src/context/LanguageContext";
 
+import { Language } from "src/context/LanguageContext";
+
 interface IProvidersProps {
   children: React.ReactNode;
+  defaultLanguage?: Language;
 }
 
 /**
@@ -13,9 +16,9 @@ interface IProvidersProps {
  * Используется для интеграции клиентских состояний (корзина, язык, авторизация)
  * в серверную иерархию Next.js App Router без потери SEO метаданных.
  */
-export const Providers: React.FC<IProvidersProps> = ({ children }) => {
+export const Providers: React.FC<IProvidersProps> = ({ children, defaultLanguage }) => {
   return (
-    <LanguageProvider>
+    <LanguageProvider defaultLanguage={defaultLanguage}>
       <CartProvider>{children}</CartProvider>
     </LanguageProvider>
   );
