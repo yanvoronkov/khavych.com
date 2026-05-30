@@ -202,7 +202,7 @@ export default function ShopClient({ products }: ShopClientProps) {
                 {/* Картинка товара с поддержкой реальных фото или заглушки */}
                 <div className={styles.imageWrapper}>
                   <img 
-                    src={product.imageUrl || "/images/placeholder.webp"} 
+                    src={product.imageUrl || "/placeholder_no_photo.jpeg"} 
                     alt={name} 
                     className={styles.productImage} 
                     style={{ width: "100%", height: "100%", objectFit: "cover" }} 

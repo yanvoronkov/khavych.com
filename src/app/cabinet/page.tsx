@@ -211,7 +211,7 @@ export default async function CabinetPage(props: {
                     {/* Изображение курса */}
                     <div className={styles.imageWrapper}>
                       <img
-                        src={((language === "de" && course.imageUrlDe) ? course.imageUrlDe : course.imageUrl) || "/images/placeholder.webp"}
+                        src={((language === "de" && course.imageUrlDe) ? course.imageUrlDe : course.imageUrl) || "/placeholder_no_photo.jpeg"}
                         alt={course.title}
                         className={styles.courseImage}
                         loading="lazy"

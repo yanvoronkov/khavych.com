@@ -386,13 +386,13 @@
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('/images/placeholder.webp') no-repeat center center;
+  background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('/placeholder_no_photo.jpeg') no-repeat center center;
   background-size: cover;
   gap: 12px;
 }
 
 .noVideoBanner {
-  background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)), url('/images/placeholder.webp') no-repeat center center;
+  background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)), url('/placeholder_no_photo.jpeg') no-repeat center center;
   background-size: cover;
   border: 1px solid #e8dad2;
   border-radius: var(--radius-lg);
