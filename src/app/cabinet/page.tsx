@@ -210,17 +210,14 @@ export default async function CabinetPage(props: {
                   <div key={course.id} className={styles.courseCard}>
                     {/* Изображение курса */}
                     <div className={styles.imageWrapper}>
-                      {((language === "de" && course.imageUrlDe) ? course.imageUrlDe : course.imageUrl) ? (
-                        <img
-                          src={(language === "de" && course.imageUrlDe) ? course.imageUrlDe : course.imageUrl}
-                          alt={course.title}
-                          className={styles.courseImage}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div className={styles.noImage}>{language === "ru" ? "Изображение курса" : "Kursbild"}</div>
-                      )}
+                      <img
+                        src={((language === "de" && course.imageUrlDe) ? course.imageUrlDe : course.imageUrl) || "/images/placeholder.webp"}
+                        alt={course.title}
+                        className={styles.courseImage}
+                        loading="lazy"
+                        decoding="async"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
                     </div>
 
                     {/* Информация о курсе */}

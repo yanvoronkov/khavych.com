@@ -201,18 +201,14 @@ export default function ShopClient({ products }: ShopClientProps) {
               <article key={product.id} className={styles.card}>
                 {/* Картинка товара с поддержкой реальных фото или заглушки */}
                 <div className={styles.imageWrapper}>
-                  {product.imageUrl ? (
-                    <img 
-                      src={product.imageUrl} 
-                      alt={name} 
-                      className={styles.productImage} 
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <span>{imageEmoji}</span>
-                  )}
+                  <img 
+                    src={product.imageUrl || "/images/placeholder.webp"} 
+                    alt={name} 
+                    className={styles.productImage} 
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <span className={`${styles.badge} ${badgeClass}`}>{categoryLabel}</span>
                   
                   {/* Бейдж скидки на картинке */}
