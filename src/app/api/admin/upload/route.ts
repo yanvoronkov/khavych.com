@@ -3,6 +3,7 @@ import { getServerSession } from "src/lib/auth";
 import { put, del } from "@vercel/blob";
 import { logger } from "src/lib/logger";
 import sharp from "sharp";
+import heicConvert from "heic-convert";
 
 // Отключаем кэширование и принудительно делаем роут динамическим
 export const dynamic = "force-dynamic";
@@ -68,7 +69,10 @@ export async function POST(request: Request) {
       }
     } else {
       // По умолчанию (для картинок товаров и курсов)
-      if (!file.type.startsWith("image/")) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      const isHeic = fileExtension === "heic" || fileExtension === "heif" || file.type === "image/heic" || file.type === "image/heif";
+
+      if (!file.type.startsWith("image/") && !isHeic) {
         return NextResponse.json(
           {
             error: true,
@@ -103,10 +107,27 @@ export async function POST(request: Request) {
     let filename = `${folder}/${Date.now()}-${safeName}`;
     let contentType = file.type;
 
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    const isHeic = fileExtension === "heic" || fileExtension === "heif" || file.type === "image/heic" || file.type === "image/heif";
+
     // Если загружается картинка и это не документ
-    if (uploadType !== "document" && file.type.startsWith("image/")) {
+    if (uploadType !== "document" && (file.type.startsWith("image/") || isHeic)) {
       try {
-        processedBuffer = await sharp(buffer)
+        let imageBuffer = buffer;
+
+        // Если это HEIC/HEIF файл от iOS, предварительно конвертируем его в JPEG
+        if (isHeic) {
+          logger.info("Обнаружен файл формата HEIC/HEIF от iOS, запускается конвертация...");
+          const converted = await heicConvert({
+            buffer: buffer as any,
+            format: "JPEG",
+            quality: 1, // Максимальное качество для промежуточной конвертации
+          });
+          imageBuffer = Buffer.from(converted);
+          logger.info("Конвертация HEIC -> JPEG успешно завершена");
+        }
+
+        processedBuffer = await sharp(imageBuffer)
           .webp({ quality: 82, lossless: false })
           .toBuffer();
         
